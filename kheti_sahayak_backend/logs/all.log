@@ -188,3 +188,41 @@
 2025-07-06 22:24:33:2433 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
 2025-07-06 22:24:33:2433 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
 2025-07-06 22:24:33:2433 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-06 22:27:25:2725 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:27:25:2725 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:27:25:2725 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:27:25:2725 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:28:21:2821 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:28:21:2821 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:28:21:2821 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:28:21:2821 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:33:3033 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:33:3033 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:33:3033 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:33:3033 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:44:3044 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:44:3044 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:44:3044 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:44:3044 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:57:3057 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:57:3057 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:30:57:3057 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:30:57:3057 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:34:25:3425 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:34:25:3425 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:34:25:3425 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:34:25:3425 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:35:11:3511 [35mhttp[39m: [35mGET /api/educational-content?limit=3[39m
+2025-07-06 22:35:15:3515 [35mhttp[39m: [35mGET /api/diagnostics/recommendations?season=summer[39m
+2025-07-06 22:35:28:3528 [35mhttp[39m: [35mGET /api/diagnostics/recommendations[39m
+2025-07-06 22:35:55:3555 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:35:55:3555 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:35:55:3555 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:35:55:3555 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:35:58:3558 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:35:58:3558 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:35:58:3558 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:35:58:3558 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:36:26:3626 [35mhttp[39m: [35mGET /api/diagnostics/recommendations?season=summer[39m
+2025-07-06 22:36:38:3638 [35mhttp[39m: [35mGET /api/diagnostics/recommendations[39m
+2025-07-06 22:37:01:371 [35mhttp[39m: [35mGET /api/diagnostics/recommendations?season=summer[39m
