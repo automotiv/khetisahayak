@@ -30,3 +30,4 @@
 2025-07-06 15:21:26:2126 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
 2025-07-06 15:21:29:2129 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
 2025-07-06 15:21:49:2149 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 18:19:05:195 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m

@@ -70,3 +70,52 @@
 2025-07-06 15:21:46:2146 [35mhttp[39m: [35mGET /api/educational-content[39m
 2025-07-06 15:21:49:2149 [35mhttp[39m: [35mGET /api/marketplace/products[39m
 2025-07-06 15:21:49:2149 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 18:26:02:262 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 18:26:13:2613 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 18:26:14:2614 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 18:26:14:2614 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 20:15:14:1514 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 21:58:04:584 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 21:58:20:5820 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 21:59:11:5911 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 21:59:25:5925 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:00:23:023 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:00:26:026 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:00:35:035 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:00:37:037 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:01:47:147 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:02:01:21 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:02:26:226 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:02:28:228 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:02:38:238 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:02:41:241 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:03:07:37 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:03:07:37 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:04:54:454 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:04:54:454 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:04:56:456 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:04:56:456 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:05:06:56 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:05:06:56 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:08:04:84 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:08:04:84 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:08:14:814 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:08:14:814 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:09:24:924 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:09:24:924 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:10:13:1013 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:10:13:1013 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:10:48:1048 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:10:48:1048 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:11:20:1120 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:11:20:1120 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:14:15:1415 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:14:15:1415 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:14:29:1429 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:14:29:1429 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:14:36:1436 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:14:36:1436 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:15:41:1541 [35mhttp[39m: [35mGET /api/health[39m
+2025-07-06 22:16:30:1630 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 22:16:30:1630 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-06 22:16:34:1634 [35mhttp[39m: [35mGET /api/health[39m
