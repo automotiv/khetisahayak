@@ -8,14 +8,14 @@ import 'package:kheti_sahayak_app/widgets/primary_button.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class NewLoginScreen extends StatefulWidget {
+  const NewLoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<NewLoginScreen> createState() => _NewLoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _NewLoginScreenState extends State<NewLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -56,7 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -241,29 +240,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-    );
-  }
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: Text(
-                  'Don\'t have an account? Register here.',
-                  style: TextStyle(color: Colors.green[700]),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
