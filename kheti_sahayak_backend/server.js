@@ -1,7 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
+const swaggerSpecs = require('./swagger');
 
 dotenv.config();
 
@@ -34,6 +36,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Kheti Sahayak API Documentation'
+}));
+
 // Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
@@ -49,6 +57,7 @@ app.get('/', (req, res) => {
     message: 'Kheti Sahayak Backend API',
     version: '1.0.0',
     status: 'running',
+    documentation: '/api-docs',
     endpoints: {
       auth: '/api/auth',
       health: '/api/health',

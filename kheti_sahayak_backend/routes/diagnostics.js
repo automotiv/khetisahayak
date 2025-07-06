@@ -12,6 +12,13 @@ const {
 } = require('../controllers/diagnosticsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Diagnostics
+ *   description: Crop diagnostics and expert review operations
+ */
+
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -42,17 +49,231 @@ const expertReviewValidationRules = [
   body('severity_level', 'Severity level must be low, moderate, or high').optional().isIn(['low', 'moderate', 'high']),
 ];
 
-// Public routes
+/**
+ * @swagger
+ * /api/diagnostics/recommendations:
+ *   get:
+ *     summary: Get crop recommendations
+ *     tags: [Diagnostics]
+ *     parameters:
+ *       - in: query
+ *         name: crop_type
+ *         schema:
+ *           type: string
+ *         description: Crop type for recommendations
+ *     responses:
+ *       200:
+ *         description: Crop recommendations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 recommendations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ */
 router.get('/recommendations', getCropRecommendations);
 
-// Protected routes
+/**
+ * @swagger
+ * /api/diagnostics/upload:
+ *   post:
+ *     summary: Upload image for crop diagnosis
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *               - crop_type
+ *               - issue_description
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *               crop_type:
+ *                 type: string
+ *               issue_description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Diagnostic uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 diagnostic:
+ *                   $ref: '#/components/schemas/CropDiagnostic'
+ *       401:
+ *         description: Not authorized
+ */
 router.post('/upload', protect, upload.single('image'), diagnosticUploadValidationRules, uploadForDiagnosis);
+
+/**
+ * @swagger
+ * /api/diagnostics:
+ *   get:
+ *     summary: Get user's diagnostic history
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Diagnostic history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 diagnostics:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CropDiagnostic'
+ *       401:
+ *         description: Not authorized
+ */
 router.get('/', protect, getDiagnosticHistory);
+
+/**
+ * @swagger
+ * /api/diagnostics/{id}:
+ *   get:
+ *     summary: Get diagnostic by ID
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Diagnostic ID
+ *     responses:
+ *       200:
+ *         description: Diagnostic details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 diagnostic:
+ *                   $ref: '#/components/schemas/CropDiagnostic'
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Diagnostic not found
+ */
 router.get('/:id', protect, getDiagnosticById);
+
+/**
+ * @swagger
+ * /api/diagnostics/{id}/expert-review:
+ *   post:
+ *     summary: Request expert review for diagnostic
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Diagnostic ID
+ *     responses:
+ *       200:
+ *         description: Expert review requested successfully
+ *       401:
+ *         description: Not authorized
+ */
 router.post('/:id/expert-review', protect, requestExpertReview);
 
-// Expert routes
+/**
+ * @swagger
+ * /api/diagnostics/{id}/expert-review:
+ *   put:
+ *     summary: Submit expert review for diagnostic
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Diagnostic ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - expert_diagnosis
+ *               - expert_recommendations
+ *             properties:
+ *               expert_diagnosis:
+ *                 type: string
+ *               expert_recommendations:
+ *                 type: string
+ *               severity_level:
+ *                 type: string
+ *                 enum: [low, moderate, high]
+ *     responses:
+ *       200:
+ *         description: Expert review submitted successfully
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Access denied - Expert role required
+ */
 router.put('/:id/expert-review', protect, authorize('expert'), expertReviewValidationRules, submitExpertReview);
+
+/**
+ * @swagger
+ * /api/diagnostics/expert/assigned:
+ *   get:
+ *     summary: Get diagnostics assigned to expert
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Assigned diagnostics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 diagnostics:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CropDiagnostic'
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Access denied - Expert role required
+ */
 router.get('/expert/assigned', protect, authorize('expert'), getExpertAssignedDiagnostics);
 
 module.exports = router;
