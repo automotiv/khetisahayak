@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mounts the project directory to the container for hot-reloading
+      - .:/usr/src/app
+      # Uses an anonymous volume to prevent host node_modules from overwriting the container's
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
