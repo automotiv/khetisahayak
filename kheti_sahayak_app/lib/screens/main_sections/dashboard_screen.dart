@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';  // Temporarily disabled
 import 'package:kheti_sahayak_app/services/weather_service.dart';
 import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
@@ -33,49 +33,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchWeatherData() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      setState(() {
-        _weatherError = 'Location services are disabled.';
-      });
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        setState(() {
-          _weatherError = 'Location permissions are denied.';
-        });
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        _weatherError = 'Location permissions are permanently denied, we cannot request permissions.';
-      });
-      return;
-    }
-
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      final data = await WeatherService.getWeather(
-          position.latitude, position.longitude);
-      setState(() {
-        _weatherData = data;
-        _weatherError = '';
-      });
-    } catch (e) {
-      setState(() {
-        _weatherError = 'Failed to get weather data: $e';
-      });
-    }
+    // Temporarily disabled geolocation functionality
+    setState(() {
+      _weatherError = 'Weather service is currently unavailable.';
+    });
+    
+    // Example weather data - remove this in production
+    setState(() {
+      _weatherData = {
+        'temperature': 25.0,
+        'condition': 'Sunny',
+        'humidity': 65,
+        'wind_speed': 5.0,
+        'location': 'Demo Location'
+      };
+      _weatherError = '';
+    });
   }
 
   Future<void> _fetchRecentDiagnostics() async {

@@ -1,0 +1,48 @@
+import { IValue, _ITable, IndexKey, CreateIndexColDef, _Transaction, _Explainer, _IndexExplanation, IndexExpression, IndexOp, Stats, _INamedIndex, Reg, _ISchema } from '../interfaces-private';
+import { nil } from '../interfaces';
+export declare class BIndex<T = any> implements _INamedIndex<T> {
+    readonly name: string;
+    readonly cols: readonly CreateIndexColDef[];
+    readonly onTable: _ITable<T>;
+    readonly hash: string;
+    readonly unique: boolean;
+    readonly notNull: boolean;
+    readonly predicate: IValue | nil;
+    get type(): 'index';
+    readonly reg: Reg;
+    expressions: (IndexExpression & IValue)[];
+    private treeBinId;
+    private treeCountId;
+    get ownerSchema(): _ISchema;
+    constructor(t: _Transaction, name: string, cols: readonly CreateIndexColDef[], onTable: _ITable<T>, hash: string, unique: boolean, notNull: boolean, predicate: IValue | nil);
+    drop(t: _Transaction): void;
+    compare(_a: any, _b: any): number;
+    buildKey(raw: any, t: _Transaction): any[];
+    truncate(t: _Transaction): void;
+    dropFromData(t: _Transaction): void;
+    private bin;
+    private setBin;
+    private setCount;
+    private getCount;
+    hasKey(key: IndexKey[], t: _Transaction): boolean;
+    add(raw: T, t: _Transaction): void;
+    delete(raw: any, t: _Transaction): void;
+    eqFirst(rawKey: IndexKey, t: _Transaction): T | null;
+    nin(rawKey: IndexKey[], t: _Transaction): Iterable<T>;
+    entropy(op: IndexOp): number;
+    stats(t: _Transaction, key?: IndexKey): Stats;
+    iterateKeys(t: _Transaction): Iterable<IndexKey>;
+    private _keyCount;
+    enumerate(op: IndexOp): Iterable<T>;
+    private _enumerate;
+    eq(key: IndexKey, t: _Transaction, matchNull: boolean): Iterable<T>;
+    neq(key: IndexKey, t: _Transaction, matchNull: boolean): Iterable<T>;
+    gt(key: IndexKey, t: _Transaction): Iterable<T>;
+    ge(key: IndexKey, t: _Transaction): Iterable<T>;
+    lt(key: IndexKey, t: _Transaction): Iterable<T>;
+    le(key: IndexKey, t: _Transaction): Iterable<T>;
+    outside(lo: IndexKey, hi: IndexKey, t: _Transaction): Iterable<T>;
+    inside(lo: IndexKey, hi: IndexKey, t: _Transaction): Iterable<T>;
+    explain(e: _Explainer): _IndexExplanation;
+}
+//# sourceMappingURL=btree-index.d.ts.map
