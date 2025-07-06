@@ -9,6 +9,7 @@ const {
   submitExpertReview,
   getExpertAssignedDiagnostics,
   getCropRecommendations,
+  getDiagnosticStats,
 } = require('../controllers/diagnosticsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -57,10 +58,25 @@ const expertReviewValidationRules = [
  *     tags: [Diagnostics]
  *     parameters:
  *       - in: query
- *         name: crop_type
+ *         name: season
  *         schema:
  *           type: string
- *         description: Crop type for recommendations
+ *         description: Growing season
+ *       - in: query
+ *         name: soil_type
+ *         schema:
+ *           type: string
+ *         description: Soil type
+ *       - in: query
+ *         name: climate_zone
+ *         schema:
+ *           type: string
+ *         description: Climate zone
+ *       - in: query
+ *         name: water_availability
+ *         schema:
+ *           type: string
+ *         description: Water availability
  *     responses:
  *       200:
  *         description: Crop recommendations
@@ -77,6 +93,40 @@ const expertReviewValidationRules = [
  *                     type: object
  */
 router.get('/recommendations', getCropRecommendations);
+
+/**
+ * @swagger
+ * /api/diagnostics/stats:
+ *   get:
+ *     summary: Get diagnostic statistics for user
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Diagnostic statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     total_diagnostics:
+ *                       type: integer
+ *                     by_status:
+ *                       type: array
+ *                     by_crop_type:
+ *                       type: array
+ *                     recent_diagnostics:
+ *                       type: array
+ *       401:
+ *         description: Not authorized
+ */
+router.get('/stats', protect, getDiagnosticStats);
 
 /**
  * @swagger
