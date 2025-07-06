@@ -1,0 +1,32 @@
+2025-07-06 14:27:44:2744 [31merror[39m: [31m500 - memDb.public.manyOrNone is not a function - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:27:44:2744 [31merror[39m: [31m500 - memDb.public.manyOrNone is not a function - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:28:32:2832 [31merror[39m: [31m500 - Cannot read properties of null (reading 'type')[39m
+
+[31m💥 This is a nasty error, which was unexpected by pg-mem. Also known "a bug" 😁 Please file an issue ![39m
+
+[31m*️⃣ Failed SQL statement: SELECT * FROM users WHERE email = $1;[39m
+
+[31m👉 You can file an issue at https://github.com/oguimbal/pg-mem along with a way to reproduce this error (if you can), and  the stacktrace:[39m
+
+[31m - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:28:32:2832 [31merror[39m: [31m500 - Cannot read properties of null (reading 'type')[39m
+
+[31m💥 This is a nasty error, which was unexpected by pg-mem. Also known "a bug" 😁 Please file an issue ![39m
+
+[31m*️⃣ Failed SQL statement: SELECT * FROM users WHERE email = $1;[39m
+
+[31m👉 You can file an issue at https://github.com/oguimbal/pg-mem along with a way to reproduce this error (if you can), and  the stacktrace:[39m
+
+[31m - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:44:46:4446 [31merror[39m: [31m500 - Not Found - /api/auth/me - /api/auth/me - GET - ::1[39m
+2025-07-06 14:45:48:4548 [31merror[39m: [31m500 - Not Found - /favicon.ico - /favicon.ico - GET - ::1[39m
+2025-07-06 15:15:38:1538 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:42:2042 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:43:2043 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:58:2058 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:05:215 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:07:217 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:25:2125 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:26:2126 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:29:2129 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:49:2149 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m

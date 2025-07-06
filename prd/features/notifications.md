@@ -89,6 +89,70 @@ Notifications can be categorized as Push Notifications (delivered even when the 
 *   **FE8.2 Geo-targeted Notifications:** Send notifications based on user's real-time location (with consent) for hyper-local alerts.
 *   **FE8.3 AI-Powered Personalization:** Use ML to predict the best time and content for individual user notifications.
 
-[TODO: Define the specific notification categories available in user settings for v1.0.]
-[TODO: Specify default notification settings for new users.]
-[TODO: Detail the content templates for different notification types.]
+## 9. Notification Settings (v1.0)
+
+To fulfill **FR4.2.1**, users will have a dedicated settings screen to manage their notification preferences. The following categories and sub-categories will be available with on/off toggles for v1.0:
+
+*   **Weather Alerts** (Push)
+*   **Government Schemes** (Push & In-App)
+    *   New Schemes
+    *   Application Deadlines (for bookmarked schemes)
+*   **Marketplace** (Push & In-App)
+    *   Order Updates
+    *   New Messages
+*   **Sharing Platform** (Push & In-App)
+    *   Booking Updates
+    *   Reminders
+*   **Expert Connect** (Push & In-App)
+    *   New Messages
+    *   Appointment Reminders
+*   **Community Forum** (Push & In-App)
+    *   Replies to my posts
+    *   @Mentions
+*   **My Farm** (Push & In-App)
+    *   Digital Logbook Reminders
+*   **News & Content** (Push & In-App)
+    *   New Educational Content
+    *   Platform Announcements
+
+## 10. Default Settings for New Users
+
+To comply with **FR4.2.3**, default settings will be enabled for high-value notifications, while ensuring the user is not overwhelmed.
+
+| Category               | Sub-Category                | Default     | Rationale                                                                    |
+| ---------------------- | --------------------------- | ----------- | ---------------------------------------------------------------------------- |
+| Weather Alerts         | -                           | **ON**      | Critical for farm planning and safety.                                       |
+| Government Schemes     | New Schemes                 | **ON**      | High-value information for farmers.                                          |
+|                        | Application Deadlines       | **ON**      | High-value reminders for schemes the user has shown interest in.             |
+| Marketplace            | Order Updates               | **ON**      | Essential for transaction status.                                            |
+|                        | New Messages                | **ON**      | Essential for communication between buyers/sellers.                          |
+| Sharing Platform       | Booking Updates             | **ON**      | Essential for rental/hire status.                                            |
+|                        | Reminders                   | **ON**      | Helpful reminders for scheduled activities.                                  |
+| Expert Connect         | New Messages                | **ON**      | Essential for communication with experts.                                    |
+|                        | Appointment Reminders       | **ON**      | High-value reminders.                                                        |
+| Community Forum        | Replies to my posts         | **ON**      | Encourages direct engagement.                                                |
+|                        | @Mentions                   | **ON**      | Direct communication, important to see.                                      |
+| My Farm                | Digital Logbook Reminders   | (User-set)  | These are explicitly created by the user, so they are inherently "on".       |
+| News & Content         | New Educational Content     | **ON**      | Core value proposition of the app. Can be disabled if the user finds it noisy. |
+|                        | Platform Announcements      | **ON**      | Important platform-wide information that should not be missed.               |
+
+## 11. Notification Content Templates
+
+To fulfill **FR4.3.1** and **FR4.3.2**, notification content will be clear, concise, and link directly to the relevant in-app content.
+
+*   **Type**: Weather Alert
+    *   **Title**: ⛈️ Weather Alert
+    *   **Body**: Heavy rainfall is expected in your area for the next 3 hours.
+    *   **Deep Link**: Weather Forecast Screen
+*   **Type**: Scheme Deadline
+    *   **Title**: 🔔 Scheme Deadline Reminder
+    *   **Body**: Application for PM Kisan Yojana closes in 2 days. Don't miss out!
+    *   **Deep Link**: Specific Government Scheme Details Screen
+*   **Type**: Marketplace Message
+    *   **Title**: 💬 New Message from Ramesh
+    *   **Body**: "Is the tractor available for rent next Tuesday?"
+    *   **Deep Link**: Chat Screen with Ramesh
+*   **Type**: Community Reply
+    *   **Title**: 💬 New Reply on your post
+    *   **Body**: Sunita replied to your post: "How to deal with pest attacks?"
+    *   **Deep Link**: Specific Forum Thread

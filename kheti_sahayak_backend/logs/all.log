@@ -1,0 +1,72 @@
+2025-07-06 14:27:44:2744 [31merror[39m: [31m500 - memDb.public.manyOrNone is not a function - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:27:44:2744 [31merror[39m: [31m500 - memDb.public.manyOrNone is not a function - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:28:32:2832 [31merror[39m: [31m500 - Cannot read properties of null (reading 'type')[39m
+
+[31m💥 This is a nasty error, which was unexpected by pg-mem. Also known "a bug" 😁 Please file an issue ![39m
+
+[31m*️⃣ Failed SQL statement: SELECT * FROM users WHERE email = $1;[39m
+
+[31m👉 You can file an issue at https://github.com/oguimbal/pg-mem along with a way to reproduce this error (if you can), and  the stacktrace:[39m
+
+[31m - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:28:32:2832 [31merror[39m: [31m500 - Cannot read properties of null (reading 'type')[39m
+
+[31m💥 This is a nasty error, which was unexpected by pg-mem. Also known "a bug" 😁 Please file an issue ![39m
+
+[31m*️⃣ Failed SQL statement: SELECT * FROM users WHERE email = $1;[39m
+
+[31m👉 You can file an issue at https://github.com/oguimbal/pg-mem along with a way to reproduce this error (if you can), and  the stacktrace:[39m
+
+[31m - /api/auth/login - POST - ::ffff:127.0.0.1[39m
+2025-07-06 14:39:24:3924 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 14:40:26:4026 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 14:44:16:4416 [35mhttp[39m: [35mGET /api/health/[39m
+2025-07-06 14:44:26:4426 [35mhttp[39m: [35mPOST /api/auth/register[39m
+2025-07-06 14:44:32:4432 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 14:44:46:4446 [35mhttp[39m: [35mGET /api/auth/me[39m
+2025-07-06 14:44:46:4446 [31merror[39m: [31m500 - Not Found - /api/auth/me - /api/auth/me - GET - ::1[39m
+2025-07-06 14:44:59:4459 [35mhttp[39m: [35mPOST /api/auth/register[39m
+2025-07-06 14:45:15:4515 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 14:45:47:4547 [35mhttp[39m: [35mGET /[39m
+2025-07-06 14:45:48:4548 [35mhttp[39m: [35mGET /favicon.ico[39m
+2025-07-06 14:45:48:4548 [31merror[39m: [31m500 - Not Found - /favicon.ico - /favicon.ico - GET - ::1[39m
+2025-07-06 14:51:10:5110 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 15:15:38:1538 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:15:38:1538 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:15:38:1538 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:17:37:1737 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:17:42:1742 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:17:49:1749 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:17:51:1751 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:18:57:1857 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 15:19:05:195 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 15:19:27:1927 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 15:19:40:1940 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-06 15:19:59:1959 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:20:01:201 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:20:02:202 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:20:09:209 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:20:34:2034 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-06 15:20:42:2042 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-06 15:20:42:2042 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:43:2043 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:20:43:2043 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:44:2044 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:20:58:2058 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:20:58:2058 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:20:58:2058 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:21:05:215 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-06 15:21:05:215 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:07:217 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:21:07:217 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:09:219 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:21:25:2125 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-06 15:21:25:2125 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:26:2126 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:21:26:2126 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:28:2128 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:21:29:2129 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-06 15:21:29:2129 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-06 15:21:46:2146 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-06 15:21:49:2149 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-06 15:21:49:2149 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
