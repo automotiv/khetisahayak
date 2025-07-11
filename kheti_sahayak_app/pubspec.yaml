@@ -31,6 +31,22 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  provider: ^6.1.1
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  image_picker: ^1.0.4
+  geolocator: ^10.1.0
+  permission_handler: ^11.1.0
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.10
+  sqflite: ^2.3.0
+  cached_network_image: ^3.3.0
+  flutter_local_notifications: ^16.3.0
+  connectivity_plus: ^5.0.2
+  package_info_plus: ^4.2.0
+  device_info_plus: ^9.1.1
+  url_launcher: ^6.2.1
+  intl: ^0.18.1
 
   # State Management
   provider: ^6.1.1

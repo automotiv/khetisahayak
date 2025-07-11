@@ -12,13 +12,13 @@ import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 Future<void> main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
-  
+
   // Initialize logger
   Logger.init();
-  
+
   runApp(
     MultiProvider(
       providers: [
@@ -49,11 +49,11 @@ class _MyAppState extends State<MyApp> {
     // Initialize user provider
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.initialize();
-    
+
     // Initialize cart provider
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     await cartProvider.loadCart();
-    
+
     // Initialize orders if user is logged in
     if (userProvider.isAuthenticated) {
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
