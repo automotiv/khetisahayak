@@ -23,3 +23,21 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd kheti_sahayak_app && flutter build ios --release --no-codesign"
+
+[[workflows.workflow]]
+name = "Build Android Bundle"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter build appbundle --release"
+
+[[workflows.workflow]]
+name = "Build Android APK"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter build apk --release"
