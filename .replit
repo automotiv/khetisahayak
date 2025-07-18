@@ -1,0 +1,43 @@
+modules = ["nodejs-20", "cpp-clang14"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Flutter Run"
+
+[[workflows.workflow]]
+name = "Flutter Run"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter run --web-hostname=0.0.0.0 --web-port=5000"
+
+[[workflows.workflow]]
+name = "Build iOS"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter build ios --release --no-codesign"
+
+[[workflows.workflow]]
+name = "Build Android Bundle"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter build appbundle --release"
+
+[[workflows.workflow]]
+name = "Build Android APK"
+author = 44895020
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd kheti_sahayak_app && flutter build apk --release"
