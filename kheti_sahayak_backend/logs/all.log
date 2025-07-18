@@ -322,3 +322,6 @@
 2025-07-11 21:29:46:2946 [32minfo[39m: [32mEnvironment: development[39m
 2025-07-19 04:15:10:1510 [32minfo[39m: [32mServer running on port 3000[39m
 2025-07-19 04:15:10:1510 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-19 04:20:34:2034 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-19 04:20:34:2034 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-19 04:21:58:2158 [35mhttp[39m: [35mPOST /api/auth/login[39m
