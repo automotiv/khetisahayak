@@ -153,7 +153,7 @@ Phone: ${_phoneController.text}
             context: context,
             builder: (ctx) => ErrorDialog(
               title: 'Order Failed',
-              message: orderProvider.error ?? 'Failed to place order. Please try again.',
+              content: orderProvider.error ?? 'Failed to place order. Please try again.',
             ),
           );
         }
@@ -165,7 +165,7 @@ Phone: ${_phoneController.text}
           context: context,
           builder: (ctx) => const ErrorDialog(
             title: 'Error',
-            message: 'An error occurred while placing your order. Please try again.',
+            content: 'An error occurred while placing your order. Please try again.',
           ),
         );
       }
@@ -218,7 +218,6 @@ Phone: ${_phoneController.text}
                   PrimaryButton(
                     onPressed: () => Navigator.pop(context),
                     text: 'Back to Cart',
-                    icon: Icons.arrow_back,
                   ),
                 ],
               ),
@@ -251,7 +250,7 @@ Phone: ${_phoneController.text}
                       _buildPaymentMethodSection(),
                       
                       // Terms and Conditions
-                      _buildTermsAndConditions(),
+                      _buildTermsAndConditions(context),
                       
                       // Place Order Button
                       Padding(
@@ -261,8 +260,6 @@ Phone: ${_phoneController.text}
                           text: _isPlacingOrder 
                               ? 'Placing Order...' 
                               : 'Place Order (${_formatCurrency(cartProvider.total)})',
-                          icon: _isPlacingOrder ? null : Icons.lock_outline,
-                          isLoading: _isPlacingOrder,
                         ),
                       ),
                     ],
@@ -411,7 +408,7 @@ Phone: ${_phoneController.text}
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: theme.dividerColor,
-            style: BorderStyle.dashed,
+            style: BorderStyle.solid,
           ),
         ),
         child: Column(
@@ -639,7 +636,7 @@ Phone: ${_phoneController.text}
         final subtotal = cartProvider.subtotal;
         final deliveryCharge = cartProvider.deliveryCharge;
         final total = cartProvider.total;
-        
+        final theme = Theme.of(context);
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           elevation: 1,
@@ -654,34 +651,42 @@ Phone: ${_phoneController.text}
               children: [
                 Text(
                   'Order Summary',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Add items worth ₹${(500 - _subtotal).toStringAsFixed(0)} more for FREE delivery',
-                        style: theme.textTheme.bodySmall?.copyWith(
+                const SizedBox(height: 8),
+                _buildPriceRow('Subtotal', subtotal.toStringAsFixed(2), theme),
+                _buildPriceRow('Delivery', deliveryCharge == 0 ? 'FREE' : deliveryCharge.toStringAsFixed(2), theme),
+                const Divider(),
+                _buildPriceRow('Total', total.toStringAsFixed(2), theme, isBold: true),
+                if (subtotal < 500)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
                           color: theme.colorScheme.primary,
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Add items worth ₹${(500 - subtotal).toStringAsFixed(0)} more for FREE delivery',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
   
@@ -958,6 +963,66 @@ Phone: ${_phoneController.text}
               child: _buildAddressForm(context),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Add missing helper widget for address section
+  Widget _buildAddressSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(context, title: 'Delivery Address', actionText: 'Add New', onAction: _addNewAddress),
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _savedAddresses.length + 1,
+              itemBuilder: (context, index) {
+                if (index < _savedAddresses.length) {
+                  return _buildAddressCard(
+                    context,
+                    address: _savedAddresses[index],
+                    isSelected: _selectedAddressIndex == index,
+                    onTap: () => _selectAddress(index),
+                  );
+                } else {
+                  return _buildAddAddressCard(context);
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Add missing helper widget for delivery method section
+  Widget _buildDeliveryMethodSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(context, title: 'Delivery Method'),
+          _buildDeliveryMethodCard(context),
+        ],
+      ),
+    );
+  }
+
+  // Add missing helper widget for payment method section
+  Widget _buildPaymentMethodSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(context, title: 'Payment Method'),
+          _buildPaymentMethods(context),
         ],
       ),
     );

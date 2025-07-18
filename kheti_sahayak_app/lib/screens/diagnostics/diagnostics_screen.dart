@@ -6,6 +6,9 @@ import 'package:kheti_sahayak_app/widgets/primary_button.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 import 'package:kheti_sahayak_app/widgets/success_dialog.dart';
+import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
+import 'package:kheti_sahayak_app/models/diagnostic.dart';
+import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
 
 class DiagnosticsScreen extends StatefulWidget {
   const DiagnosticsScreen({Key? key}) : super(key: key);
@@ -19,34 +22,81 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
   File? _selectedImage;
   bool _isAnalyzing = false;
   bool _showResult = false;
+  bool _isLoadingHistory = false;
   
-  // Mock data for demonstration
-  final Map<String, dynamic> _mockDiagnosis = {
-    'diseaseName': 'Tomato Early Blight',
-    'scientificName': 'Alternaria solani',
-    'confidence': 87,
-    'description': 'Early blight is a common tomato disease caused by the fungus Alternaria solani. It affects leaves, stems, and fruit and can reduce yield.',
-    'symptoms': [
-      'Small, dark spots on lower leaves',
-      'Concentric rings in spots (target pattern)',
-      'Yellowing leaves',
-      'Defoliation (leaf drop) from the bottom up',
-    ],
-    'treatment': [
-      'Remove and destroy infected plant parts',
-      'Apply copper-based fungicides',
-      'Improve air circulation',
-      'Water at the base of plants',
-      'Use disease-resistant varieties',
-    ],
-    'prevention': [
-      'Rotate crops (3-year rotation)',
-      'Space plants properly',
-      'Use mulch to prevent soil splash',
-      'Avoid overhead watering',
-      'Remove plant debris at season end',
-    ],
-  };
+  // Form controllers
+  final TextEditingController _cropTypeController = TextEditingController();
+  final TextEditingController _issueDescriptionController = TextEditingController();
+  
+  // Data
+  Diagnostic? _currentDiagnostic;
+  List<Diagnostic> _diagnosticHistory = [];
+  List<CropRecommendation> _cropRecommendations = [];
+  Map<String, dynamic>? _aiAnalysis;
+  
+  // Filter options
+  String? _selectedStatus;
+  String? _selectedCropType;
+  final List<String> _statusOptions = ['All', 'pending', 'analyzed', 'resolved'];
+  final List<String> _cropTypeOptions = [
+    'All', 'Tomato', 'Potato', 'Corn', 'Wheat', 'Rice', 'Cotton', 'Sugarcane'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDiagnosticHistory();
+    _loadCropRecommendations();
+  }
+
+  @override
+  void dispose() {
+    _cropTypeController.dispose();
+    _issueDescriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDiagnosticHistory() async {
+    setState(() {
+      _isLoadingHistory = true;
+    });
+
+    try {
+      final result = await DiagnosticService.getUserDiagnostics(
+        status: _selectedStatus == 'All' ? null : _selectedStatus,
+        cropType: _selectedCropType == 'All' ? null : _selectedCropType,
+      );
+      
+      setState(() {
+        _diagnosticHistory = result['diagnostics'];
+        _isLoadingHistory = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingHistory = false;
+      });
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => ErrorDialog(
+            title: 'Error',
+            content: 'Failed to load diagnostic history: $e',
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadCropRecommendations() async {
+    try {
+      final recommendations = await DiagnosticService.getCropRecommendations();
+      setState(() {
+        _cropRecommendations = recommendations;
+      });
+    } catch (e) {
+      // Silently handle error for recommendations
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -55,6 +105,8 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
         setState(() {
           _selectedImage = File(image.path);
           _showResult = false;
+          _currentDiagnostic = null;
+          _aiAnalysis = null;
         });
       }
     } catch (e) {
@@ -71,20 +123,87 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
   }
 
   Future<void> _analyzeImage() async {
-    if (_selectedImage == null) return;
+    if (_selectedImage == null || 
+        _cropTypeController.text.isEmpty || 
+        _issueDescriptionController.text.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (ctx) => ErrorDialog(
+          title: 'Missing Information',
+          content: 'Please provide crop type and issue description.',
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isAnalyzing = true;
       _showResult = false;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final result = await DiagnosticService.uploadForDiagnosis(
+        imageFile: _selectedImage!,
+        cropType: _cropTypeController.text,
+        issueDescription: _issueDescriptionController.text,
+      );
+      
+      setState(() {
+        _currentDiagnostic = result['diagnostic'];
+        _aiAnalysis = result['aiAnalysis'];
+        _isAnalyzing = false;
+        _showResult = true;
+      });
+      
+      // Reload history to include new diagnostic
+      _loadDiagnosticHistory();
+    } catch (e) {
+      setState(() {
+        _isAnalyzing = false;
+      });
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => ErrorDialog(
+            title: 'Analysis Failed',
+            content: 'Failed to analyze image: $e',
+          ),
+        );
+      }
+    }
+  }
 
-    setState(() {
-      _isAnalyzing = false;
-      _showResult = true;
-    });
+  Future<void> _requestExpertReview() async {
+    if (_currentDiagnostic == null) return;
+
+    try {
+      final result = await DiagnosticService.requestExpertReview(_currentDiagnostic!.id);
+      
+      setState(() {
+        _currentDiagnostic = result['diagnostic'];
+      });
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => SuccessDialog(
+            title: 'Expert Review Requested',
+            content: 'Your diagnostic has been assigned to an expert for review.',
+            buttonText: 'OK',
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => ErrorDialog(
+            title: 'Request Failed',
+            content: 'Failed to request expert review: $e',
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -96,6 +215,15 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
       appBar: AppBar(
         title: const Text('Crop Diagnostics'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              // Show diagnostic history in a bottom sheet
+              _showDiagnosticHistory();
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -112,15 +240,16 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
               PrimaryButton(
                 onPressed: _isAnalyzing ? null : _analyzeImage,
                 text: _isAnalyzing ? 'Analyzing...' : 'Analyze Plant',
-                icon: _isAnalyzing ? null : Icons.search,
                 isLoading: _isAnalyzing,
               ),
             
             // Analysis results
-            if (_showResult && _selectedImage != null) ..._buildAnalysisResults(theme, colorScheme),
+            if (_showResult && _currentDiagnostic != null) 
+              ..._buildAnalysisResults(theme, colorScheme),
             
-            // Recent scans section
-            _buildRecentScansSection(theme),
+            // Crop recommendations section
+            if (_cropRecommendations.isNotEmpty)
+              _buildCropRecommendationsSection(theme, colorScheme),
             
             const SizedBox(height: 24),
           ],
@@ -197,6 +326,33 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
             ),
             const SizedBox(height: 16),
             
+            // Form fields
+            if (_selectedImage != null) ...[
+              TextField(
+                controller: _cropTypeController,
+                decoration: InputDecoration(
+                  labelText: 'Crop Type',
+                  hintText: 'e.g., Tomato, Potato, Corn',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _issueDescriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Issue Description',
+                  hintText: 'Describe the symptoms you observe',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+            ],
+            
             // Action buttons
             Row(
               children: [
@@ -236,8 +392,11 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
   }
 
   List<Widget> _buildAnalysisResults(ThemeData theme, ColorScheme colorScheme) {
+    final diagnostic = _currentDiagnostic!;
+    final aiAnalysis = _aiAnalysis;
+    
     return [
-      // Disease name and confidence
+      // Status and confidence
       Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -253,12 +412,12 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: _getStatusColor(diagnostic.status).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.health_and_safety_outlined,
-                      color: colorScheme.primary,
+                      _getStatusIcon(diagnostic.status),
+                      color: _getStatusColor(diagnostic.status),
                       size: 24,
                     ),
                   ),
@@ -268,45 +427,37 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _mockDiagnosis['diseaseName'],
+                          'Status: ${diagnostic.status.toUpperCase()}',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          _mockDiagnosis['scientificName'],
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontStyle: FontStyle.italic,
-                            color: theme.hintColor,
+                        if (diagnostic.confidenceScore != null)
+                          Text(
+                            'Confidence: ${(diagnostic.confidenceScore! * 100).toStringAsFixed(1)}%',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.hintColor,
+                            ),
                           ),
-                        ),
                       ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${_mockDiagnosis['confidence']}% Confidence',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              Text(
-                _mockDiagnosis['description'],
-                style: theme.textTheme.bodyMedium,
-              ),
+              if (diagnostic.diagnosisResult != null) ...[
+                Text(
+                  'AI Diagnosis:',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  diagnostic.diagnosisResult!,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
             ],
           ),
         ),
@@ -314,86 +465,278 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
       
       const SizedBox(height: 16),
       
-      // Symptoms
-      _buildInfoCard(
-        theme,
-        colorScheme,
-        title: 'Symptoms',
-        icon: Icons.warning_amber_rounded,
-        items: List<String>.from(_mockDiagnosis['symptoms']),
-      ),
+      // AI Analysis details
+      if (aiAnalysis != null) ...[
+        _buildInfoCard(
+          theme,
+          colorScheme,
+          title: 'AI Analysis',
+          icon: Icons.psychology_outlined,
+          items: [
+            'Disease: ${aiAnalysis['disease_name'] ?? 'Unknown'}',
+            'Confidence: ${(aiAnalysis['confidence'] ?? 0) * 100}%',
+            'Severity: ${aiAnalysis['severity'] ?? 'Unknown'}',
+          ],
+        ),
+        const SizedBox(height: 16),
+      ],
       
-      const SizedBox(height: 16),
+      // Recommendations
+      if (diagnostic.recommendations != null) ...[
+        _buildInfoCard(
+          theme,
+          colorScheme,
+          title: 'Recommendations',
+          icon: Icons.medical_services_outlined,
+          items: diagnostic.recommendations!.split('\n').where((line) => line.trim().isNotEmpty).toList(),
+        ),
+        const SizedBox(height: 16),
+      ],
       
-      // Treatment
-      _buildInfoCard(
-        theme,
-        colorScheme,
-        title: 'Treatment',
-        icon: Icons.medical_services_outlined,
-        items: List<String>.from(_mockDiagnosis['treatment']),
-      ),
-      
-      const SizedBox(height: 16),
-      
-      // Prevention
-      _buildInfoCard(
-        theme,
-        colorScheme,
-        title: 'Prevention',
-        icon: Icons.shield_outlined,
-        items: List<String>.from(_mockDiagnosis['prevention']),
-      ),
-      
-      const SizedBox(height: 24),
+      // Expert review section
+      if (diagnostic.hasExpertReview) ...[
+        _buildExpertReviewSection(theme, colorScheme, diagnostic),
+        const SizedBox(height: 16),
+      ],
       
       // Action buttons
       Row(
         children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Save diagnosis
-                showDialog(
-                  context: context,
-                  builder: (ctx) => SuccessDialog(
-                    title: 'Diagnosis Saved',
-                    content: 'The diagnosis has been saved to your history.',
-                    buttonText: 'OK',
+          if (!diagnostic.hasExpertReview && diagnostic.status == 'analyzed')
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _requestExpertReview,
+                icon: const Icon(Icons.person_search),
+                label: const Text('Request Expert Review'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.secondary,
+                  foregroundColor: colorScheme.onSecondary,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-              icon: const Icon(Icons.bookmark_border),
-              label: const Text('Save'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // Share diagnosis
-              },
-              icon: const Icon(Icons.share_outlined),
-              label: const Text('Share'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          if (diagnostic.hasExpertReview)
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // Contact expert
+                },
+                icon: const Icon(Icons.phone),
+                label: const Text('Contact Expert'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     ];
+  }
+
+  Widget _buildExpertReviewSection(ThemeData theme, ColorScheme colorScheme, Diagnostic diagnostic) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Expert Review',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Expert: ${diagnostic.expertFullName}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (diagnostic.expertPhone != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Phone: ${diagnostic.expertPhone}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.hintColor,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCropRecommendationsSection(ThemeData theme, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          'Crop Recommendations',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 200,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _cropRecommendations.length,
+            itemBuilder: (context, index) {
+              final recommendation = _cropRecommendations[index];
+              return Container(
+                width: 200,
+                margin: const EdgeInsets.only(right: 12),
+                child: Card(
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          recommendation.cropName,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (recommendation.season != null) ...[
+                          Text(
+                            recommendation.seasonDisplay,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        if (recommendation.waterRequirement != null) ...[
+                          Text(
+                            recommendation.waterRequirementDisplay,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.hintColor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        if (recommendation.description != null) ...[
+                          Text(
+                            recommendation.description!,
+                            style: theme.textTheme.bodySmall,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showDiagnosticHistory() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  const Text(
+                    'Diagnostic History',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _isLoadingHistory
+                  ? const Center(child: CircularProgressIndicator())
+                  : _diagnosticHistory.isEmpty
+                      ? const Center(
+                          child: Text('No diagnostic history found'),
+                        )
+                      : ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _diagnosticHistory.length,
+                          itemBuilder: (context, index) {
+                            final diagnostic = _diagnosticHistory[index];
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                leading: Icon(
+                                  _getStatusIcon(diagnostic.status),
+                                  color: _getStatusColor(diagnostic.status),
+                                ),
+                                title: Text(diagnostic.cropType),
+                                subtitle: Text(
+                                  'Status: ${diagnostic.status} • ${diagnostic.createdAt.toString().substring(0, 10)}',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.arrow_forward_ios),
+                                  onPressed: () {
+                                    // Navigate to diagnostic detail
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildInfoCard(
@@ -455,57 +798,29 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
     );
   }
 
-  Widget _buildRecentScansSection(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Text(
-          'Recent Scans',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Placeholder for recent scans list
-        Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: theme.dividerColor.withOpacity(0.5),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.history_outlined,
-                  size: 48,
-                  color: theme.hintColor.withOpacity(0.5),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'No recent scans',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Your recent plant disease scans will appear here',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.hintColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'analyzed':
+        return Colors.blue;
+      case 'resolved':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Icons.schedule;
+      case 'analyzed':
+        return Icons.psychology;
+      case 'resolved':
+        return Icons.check_circle;
+      default:
+        return Icons.help;
+    }
   }
 }

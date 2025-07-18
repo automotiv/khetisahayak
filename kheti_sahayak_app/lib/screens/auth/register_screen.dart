@@ -57,11 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
     
     final success = await userProvider.register(
-      name: _nameController.text.trim(),
       email: _emailController.text.trim(),
-      phone: _phoneController.text.trim(),
       password: _passwordController.text.trim(),
-      role: _selectedRole,
+      username: _nameController.text.trim(), // Add the required 'username' parameter
     );
 
     setState(() => _isLoading = false);
@@ -132,8 +130,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _nameController,
-                      hintText: 'Enter your full name',
-                      prefixIcon: Icons.person_outline,
+                      label: 'Enter your full name',
+                      icon: Icons.person_outline,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
@@ -152,9 +150,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _emailController,
-                      hintText: 'Enter your email',
+                      label: 'Enter your email',
                       keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.email_outlined,
+                      icon: Icons.email_outlined,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
@@ -176,9 +174,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _phoneController,
-                      hintText: 'Enter your phone number',
+                      label: 'Enter your phone number',
                       keyboardType: TextInputType.phone,
-                      prefixIcon: Icons.phone_outlined,
+                      icon: Icons.phone_outlined,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your phone number';
@@ -247,9 +245,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _passwordController,
-                      hintText: 'Create a password',
+                      label: 'Create a password',
                       obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outline,
+                      icon: Icons.lock_outline,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
@@ -284,9 +282,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _confirmPasswordController,
-                      hintText: 'Confirm your password',
+                      label: 'Confirm your password',
                       obscureText: _obscureConfirmPassword,
-                      prefixIcon: Icons.lock_outline,
+                      icon: Icons.lock_outline,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword

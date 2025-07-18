@@ -226,3 +226,99 @@
 2025-07-06 22:36:26:3626 [35mhttp[39m: [35mGET /api/diagnostics/recommendations?season=summer[39m
 2025-07-06 22:36:38:3638 [35mhttp[39m: [35mGET /api/diagnostics/recommendations[39m
 2025-07-06 22:37:01:371 [35mhttp[39m: [35mGET /api/diagnostics/recommendations?season=summer[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/swagger-ui.css[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/swagger-ui-bundle.js[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
+2025-07-07 11:08:24:824 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/swagger-ui-bundle.js[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/swagger-ui.css[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
+2025-07-07 11:08:26:826 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/swagger-ui.css[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/swagger-ui-bundle.js[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
+2025-07-07 11:19:31:1931 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/swagger-ui-bundle.js[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/swagger-ui.css[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
+2025-07-07 11:19:33:1933 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-11 19:45:20:4520 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 19:45:20:4520 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 19:45:29:4529 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 19:45:29:4529 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 19:50:16:5016 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 19:50:16:5016 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/swagger-ui.css[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/swagger-ui-bundle.js[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/swagger-ui-standalone-preset.js[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/swagger-ui-init.js[39m
+2025-07-11 19:52:05:525 [35mhttp[39m: [35mGET /api-docs/favicon-32x32.png[39m
+2025-07-11 19:55:02:552 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 19:55:02:552 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:55:02:552 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 19:57:05:575 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:57:30:5730 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:57:42:5742 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:57:50:5750 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:57:57:5757 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:58:05:585 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:58:55:5855 [35mhttp[39m: [35mPOST /api/auth/login[39m
+2025-07-11 19:58:55:5855 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 19:58:55:5855 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:58:55:5855 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 19:59:02:592 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-11 19:59:02:592 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:59:04:594 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 19:59:04:594 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:59:06:596 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 19:59:11:5911 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 19:59:11:5911 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:59:15:5915 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 19:59:15:5915 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:59:15:5915 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 19:59:22:5922 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-11 19:59:22:5922 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-11 19:59:26:5926 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 19:59:33:5933 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-11 19:59:33:5933 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:00:57:057 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 20:00:57:057 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:01:09:19 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 20:01:11:111 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 20:01:11:111 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:01:11:111 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 20:05:31:531 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 20:05:31:531 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 20:05:33:533 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-11 20:05:33:533 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:05:33:533 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 20:05:33:533 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:05:34:534 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 20:05:36:536 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 20:05:37:537 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 20:05:37:537 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:05:37:537 [35mhttp[39m: [35mGET /api/marketplace/products[39m
+2025-07-11 20:05:37:537 [31merror[39m: [31m500 - invalid input syntax for type uuid: "products" - /api/marketplace/products - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:05:38:538 [35mhttp[39m: [35mGET /api/diagnostics/user/some_user_id[39m
+2025-07-11 20:05:38:538 [31merror[39m: [31m500 - Not Found - /api/diagnostics/user/some_user_id - /api/diagnostics/user/some_user_id - GET - ::ffff:127.0.0.1[39m
+2025-07-11 20:05:38:538 [35mhttp[39m: [35mGET /api/educational-content[39m
+2025-07-11 20:42:38:4238 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 20:42:38:4238 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 21:29:04:294 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 21:29:04:294 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-11 21:29:46:2946 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-11 21:29:46:2946 [32minfo[39m: [32mEnvironment: development[39m
+2025-07-19 04:15:10:1510 [32minfo[39m: [32mServer running on port 3000[39m
+2025-07-19 04:15:10:1510 [32minfo[39m: [32mEnvironment: development[39m

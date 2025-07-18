@@ -50,7 +50,6 @@ class AppRoutes {
       final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
       return OrderConfirmationScreen(
         orderId: args?['orderId'] ?? '',
-        totalAmount: args?['totalAmount'] ?? 0.0,
       );
     },
     orderDetails: (context) {

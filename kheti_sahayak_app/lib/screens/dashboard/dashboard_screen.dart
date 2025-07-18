@@ -256,9 +256,8 @@ class _HomeTab extends StatelessWidget {
           // Placeholder for activities
           _buildPlaceholderCard(
             context,
-            'No recent activities',
-            'Your recent activities will appear here',
-            Icons.history,
+            title: 'No recent activities',
+            icon: Icons.history,
           ),
           
           const SizedBox(height: 24),
@@ -331,7 +330,6 @@ class _HomeTab extends StatelessWidget {
   Widget _buildPlaceholderCard(
     BuildContext context, {
     required String title,
-    required String subtitle,
     required IconData icon,
   }) {
     final theme = Theme.of(context);
@@ -360,12 +358,6 @@ class _HomeTab extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
           ],

@@ -18,6 +18,11 @@ class UserProvider with ChangeNotifier {
     _loadCurrentUser();
   }
 
+  // Initialize method for main.dart
+  Future<void> initialize() async {
+    await _loadCurrentUser();
+  }
+
   // Load current user from secure storage
   Future<void> _loadCurrentUser() async {
     try {
@@ -175,5 +180,11 @@ class UserProvider with ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  // Dispose method
+  void dispose() {
+    _authService.dispose();
+    super.dispose();
   }
 }

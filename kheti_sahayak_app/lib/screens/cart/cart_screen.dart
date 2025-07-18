@@ -219,32 +219,22 @@ class _CartScreenState extends State<CartScreen> {
                       _buildPriceRow(
                         'Subtotal',
                         _formatCurrency(_subtotal),
-                        theme,
                       ),
                       if (_totalSavings > 0)
                         _buildPriceRow(
                           'Total Savings',
                           '-${_formatCurrency(_totalSavings)}',
-                          theme,
-                          textColor: colorScheme.error,
                         ),
                       _buildPriceRow(
                         'Delivery Charge',
                         _deliveryCharge == 0
                             ? 'FREE'
                             : _formatCurrency(_deliveryCharge),
-                        theme,
-                        textColor: _deliveryCharge == 0
-                            ? colorScheme.primary
-                            : null,
                       ),
                       const Divider(height: 24),
                       _buildPriceRow(
                         'Total Amount',
                         _formatCurrency(_total),
-                        theme,
-                        isBold: true,
-                        textColor: colorScheme.primary,
                       ),
                       
                       const SizedBox(height: 16),
@@ -255,7 +245,6 @@ class _CartScreenState extends State<CartScreen> {
                         text: _isCheckingOut
                             ? 'Processing...'
                             : 'Proceed to Checkout (${_formatCurrency(_total)})',
-                        icon: _isCheckingOut ? null : Icons.lock_outline,
                         isLoading: _isCheckingOut,
                       ),
                       
@@ -521,7 +510,6 @@ class _CartScreenState extends State<CartScreen> {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               text: 'Continue Shopping',
-              icon: Icons.arrow_forward,
             ),
           ],
         ),
@@ -531,11 +519,8 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildPriceRow(
     String label,
-    String value, {
-    required ThemeData theme,
-    bool isBold = false,
-    Color? textColor,
-  }) {
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -543,16 +528,14 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           Text(
             label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.hintColor,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).hintColor,
             ),
           ),
           Text(
             value.startsWith('₹') ? value : '₹$value',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: textColor ?? theme.textTheme.bodyMedium?.color,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ],
