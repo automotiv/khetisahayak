@@ -110,9 +110,9 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                           const SizedBox(height: 8),
                           CustomTextField(
                             controller: _emailController,
-                            hintText: 'Enter your email',
+                            label: 'Enter your email',
                             keyboardType: TextInputType.emailAddress,
-                            prefixIcon: Icons.email_outlined,
+                            icon: Icons.email_outlined,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your email';
@@ -134,9 +134,9 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                           const SizedBox(height: 8),
                           CustomTextField(
                             controller: _passwordController,
-                            hintText: 'Enter your password',
+                            label: 'Enter your password',
                             obscureText: _obscurePassword,
-                            prefixIcon: Icons.lock_outline,
+                            icon: Icons.lock_outline,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword

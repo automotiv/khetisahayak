@@ -41,6 +41,11 @@ class AuthService {
     }
   }
   
+  // Static method to get token for API service
+  static Future<String?> getToken() async {
+    return await _storage.read(key: _tokenKey);
+  }
+  
   Future<User> register(String username, String email, String password, {
     String? fullName,
     String? phoneNumber,
@@ -142,7 +147,6 @@ class AuthService {
           if (address != null) 'address': address,
           if (bio != null) 'bio': bio,
         },
-        includeAuth: true,
       );
       
       final updatedUser = User.fromJson(response);
@@ -167,7 +171,6 @@ class AuthService {
         'current_password': currentPassword,
         'new_password': newPassword,
       },
-      includeAuth: true,
     );
   }
   

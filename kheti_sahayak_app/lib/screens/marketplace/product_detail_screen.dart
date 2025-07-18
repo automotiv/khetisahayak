@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
@@ -19,7 +18,7 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  final CarouselController _carouselController = CarouselController();
+  final PageController _pageController = PageController();
   int _currentImageIndex = 0;
   int _quantity = 1;
   bool _isLoading = false;
@@ -130,20 +129,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 fit: StackFit.expand,
                 children: [
                   // Image carousel
-                  CarouselSlider.builder(
-                    carouselController: _carouselController,
-                    options: CarouselOptions(
-                      height: double.infinity,
-                      viewportFraction: 1.0,
-                      enableInfiniteScroll: _product['images'].length > 1,
-                      autoPlay: _product['images'].length > 1,
-                      autoPlayInterval: const Duration(seconds: 5),
-                      onPageChanged: (index, reason) {
-                        setState(() => _currentImageIndex = index);
-                      },
-                    ),
+                  PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() => _currentImageIndex = index);
+                    },
                     itemCount: _product['images'].length,
-                    itemBuilder: (context, index, realIndex) {
+                    itemBuilder: (context, index) {
                       return Image.network(
                         _product['images'][index],
                         fit: BoxFit.cover,
@@ -183,7 +175,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: _product['images'].asMap().entries.map((entry) {
                           return GestureDetector(
-                            onTap: () => _carouselController.animateToPage(entry.key),
+                            onTap: () => _pageController.animateToPage(
+                              entry.key,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            ),
                             child: Container(
                               width: 8,
                               height: 8,

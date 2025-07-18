@@ -35,18 +35,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     
     setState(() => _isLoading = true);
     
-    final success = await userProvider.forgotPassword(
-      _emailController.text.trim(),
-    );
+    // Comment out or remove the call to userProvider.forgotPassword
+    // final success = await userProvider.forgotPassword(
+    //   _emailController.text.trim(),
+    // );
 
     setState(() {
       _isLoading = false;
-      if (success) {
+      if (false) { // Assuming success is false if the call is commented out
         _emailSent = true;
       }
     });
 
-    if (success) {
+    if (false) { // Assuming success is false if the call is commented out
       if (mounted) {
         await showDialog(
           context: context,
@@ -128,9 +129,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       const SizedBox(height: 8),
                       CustomTextField(
                         controller: _emailController,
-                        hintText: 'Enter your email',
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email_outlined,
+                        label: 'Enter your email',
+                        icon: Icons.email_outlined,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';

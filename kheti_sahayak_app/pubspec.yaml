@@ -32,35 +32,42 @@ dependencies:
     sdk: flutter
 
   # UI Components
-  cupertino_icons: ^1.0.6
-  flutter_svg: ^2.0.10+1
-  cached_network_image: ^3.3.1
-  image_picker: ^1.0.7
-  intl: ^0.19.0
+  cupertino_icons:
+  flutter_svg:
+  cached_network_image:
+  image_picker:
+  intl:
   
   # State Management
-  provider: ^6.1.1
+  provider:
   
   # Network & Storage
-  http: ^1.2.1
-  dio: ^5.4.0
-  flutter_secure_storage: ^9.0.0
-  shared_preferences: ^2.2.2
+  http:
+  dio:
+  flutter_secure_storage:
+  shared_preferences:
   
   # Form Validation
-  form_validator: ^2.1.1
+  form_validator:
   
   # Utils
-  logger: ^2.0.2
-  uuid: ^4.2.2
+  logger:
+  uuid:
+  
+  # Environment variables
+  flutter_dotenv:
+  
+  # UI Enhancement
+  carousel_slider:
+  readmore:
   
   # Maps & Location (temporarily disabled)
   # geolocator: ^12.0.0
   
   # Image Processing
-  image: ^4.1.7
-  path_provider: ^2.1.1
-  path: ^1.8.3
+  image:
+  path_provider:
+  path:
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +80,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

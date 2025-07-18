@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kheti_sahayak_app/providers/user_provider.dart';
 import 'package:kheti_sahayak_app/providers/cart_provider.dart';
 import 'package:kheti_sahayak_app/providers/order_provider.dart';
@@ -13,11 +12,8 @@ Future<void> main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-  
   // Initialize logger
-  Logger.init();
+  AppLogger.init();
   
   runApp(
     MultiProvider(

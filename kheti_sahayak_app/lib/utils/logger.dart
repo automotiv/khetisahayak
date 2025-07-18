@@ -1,16 +1,7 @@
 import 'package:logger/logger.dart';
 
 class LoggerHelper {
-  static final Logger _logger = Logger(
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 5,
-      lineLength: 50,
-      colors: true,
-      printEmojis: true,
-      printTime: true,
-    ),
-  );
+  static final Logger _logger = Logger();
 
   static void debug(String message) {
     _logger.d(message);
@@ -37,7 +28,8 @@ class LoggerHelper {
   }
 }
 
-class Logger {
+// Rename Logger class to AppLogger to avoid shadowing
+class AppLogger {
   static void init() {
     // Initialize any logger configurations here
   }

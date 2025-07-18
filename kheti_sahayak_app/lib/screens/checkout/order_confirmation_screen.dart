@@ -22,6 +22,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   bool _isLoading = true;
   String? _error;
   OrderItem? _order;
+  
+  TextTheme get textTheme => Theme.of(context).textTheme;
 
   @override
   void initState() {
@@ -191,7 +193,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         border: Border.all(color: colorScheme.primary),
                       ),
                       child: Text(
-                        'Order #$orderId',
+                        'Order #${order.orderNumber}',
                         style: textTheme.bodyLarge?.copyWith(
                           color: colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -250,10 +252,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         icon: Icons.payment_outlined,
                         label: 'Total Amount',
                         value: '₹${order.total.toStringAsFixed(2)}',
-                        valueStyle: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
+                        isBold: true,
                       ),
                       const SizedBox(height: 8),
                       
@@ -300,17 +299,17 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         children: [
                           // Subtotal
                           _buildPriceRow(
-                            context,
-                            label: 'Subtotal',
-                            value: '₹${order.subtotal.toStringAsFixed(2)}',
+                            'Subtotal',
+                            '₹${order.subtotal.toStringAsFixed(2)}',
+                            theme,
                           ),
                           const SizedBox(height: 8),
                           
                           // Delivery charge
                           _buildPriceRow(
-                            context,
-                            label: 'Delivery Charge',
-                            value: order.deliveryCharge == 0 ? 'FREE' : '₹${order.deliveryCharge.toStringAsFixed(2)}',
+                            'Delivery Charge',
+                            order.deliveryCharge == 0 ? 'FREE' : '₹${order.deliveryCharge.toStringAsFixed(2)}',
+                            theme,
                             valueColor: order.deliveryCharge == 0 ? colorScheme.primary : null,
                           ),
                           
@@ -318,9 +317,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           if (order.discount > 0) ...[
                             const SizedBox(height: 8),
                             _buildPriceRow(
-                              context,
-                              label: 'Coupon Discount',
-                              value: '-₹${order.discount.toStringAsFixed(2)}',
+                              'Coupon Discount',
+                              '-₹${order.discount.toStringAsFixed(2)}',
+                              theme,
                               valueColor: colorScheme.primary,
                             ),
                           ],
@@ -329,12 +328,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           
                           // Total
                           _buildPriceRow(
-                            context,
-                            label: 'Total Amount',
-                            value: '₹${order.total.toStringAsFixed(2)}',
+                            'Total Amount',
+                            '₹${order.total.toStringAsFixed(2)}',
+                            theme,
                             isBold: true,
                             valueColor: colorScheme.primary,
-                            valueSize: 16,
+                            fontSize: 16,
                           ),
                         ],
                       ),
@@ -398,10 +397,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                     child: PrimaryButton(
                       onPressed: () {
                         // Navigate to order details or track order
-                        Navigator.pushNamed(context, '/order-details', arguments: orderId);
+                        Navigator.pushNamed(context, '/order-details', arguments: widget.orderId);
                       },
                       text: 'Track Order',
-                      icon: Icons.local_shipping_outlined,
                     ),
                   ),
                 ],
@@ -425,45 +423,34 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
   
   Widget _buildOrderSummary(BuildContext context) {
+    final order = _order!;
+    final orderDate = order.orderDate;
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-              ),
-            // Order summary
-            _buildInfoRow('Order ID', orderId, context),
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow('Order ID', order.orderNumber, context),
             const SizedBox(height: 8),
             _buildInfoRow('Order Date', _formatDate(orderDate), context),
             const SizedBox(height: 8),
-            _buildInfoRow('Items', '${orderItems.length} items', context),
+            _buildInfoRow('Items', '${order.items.length} items', context),
             const SizedBox(height: 8),
             _buildInfoRow('Delivery', 'Standard Delivery', context),
             const SizedBox(height: 8),
-            _buildInfoRow(
-              'Expected Delivery',
-              _getExpectedDeliveryDate(),
-              context,
-              valueStyle: textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            
+            _buildInfoRow('Expected Delivery', _getExpectedDeliveryDate(), context),
             const Divider(height: 24),
-            
-            // Price summary
-            _buildPriceRow('Subtotal', _calculateSubtotal(), context),
-            _buildPriceRow('Delivery', 'FREE', context, isFree: true),
+            _buildPriceRow('Subtotal', _calculateSubtotal().toStringAsFixed(2), theme),
+            _buildPriceRow('Delivery', 'FREE', theme),
             const Divider(height: 24),
-            _buildPriceRow(
-              'Total Amount',
-              '₹${totalAmount.toStringAsFixed(2)}',
-              context,
-              isBold: true,
-              isPrimary: true,
-            ),
+            _buildPriceRow('Total Amount', '₹${order.total.toStringAsFixed(2)}', theme),
           ],
         ),
       ),
@@ -473,8 +460,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   Widget _buildAddressCard(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    
-    // Parse address components
+    final order = _order!;
     final addressLines = _order!.shippingAddress.split('\n');
     final name = addressLines.isNotEmpty ? addressLines[0] : '';
     final address = addressLines.length > 1 ? addressLines[1] : '';
@@ -633,7 +619,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     ];
     
     // Get the current status index
-    final currentStatus = _order!.status.toLowerCase();
+    final currentStatus = _order!.status.toString().toLowerCase();
     final currentStatusIndex = allStatuses.indexOf(currentStatus);
     
     // Define status details
@@ -860,7 +846,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                 );
               },
             ),
-            if (_order!.status.toLowerCase() == 'delivered') ...[
+            if (_order!.status == OrderStatus.delivered) ...[
               const Divider(height: 24),
               _buildHelpItem(
                 context,
@@ -975,52 +961,49 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   Widget _buildPriceRow(
     String label,
     String value,
-    BuildContext context, {
+    ThemeData theme, {
     bool isBold = false,
     bool isFree = false,
     bool isPrimary = false,
+    Color? valueColor,
+    double? fontSize,
   }) {
-    final theme = Theme.of(context);
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            color: theme.hintColor,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              color: theme.hintColor,
+              fontSize: fontSize,
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            color: isFree
-                ? theme.colorScheme.primary
-                : isPrimary
-                    ? theme.colorScheme.primary
-                    : theme.textTheme.bodyMedium?.color,
+          Text(
+            value.startsWith('₹') ? value : '₹$value',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              color: valueColor ?? theme.textTheme.bodyMedium?.color,
+              fontSize: fontSize,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-  
-  String _formatDate(DateTime date) {
-    return '${_getWeekday(date.weekday)}, ${date.day} ${_getMonth(date.month)} ${date.year}';
   }
   
   String _formatDateTime(DateTime date) {
     final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
     final amPm = date.hour < 12 ? 'AM' : 'PM';
     final minute = date.minute.toString().padLeft(2, '0');
-    return '${_getWeekday(date.weekday)}, ${date.day} ${_getMonth(date.month)} at $hour:$minute $amPm';
+    return '${_getDayName(date.weekday)}, ${date.day} ${_getMonthName(date.month)} at $hour:$minute $amPm';
   }
   
   String _getExpectedDeliveryDate() {
-    final deliveryDate = orderDate.add(const Duration(days: 3));
-    return '${_getWeekday(deliveryDate.weekday)}, ${deliveryDate.day} ${_getMonth(deliveryDate.month)}';
+    final deliveryDate = _order?.orderDate.add(const Duration(days: 3)) ?? DateTime.now().add(const Duration(days: 3));
+    return '${_getDayName(deliveryDate.weekday)}, ${deliveryDate.day} ${_getMonthName(deliveryDate.month)}';
   }
   
   String _getWeekday(int weekday) {
@@ -1037,9 +1020,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
   
   double _calculateSubtotal() {
-    return orderItems.fold(0, (sum, item) {
-      return sum + (item['price'] * item['quantity']);
-    });
+    return _order?.items.fold(0.0, (double? sum, item) {
+      return sum! + (item.price * item.quantity);
+    }) ?? 0.0;
   }
   
   void _showContactSupportDialog(BuildContext context) {
@@ -1247,6 +1230,27 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           style: theme.textTheme.bodyMedium,
         ),
       ],
+    );
+  }
+
+  Widget _buildDetailRow(BuildContext context, {required IconData icon, required String label, required String value, bool isBold = false}) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(label + ': ', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+        Expanded(child: Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.normal))),
+      ],
+    );
+  }
+
+  Widget _buildOrderItem(BuildContext context, dynamic item) {
+    // Replace dynamic with your actual item type
+    return ListTile(
+      title: Text(item.name ?? ''),
+      subtitle: Text('Qty: ${item.quantity}'),
+      trailing: Text('₹${item.price}'),
     );
   }
 }
