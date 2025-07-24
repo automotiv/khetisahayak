@@ -18,13 +18,13 @@ terraform {
     }
   }
 
-  # Backend configuration for state management
-  backend "azurerm" {
-    resource_group_name  = "rg-khetisahayak-tfstate"
-    storage_account_name = "sakhetisahayaktfstate"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-  }
+  # Backend configuration for state management (commented out for initial deployment)
+  # backend "azurerm" {
+  #   resource_group_name  = "rg-khetisahayak-tfstate"
+  #   storage_account_name = "sakhetisahayaktfstate"
+  #   container_name       = "tfstate"
+  #   key                  = "terraform.tfstate"
+  # }
 }
 
 # Configure the Azure Provider
@@ -60,18 +60,9 @@ locals {
   # Resource naming convention
   name_prefix = "${var.project_name}-${var.environment}"
   
-  # Application settings
+  # Application settings - simplified for initial deployment
   app_settings = {
     NODE_ENV                    = var.environment
-    DATABASE_URL               = module.database.connection_string
-    REDIS_URL                  = module.redis.connection_string
-    JWT_SECRET                 = "@Microsoft.KeyVault(VaultName=${module.key_vault.name};SecretName=jwt-secret)"
-    STORAGE_ACCOUNT_NAME       = module.storage.account_name
-    STORAGE_ACCOUNT_KEY        = "@Microsoft.KeyVault(VaultName=${module.key_vault.name};SecretName=storage-account-key)"
-    APPLICATION_INSIGHTS_KEY   = module.monitoring.instrumentation_key
-    WEATHER_API_KEY           = "@Microsoft.KeyVault(VaultName=${module.key_vault.name};SecretName=weather-api-key)"
-    SMS_API_KEY               = "@Microsoft.KeyVault(VaultName=${module.key_vault.name};SecretName=sms-api-key)"
-    PAYMENT_GATEWAY_KEY       = "@Microsoft.KeyVault(VaultName=${module.key_vault.name};SecretName=payment-gateway-key)"
     WEBSITE_NODE_DEFAULT_VERSION = "18-lts"
     SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
   }
@@ -97,63 +88,61 @@ module "networking" {
   subnet_address_spaces  = var.subnet_address_spaces
 }
 
-# Key Vault Module
-module "key_vault" {
-  source = "./modules/key_vault"
+# Key Vault Module - Commented out for initial deployment
+# module "key_vault" {
+#   source = "./modules/key_vault"
 
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+# }
 
-  tenant_id = data.azurerm_client_config.current.tenant_id
-  object_id = data.azurerm_client_config.current.object_id
-}
+# Storage Module - Commented out for initial deployment
+# module "storage" {
+#   source = "./modules/storage"
 
-# Storage Module
-module "storage" {
-  source = "./modules/storage"
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
 
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
+#   cors_allowed_origins = var.cors_allowed_origins
+# }
 
-  cors_allowed_origins = var.cors_allowed_origins
-}
+# Database Module (PostgreSQL) - Commented out for initial deployment
+# module "database" {
+#   source = "./modules/database"
 
-# Database Module (PostgreSQL)
-module "database" {
-  source = "./modules/database"
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
 
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
+#   subnet_id                    = module.networking.database_subnet_id
+#   private_dns_zone_id          = module.networking.private_dns_zone_id
+#   administrator_login          = var.db_admin_username
+#   administrator_login_password = var.db_admin_password
+#   sku_name                    = var.db_sku_name
+#   storage_mb                  = var.db_storage_mb
+#   backup_retention_days       = var.db_backup_retention_days
+#   geo_redundant_backup_enabled = var.db_geo_redundant_backup_enabled
+# }
 
-  subnet_id                    = module.networking.database_subnet_id
-  administrator_login          = var.db_admin_username
-  administrator_login_password = var.db_admin_password
-  sku_name                    = var.db_sku_name
-  storage_mb                  = var.db_storage_mb
-  backup_retention_days       = var.db_backup_retention_days
-  geo_redundant_backup_enabled = var.db_geo_redundant_backup_enabled
-}
+# Redis Cache Module - Commented out for initial deployment
+# module "redis" {
+#   source = "./modules/redis"
 
-# Redis Cache Module
-module "redis" {
-  source = "./modules/redis"
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
 
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
-
-  subnet_id = module.networking.cache_subnet_id
-  sku_name  = var.redis_sku_name
-  family    = var.redis_family
-  capacity  = var.redis_capacity
-}
+#   subnet_id = module.networking.cache_subnet_id
+#   sku_name  = var.redis_sku_name
+#   family    = var.redis_family
+#   capacity  = var.redis_capacity
+# }
 
 # Container Registry Module
 module "container_registry" {
@@ -164,193 +153,163 @@ module "container_registry" {
   name_prefix        = local.name_prefix
   tags               = local.common_tags
 
-  sku = var.acr_sku
+  sku           = var.acr_sku
+  admin_enabled = true
 }
 
-# App Service Plan Module
-module "app_service_plan" {
-  source = "./modules/app_service_plan"
+# App Service Plan Module - Commented out due to quota restrictions
+# module "app_service_plan" {
+#   source = "./modules/app_service_plan"
+
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+
+#   sku_name          = var.app_service_sku_name
+#   enable_autoscaling = var.app_service_sku_name != "F1" # Disable autoscaling for F1 (Free) tier
+# }
+
+# Backend App Service Module - Commented out due to quota restrictions
+# module "backend_app_service" {
+#   source = "./modules/app_service"
+
+#   resource_group_name   = azurerm_resource_group.main.name
+#   location             = azurerm_resource_group.main.location
+#   name_prefix          = "${local.name_prefix}-backend"
+#   tags                 = local.common_tags
+
+#   app_service_plan_id  = module.app_service_plan.app_service_plan_id
+#   app_settings        = local.app_settings
+#   always_on           = var.app_service_sku_name != "F1" # Disable always_on for F1 (Free) tier
+# }
+
+# Backend Container Instance - Alternative to App Service
+module "backend_container_instance" {
+  source = "./modules/container_instance"
 
   resource_group_name = azurerm_resource_group.main.name
   location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
+  name_prefix        = "${local.name_prefix}-backend"
   tags               = local.common_tags
 
-  sku_name = var.app_service_sku_name
+  docker_image       = "${module.container_registry.container_registry_login_server}/kheti-sahayak-backend-demo:latest"
+  cpu_cores         = 1.0
+  memory_gb         = 2.0
+  container_port    = 3000
+  
+  registry_server   = module.container_registry.container_registry_login_server
+  registry_username = module.container_registry.container_registry_admin_username
+  registry_password = module.container_registry.container_registry_admin_password
+  
+  environment_variables = {
+    NODE_ENV = "dev"
+    PORT     = "3000"
+  }
+
+  depends_on = [module.container_registry]
 }
 
-# Backend App Service Module
-module "backend_app_service" {
-  source = "./modules/app_service"
-
-  resource_group_name   = azurerm_resource_group.main.name
-  location             = azurerm_resource_group.main.location
-  name_prefix          = "${local.name_prefix}-backend"
-  tags                 = local.common_tags
-
-  service_plan_id      = module.app_service_plan.id
-  subnet_id           = module.networking.app_subnet_id
-  app_settings        = local.app_settings
-  
-  # Custom domains and SSL
-  custom_domain       = var.backend_custom_domain
-  
-  # Docker configuration
-  docker_image        = "${module.container_registry.login_server}/khetisahayak-backend:latest"
-  docker_registry_url = "https://${module.container_registry.login_server}"
-  
-  # Health check
-  health_check_path   = "/api/health"
-  
-  # Scaling
-  always_on          = true
-  
-  depends_on = [
-    module.database,
-    module.redis,
-    module.key_vault
-  ]
-}
-
-# Frontend Static Web App Module
-module "frontend_static_web_app" {
-  source = "./modules/static_web_app"
+# Frontend Container Instance
+module "frontend_container_instance" {
+  source = "./modules/container_instance"
 
   resource_group_name = azurerm_resource_group.main.name
   location           = azurerm_resource_group.main.location
   name_prefix        = "${local.name_prefix}-frontend"
   tags               = local.common_tags
 
-  sku_tier = var.static_web_app_sku_tier
-  sku_size = var.static_web_app_sku_size
+  docker_image       = "${module.container_registry.container_registry_login_server}/kheti-sahayak-frontend:latest"
+  cpu_cores         = 0.5
+  memory_gb         = 1.0
+  container_port    = 80
   
-  # Repository configuration
-  repository_url    = var.repository_url
-  repository_branch = var.repository_branch
+  registry_server   = module.container_registry.container_registry_login_server
+  registry_username = module.container_registry.container_registry_admin_username
+  registry_password = module.container_registry.container_registry_admin_password
   
-  # Build configuration
-  app_location    = "/kheti_sahayak_app"
-  api_location    = ""
-  output_location = "/build/web"
+  environment_variables = {
+    ENVIRONMENT = "dev"
+  }
+
+  depends_on = [module.container_registry]
 }
 
-# API Management Module
-module "api_management" {
-  source = "./modules/api_management"
+# Frontend Static Web App Module - Commented out for initial deployment
+# module "frontend_static_web_app" {
+#   source = "./modules/static_web_app"
 
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = "${local.name_prefix}-frontend"
+#   tags               = local.common_tags
+# }
 
-  publisher_name  = var.api_publisher_name
-  publisher_email = var.api_publisher_email
-  sku_name       = var.apim_sku_name
+# API Management Module - Commented out for initial deployment
+# module "api_management" {
+#   source = "./modules/api_management"
 
-  backend_url = "https://${module.backend_app_service.default_hostname}"
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+
+#   publisher_name  = var.api_publisher_name
+#   publisher_email = var.api_publisher_email
+#   sku_name       = var.apim_sku_name
+# }
+
+# Monitoring Module (Application Insights + Log Analytics) - Commented out for initial deployment
+# module "monitoring" {
+#   source = "./modules/monitoring"
+
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+# }
+
+# Security Module (Security Center, Defender) - Commented out for initial deployment
+# module "security" {
+#   source = "./modules/security"
+
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+# }
+
+# CDN Module - Commented out for initial deployment
+# module "cdn" {
+#   source = "./modules/cdn"
+
+#   resource_group_name = azurerm_resource_group.main.name
+#   location           = azurerm_resource_group.main.location
+#   name_prefix        = local.name_prefix
+#   tags               = local.common_tags
+# }
+
+# Secrets stored in Key Vault - Commented out for initial deployment
+# resource "azurerm_key_vault_secret" "jwt_secret" {
+#   name         = "jwt-secret"
+#   value        = random_password.jwt_secret.result
+#   key_vault_id = module.key_vault.id
   
-  # Custom domain
-  gateway_custom_domain = var.api_custom_domain
-}
+#   depends_on = [module.key_vault]
+# }
 
-# Monitoring Module (Application Insights + Log Analytics)
-module "monitoring" {
-  source = "./modules/monitoring"
-
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
-
-  retention_in_days = var.log_retention_days
-}
-
-# Security Module (Security Center, Defender)
-module "security" {
-  source = "./modules/security"
-
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
-
-  key_vault_id = module.key_vault.id
-}
-
-# CDN Module
-module "cdn" {
-  source = "./modules/cdn"
-
-  resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  name_prefix        = local.name_prefix
-  tags               = local.common_tags
-
-  origin_host_name = module.frontend_static_web_app.default_hostname
-  custom_domain    = var.frontend_custom_domain
-}
-
-# Secrets stored in Key Vault
-resource "azurerm_key_vault_secret" "jwt_secret" {
-  name         = "jwt-secret"
-  value        = random_password.jwt_secret.result
-  key_vault_id = module.key_vault.id
+# resource "azurerm_key_vault_secret" "storage_account_key" {
+#   name         = "storage-account-key"
+#   value        = module.storage.primary_access_key
+#   key_vault_id = module.key_vault.id
   
-  depends_on = [module.key_vault]
-}
+#   depends_on = [module.key_vault, module.storage]
+# }
 
-resource "azurerm_key_vault_secret" "storage_account_key" {
-  name         = "storage-account-key"
-  value        = module.storage.primary_access_key
-  key_vault_id = module.key_vault.id
-  
-  depends_on = [module.key_vault, module.storage]
-}
+# Generate random passwords and secrets - Commented out for initial deployment
+# resource "random_password" "jwt_secret" {
+#   length  = 32
+#   special = true
+# }
 
-# Generate random passwords and secrets
-resource "random_password" "jwt_secret" {
-  length  = 32
-  special = true
-}
-
-# Outputs
-output "resource_group_name" {
-  description = "Name of the resource group"
-  value       = azurerm_resource_group.main.name
-}
-
-output "backend_url" {
-  description = "Backend application URL"
-  value       = "https://${module.backend_app_service.default_hostname}"
-}
-
-output "frontend_url" {
-  description = "Frontend application URL"
-  value       = "https://${module.frontend_static_web_app.default_hostname}"
-}
-
-output "api_management_url" {
-  description = "API Management gateway URL"
-  value       = module.api_management.gateway_url
-}
-
-output "database_server_fqdn" {
-  description = "Database server FQDN"
-  value       = module.database.server_fqdn
-}
-
-output "container_registry_login_server" {
-  description = "Container registry login server"
-  value       = module.container_registry.login_server
-}
-
-output "key_vault_uri" {
-  description = "Key Vault URI"
-  value       = module.key_vault.vault_uri
-}
-
-output "application_insights_instrumentation_key" {
-  description = "Application Insights instrumentation key"
-  value       = module.monitoring.instrumentation_key
-  sensitive   = true
-}
+# Note: All outputs are defined in outputs.tf to avoid duplication

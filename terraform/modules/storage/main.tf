@@ -120,16 +120,6 @@ resource "azurerm_storage_management_policy" "main" {
       }
     }
   }
-}
-    default_action = var.default_network_access_rule
-    bypass         = ["AzureServices"]
-    
-    # Allow specific IP ranges (for development)
-    ip_rules = var.allowed_ip_ranges
-    
-    # Virtual network rules
-    virtual_network_subnet_ids = var.allowed_subnet_ids
-  }
 
   tags = var.tags
 }
@@ -163,37 +153,6 @@ resource "azurerm_storage_container" "backups" {
   name                  = "backups"
   storage_account_name  = azurerm_storage_account.main.name
   container_access_type = "private"
-}
-
-# Storage management policy for lifecycle management
-resource "azurerm_storage_management_policy" "main" {
-  storage_account_id = azurerm_storage_account.main.id
-
-  rule {
-    name    = "lifecycleRule"
-    enabled = true
-    
-    filters {
-      prefix_match = ["uploads/", "backups/"]
-      blob_types   = ["blockBlob"]
-    }
-    
-    actions {
-      base_blob {
-        tier_to_cool_after_days_since_modification_greater_than    = 30
-        tier_to_archive_after_days_since_modification_greater_than = 90
-        delete_after_days_since_modification_greater_than          = 365
-      }
-      
-      snapshot {
-        delete_after_days_since_creation_greater_than = 90
-      }
-      
-      version {
-        delete_after_days_since_creation = 90
-      }
-    }
-  }
 }
 
 # Queue for background processing

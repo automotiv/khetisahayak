@@ -8,9 +8,12 @@ resource "azurerm_virtual_network" "main" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  ddos_protection_plan {
-    id     = var.enable_ddos_protection ? azurerm_network_ddos_protection_plan.main[0].id : null
-    enable = var.enable_ddos_protection
+  dynamic "ddos_protection_plan" {
+    for_each = var.enable_ddos_protection ? [1] : []
+    content {
+      id     = azurerm_network_ddos_protection_plan.main[0].id
+      enable = true
+    }
   }
 }
 

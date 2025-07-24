@@ -62,15 +62,15 @@ resource "azurerm_linux_web_app" "backend" {
     }
   }
 
-  # Connection strings
-  dynamic "connection_string" {
-    for_each = var.connection_strings
-    content {
-      name  = connection_string.value.name
-      type  = connection_string.value.type
-      value = connection_string.value.value
-    }
-  }
+  # Connection strings - Commented out for initial deployment
+  # dynamic "connection_string" {
+  #   for_each = tomap({ for idx, cs in var.connection_strings : tostring(idx) => cs })
+  #   content {
+  #     name  = connection_string.value.name
+  #     type  = connection_string.value.type
+  #     value = connection_string.value.value
+  #   }
+  # }
 
   # Authentication
   dynamic "auth_settings_v2" {

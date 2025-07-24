@@ -121,7 +121,7 @@ variable "acr_sku" {
 variable "app_service_sku_name" {
   description = "SKU name for App Service Plan"
   type        = string
-  default     = "P1v3"
+  default     = "B1"
 }
 
 # Static Web App Configuration

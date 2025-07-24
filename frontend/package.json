@@ -1,0 +1,14 @@
+{
+  "name": "kheti-sahayak-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Kheti Sahayak application",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p dist && cp src/* dist/",
+    "start": "http-server dist -p 3000",
+    "dev": "http-server src -p 3000"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
