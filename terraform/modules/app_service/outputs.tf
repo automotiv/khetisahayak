@@ -47,7 +47,7 @@ output "custom_domain_bindings" {
 
 output "app_service_identity" {
   description = "Identity of the App Service"
-  value = azurerm_linux_web_app.backend.identity != null ? {
+  value = length(azurerm_linux_web_app.backend.identity) > 0 ? {
     type         = azurerm_linux_web_app.backend.identity[0].type
     principal_id = azurerm_linux_web_app.backend.identity[0].principal_id
     tenant_id    = azurerm_linux_web_app.backend.identity[0].tenant_id

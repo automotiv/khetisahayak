@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kheti Sahayak - Agricultural Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #2E7D32;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .api-status {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-online {
+            background-color: #4CAF50;
+        }
+        
+        .status-offline {
+            background-color: #f44336;
+        }
+        
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌾 Kheti Sahayak</h1>
+            <p>Your Digital Agricultural Assistant</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🌱 Crop Management</h3>
+                <p>Get expert advice on crop selection, planting schedules, and farming techniques tailored to your region and soil conditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🌤️ Weather Insights</h3>
+                <p>Access real-time weather data and forecasts to make informed decisions about irrigation, harvesting, and crop protection.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>💰 Market Prices</h3>
+                <p>Stay updated with current market prices for your crops and find the best selling opportunities in your area.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🛒 Equipment Rental</h3>
+                <p>Rent or lend agricultural equipment to maximize efficiency and reduce costs through our peer-to-peer platform.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>👥 Community Forum</h3>
+                <p>Connect with fellow farmers, share experiences, and get answers to your agricultural questions from the community.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📚 Learning Resources</h3>
+                <p>Access educational content, tutorials, and best practices to improve your farming knowledge and skills.</p>
+            </div>
+        </div>
+        
+        <div class="api-status">
+            <h3>Backend API Status</h3>
+            <p id="api-status">
+                <span class="status-indicator status-offline"></span>
+                Checking connection...
+            </p>
+            <button class="btn" onclick="checkApiStatus()">Check API</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'http://20.242.211.179:3000';
+
+        async function checkApiStatus() {
+            const statusElement = document.getElementById('api-status');
+            statusElement.innerHTML = '<span class="status-indicator status-offline"></span>Checking...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    statusElement.innerHTML = '<span class="status-indicator status-online"></span>Backend API is online and healthy!';
+                } else {
+                    throw new Error('API not responding correctly');
+                }
+            } catch (error) {
+                statusElement.innerHTML = '<span class="status-indicator status-offline"></span>Backend API is offline or unreachable';
+                console.error('API check failed:', error);
+            }
+        }
+
+        // Check API status on page load
+        document.addEventListener('DOMContentLoaded', checkApiStatus);
+    </script>
+</body>
+</html>
