@@ -9,6 +9,7 @@ This directory contains comprehensive Product Requirements Documents for the Khe
 - [**01_user_profiles.md**](01_user_profiles.md) - Detailed user personas and roles
 - [**02_features_overview.md**](02_features_overview.md) - High-level feature summary
 - [**03_non_functional_requirements.md**](03_non_functional_requirements.md) - Performance, security, and quality requirements
+- [**04_product_roadmap.md**](04_product_roadmap.md) - Strategic product roadmap and vision phases
 
 ### 🎯 Feature Specifications
 The `features/` directory contains detailed specifications for each major feature:
@@ -73,15 +74,26 @@ The `technical/` directory contains technical implementation details:
 
 ## 🎯 Product Overview
 
-### Mission Statement
-**Kheti Sahayak** aims to empower Indian farmers by bridging informational and transactional gaps in agriculture through digital innovation. Our goal is to provide timely, accurate, and actionable agricultural insights that increase productivity, reduce losses, and improve farmer livelihoods.
+### Vision Statement
+To create a digitally empowered agricultural ecosystem where every Indian farmer has the knowledge, resources, and market access to prosper, ensuring a sustainable and food-secure future for the nation.
+
+### Mission
+To empower Indian farmers by providing a comprehensive digital platform that delivers timely, accurate, and actionable insights, bridging critical gaps in information, market access, and services to increase productivity, reduce losses, and improve livelihoods.
+
+### Guiding Principles
+
+1.  **Farmer-Centricity:** Solve real-world challenges for farmers with intuitive, accessible, and impactful solutions.
+2.  **Actionable Intelligence:** Convert complex data into simple, clear, and actionable advice.
+3.  **Trust & Transparency:** Build a secure and reliable ecosystem through data privacy and verified information.
+4.  **Community & Collaboration:** Foster a network where farmers, experts, and vendors create shared value.
+5.  **Sustainable Prosperity:** Promote practices that are both economically and environmentally sustainable.
 
 ### Key Value Propositions
 
 1. **🔬 AI-Powered Diagnostics**: Advanced crop disease detection using image recognition
 2. **🌤️ Hyperlocal Weather**: Village-level weather forecasts and alerts
 3. **🛒 Digital Marketplace**: Direct access to agricultural products and services
-4. **👨‍🌾 Expert Network**: Direct consultation with agricultural specialists
+4. **👨‍🌾 Expert Network**: On-demand consultation with agricultural specialists
 5. **📚 Knowledge Hub**: Comprehensive educational content in local languages
 6. **📱 Mobile-First**: Designed for smartphones with offline capabilities
 7. **🌐 Multilingual**: Support for major Indian languages
@@ -106,33 +118,14 @@ The `technical/` directory contains technical implementation details:
 
 ## 📊 Implementation Status
 
-### Phase 1: Core Platform (v1.0) - ✅ Complete
-- User authentication and profiles
-- Basic crop diagnostics
-- Educational content management
-- Marketplace foundation
-- Mobile app (Android/iOS)
+The Kheti Sahayak platform is being developed in strategic phases, each building upon the last to realize our long-term vision. For a detailed breakdown of features, goals, and timelines for each phase, please refer to our comprehensive **Product Roadmap**.
 
-### Phase 2: Enhanced Features (v1.1-1.4) - ✅ Complete
-- Advanced AI diagnostics
-- Weather integration
-- Expert consultation system
-- Enhanced marketplace
-- Community forum
-
-### Phase 3: Scale & Optimization (v2.0) - 🔄 In Progress
-- Multilingual support
-- Offline capabilities
-- Advanced analytics
-- Performance optimization
-- Government scheme integration
-
-### Phase 4: Advanced Features (v2.1+) - 📋 Planned
-- IoT sensor integration
-- Market price predictions
-- AR/VR features
-- Advanced AI recommendations
-- Social commerce features
+### High-Level Phases
+- **Phase 1: Foundation & MVP (v1.0)** - ✅ Complete
+- **Phase 2: Engagement & Enrichment (v1.5)** - ✅ Complete
+- **Phase 3: Scale & Intelligence (v2.0)** - 🔄 In Progress
+- **Phase 4: Monetization & Ecosystem Integration (v2.5)** - 📋 Planned
+- **Phase 5: Community & Platform Leadership (v3.0+)** - 🚀 Visionary
 
 ## 🔄 Document Maintenance
 
