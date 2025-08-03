@@ -1120,31 +1120,13 @@ We welcome contributions from the community! Here's how you can help:
 4. **Request review**: Get at least one team member review
 5. **Address feedback**: Make requested changes promptly
 
-### 🐛 Bug Reports
+### 💬 Community & Feedback
 
-Use our [issue template](.github/ISSUE_TEMPLATE/bug_report.md) to report bugs:
+The best way to contribute and provide feedback is through our GitHub repository.
 
-- Clear description of the issue
-- Steps to reproduce
-- Expected vs actual behavior
-- Screenshots/logs if applicable
-- Environment details
-
-### 💡 Feature Requests
-
-Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md):
-
-- Clear use case description
-- Detailed feature specification
-- Potential implementation approach
-- Impact assessment
-
-### 👥 Community
-
-- 💬 **Discord**: Join our developer community
-- � **Email**: contribute@khetisahayak.com
-- 🐦 **Twitter**: @KhetiSahayak
-- � **Blog**: Technical insights and updates
+- **💡 Feature Requests & Ideas**: Have a new idea or want to discuss a feature? Head over to our [**GitHub Discussions**](https://github.com/your-username/khetisahayak/discussions). We use polls here to vote on new features!
+- **🐞 Bug Reports**: Found a bug? Please report it by opening a new [**GitHub Issue**](https://github.com/your-username/khetisahayak/issues) using the bug report template.
+- **❓ Questions & Support**: For general questions and community support, join the conversation in [**GitHub Discussions**](https://github.com/your-username/khetisahayak/discussions).
 
 ---
 

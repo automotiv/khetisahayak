@@ -2,6 +2,17 @@
 
 ## 2.0 Project Context & Vision
 
+### Vision
+To build a self-sustaining digital ecosystem that empowers every farmer to be more knowledgeable, profitable, and resilient. We envision a future where technology bridges the gap between traditional farming wisdom and modern agricultural science, creating a thriving rural economy.
+
+### Guiding Principles
+
+1.  **Farmer-First Design:** Every feature must be intuitive and solve a real-world problem for farmers with varying levels of digital literacy. Our success is measured by their success.
+2.  **Data-Driven Empowerment:** We transform complex data (weather, soil, market) into simple, actionable insights that lead to tangible improvements in yield and income.
+3.  **Ecosystem, Not Just an App:** We are building a collaborative platform where farmers, experts, vendors, and communities create compounding value for each other, fostering a cycle of growth and knowledge sharing.
+4.  **Trust and Transparency:** We build unwavering trust through data privacy, verified information, and transparent marketplace practices. Every interaction must reinforce the farmer's confidence in our platform.
+5.  **Sustainable Impact:** We promote practices that are not only profitable for the farmer but also sustainable for the environment and future generations, ensuring long-term prosperity for the agricultural sector.
+
 ### Problem Statement
 Smallholder farmers in India face challenges such as limited market access, unpredictable weather, lack of timely information, low productivity, and restricted access to expert advice and government schemes. These issues impact their income, crop yield, and resilience.
 

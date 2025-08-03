@@ -66,20 +66,35 @@
 *   **Conclusion:** Vendors ensure farmers have access to necessary products/services, enhancing the agricultural ecosystem through active participation.
 
 ### **2.1.4 Laborers** 
-*[TODO: Confirm if Laborers are a distinct user type or managed within another feature.]*
+*(Note: Laborers are a distinct user type discoverable via the Sharing Platform)*
 
 *   **Role:** Individuals offering farming-related labor services.
 *   **Needs & Goals:**
     *   Find temporary or seasonal farm work opportunities.
     *   Showcase skills and availability.
     *   Receive fair wages and timely payments.
-*   **Responsibilities within the platform:**
+*   **Responsibilities within the platform (as a user):**
     *   Maintain an accurate profile detailing skills and availability.
     *   Fulfill agreed-upon tasks professionally.
     *   Communicate clearly with farmers hiring them.
 *   **Key Interactions:** Equipment & Labor Sharing feature.
 
-### **2.1.5 Platform Administrators**
-*[TODO: Add details about Admin roles and permissions based on feature requirements, e.g., content moderation, user verification, dispute resolution, platform analytics.]*
+### **2.1.5 Mechanics**
+
+*   **Role:** Skilled technicians and mechanics specializing in the repair and maintenance of agricultural machinery (tractors, pumps, harvesters, etc.). They are a specialized subset of the "Expert" user type.
+*   **Detailed Responsibilities:**
+    1.  **Provide Consultations:** Offer remote diagnostic advice and troubleshooting help to farmers via Expert Connect (chat/video).
+    2.  **Offer Services:** List their services (e.g., on-site repair, routine maintenance) in the Marketplace.
+    3.  **Share Knowledge:** Contribute to the Community Forum and Educational Content sections with maintenance tips and technical guides.
+    4.  **Verify Parts:** Potentially assist in verifying the authenticity or compatibility of spare parts listed on the Marketplace.
+*   **Key Interactions:** Expert Connect, Marketplace, Community Forum, Machinery Management.
+
+### **2.1.6 Platform Administrators**
 
 *   **Role:** Internal team responsible for managing the platform, content moderation, user support, vendor/expert verification, and ensuring smooth operation.
+*   **Detailed Responsibilities:**
+    1.  **User Management:** Oversee the verification and onboarding process for Vendors, Experts, and Mechanics. Handle user-reported issues and account management.
+    2.  **Content Moderation:** Monitor the Community Forum and Marketplace listings for inappropriate content, spam, or fraud.
+    3.  **Dispute Resolution:** Act as mediators in disputes arising from Marketplace transactions or Sharing Platform rentals.
+    4.  **Platform Analytics:** Monitor key performance indicators (KPIs), user engagement, and system health to inform product decisions.
+    5.  **Support:** Manage the primary support channels for all user types.

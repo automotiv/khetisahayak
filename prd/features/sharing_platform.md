@@ -27,6 +27,9 @@ This feature facilitates a sharing economy within the "Kheti Sahayak" community,
 *   **FR4.1.1 Equipment Listing:** Owners must be able to create listings for their equipment, including:
     *   Type, Brand, Model, Age, Condition.
     *   High-quality images/videos.
+    *   **Usage Hours / Kilometers.**
+    *   **Last Service Date.**
+    *   **Insurance Availability.**
     *   Rental Terms (Price per hour/day, Security Deposit).
     *   Usage instructions or limitations.
     *   Location of the equipment.
@@ -37,6 +40,7 @@ This feature facilitates a sharing economy within the "Kheti Sahayak" community,
     *   Generate a standardized digital rental agreement upon booking confirmation.
     *   Agreement must include equipment details, rental duration, pricing, deposit, usage terms, maintenance responsibility, termination clauses, and dispute resolution mechanism.
     *   Support for e-signatures to finalize the agreement. [TODO: Confirm e-signature requirement/feasibility.]
+    *   **Include clauses for Insurance & Liability and Fuel Policy (e.g., return with full tank).**
     *   Agreements must be stored and accessible to both parties.
 
 ### 4.2 Labor Sharing
