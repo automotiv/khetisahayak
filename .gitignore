@@ -18,6 +18,13 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 *.tfvars
+# Terraform files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+terraform/environments/dev/dev.tfvars
 
 # Node.js
 **/node_modules/
@@ -43,3 +50,10 @@ ios/Runner.xcodeproj/xcuserdata/
 ios/Flutter/Generated.xcconfig
 ios/Flutter/flutter_export_environment.sh
 lib/.env
+
+# Logs
+kheti_sahayak_backend/logs/
+
+# Flutter archives
+flutter_*.zip
+
