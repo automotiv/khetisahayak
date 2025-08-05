@@ -179,3 +179,5 @@ The Marketplace feature provides a digital platform within "Kheti Sahayak" for f
 - **Product Categories for v1.0:** (see above for recommended list)
 - **Vendor Commission Structure:** Recommend starting with a small percentage per transaction; evaluate fixed fees/subscription as scale grows.
 - **Logistics:** v1.0 is seller-managed; plan for platform integration in future.
+
+git remote set-url origin https://github.com/automotiv/khetisahayak.git
