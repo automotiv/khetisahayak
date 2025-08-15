@@ -6,7 +6,7 @@ from pathlib import Path
 # --- Constants ---
 # It's good practice to define constants at the top for easy configuration.
 TRACEABILITY_FILE_PATH = "khetisahayak.wiki/prd/prd_task_traceability.md"
-REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/main/"
+REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/master/"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRD_LINK_MARKER = "**[View Full PRD]"
 

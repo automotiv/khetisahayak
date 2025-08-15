@@ -11,7 +11,7 @@ PROJECT_OWNER = "automotiv"
 PROJECT_NUMBER = "3"
 PROJECT_TITLE = "Kheti Sahayak MVP"
 REPO_SLUG = "automotiv/khetisahayak"
-REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/main/"
+REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/master/"
 
 ROW_REGEX = re.compile(r"\|\s*\*\*(?P<feature>.*?)\*\*.*?\|\s*\[.*?\]\((?P<prd>.*?)\)\s*\|\s*(?P<issuecol>.*?)\|", re.DOTALL)
 ISSUE_LINK_REGEX = re.compile(r"\[(?P<label>.*?)\]\((?P<url>https?://github.com/[^/]+/[^/]+/issues/(?P<num>\d+))\)")
