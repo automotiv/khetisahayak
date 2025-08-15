@@ -11,6 +11,7 @@ PROJECT_NUMBER = "3"
 PROJECT_TITLE = "Kheti Sahayak MVP"
 REPO_SLUG = "automotiv/khetisahayak"
 REPO_BASE_URL = "https://github.com/automotiv/khetisahayak/wiki/"
+OWNER = REPO_SLUG.split("/")[0]
 
 ROW_REGEX = re.compile(r"\|\s*\*\*(?P<feature>.*?)\*\*.*?\|\s*\[.*?\]\((?P<prd>.*?)\)\s*\|\s*(?P<issuecol>.*?)\|", re.DOTALL)
 ISSUE_LINK_REGEX = re.compile(r"\[(?P<label>.*?)\]\((?P<url>https?://github.com/[^/]+/[^/]+/issues/(?P<num>\d+))\)")
@@ -35,10 +36,30 @@ def gh_json(cmd):
     return json.loads(res.stdout or "{}")
 
 
+def gh_project_json(cmd_core):
+    """Run a 'gh project ...' command with JSON output, trying repo-scope first, then owner-scope.
+
+    cmd_core example: ["project", "view", PROJECT_NUMBER]
+    """
+    base = list(cmd_core)
+    if "--format" not in base:
+        base += ["--format", "json"]
+    # Try repo-scoped first
+    try:
+        res = run(["gh"] + base + ["--repo", REPO_SLUG])
+        return json.loads(res.stdout or "{}")
+    except RuntimeError as e:
+        if "unknown flag: --repo" not in str(e):
+            # Other failure; re-raise
+            raise
+    # Fallback to owner-scoped
+    res = run(["gh"] + base + ["--owner", OWNER])
+    return json.loads(res.stdout or "{}")
+
+
 def get_project_id():
     # Fetch full JSON to reliably access the 'id' field
-    res = run(["gh", "project", "view", PROJECT_NUMBER, "--repo", REPO_SLUG, "--format", "json"], capture=True)
-    data = json.loads(res.stdout or "{}")
+    data = gh_project_json(["project", "view", PROJECT_NUMBER])
     pid = data.get("id")
     if not pid:
         raise RuntimeError("Failed to retrieve project ID")
@@ -46,7 +67,7 @@ def get_project_id():
 
 
 def get_prd_field_id():
-    fields = gh_json(["project", "field-list", PROJECT_NUMBER, "--repo", REPO_SLUG]).get("fields", [])
+    fields = gh_project_json(["project", "field-list", PROJECT_NUMBER]).get("fields", [])
     for f in fields:
         if f.get("name") == "PRD":
             return f.get("id")
@@ -103,7 +124,7 @@ def update_matrix(rows_info):
 
 
 def list_project_items() -> list:
-    data = gh_json(["project", "item-list", PROJECT_NUMBER, "--repo", REPO_SLUG])
+    data = gh_project_json(["project", "item-list", PROJECT_NUMBER])
     return data.get("items", []) if isinstance(data, dict) else []
 
 
@@ -142,9 +163,8 @@ def ensure_item_in_project(issue_number: int, issue_url: str, project_id: str) -
         if content.get("type") == "Issue" and content.get("url") == issue_url:
             return it.get("id", "")
     # Add to project using URL and capture created item id
-    res = run(["gh", "project", "item-add", PROJECT_NUMBER, "--repo", REPO_SLUG, "--url", issue_url, "--format", "json"], capture=True)
+    data = gh_project_json(["project", "item-add", PROJECT_NUMBER, "--url", issue_url])
     try:
-        data = json.loads(res.stdout or "{}")
         if isinstance(data, dict) and data.get("id"):
             return data["id"]
     except json.JSONDecodeError:

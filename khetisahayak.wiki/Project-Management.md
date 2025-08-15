@@ -1,4 +1,4 @@
-# Project Management with GitHub
+ils# Project Management with GitHub
 
 ## GitHub Projects Setup
 
@@ -70,8 +70,8 @@ For each task in `agile/crop_health_plan.md`, create a GitHub Issue:
 ### Development Workflow
 1. Move issue to "In Progress" when starting work
 2. Create a feature branch: `feature/crop-health/[issue-number]-short-description`
-3. Make changes and commit with issue number: `git commit -m "#123 Add image capture functionality"`
-4. Push changes and create a Pull Request
+3. Make changes and commit regularly.
+4. Push changes and create a Pull Request. In the PR description, use a closing keyword like `Closes #123` to automatically link and close the issue when the PR is merged.
 5. Move issue to "In Review"
 6. After approval and merge, move to "Done"
 
@@ -83,51 +83,26 @@ For each task in `agile/crop_health_plan.md`, create a GitHub Issue:
 
 ## GitHub Project Automation
 
-### 1. Auto-add Issues
-Create `.github/workflows/project-automation.yml`:
+Your project should have a workflow file at `.github/workflows/project-automation.yml` to automatically add new issues to your project board. This ensures nothing gets lost.
 
 ```yaml
-name: Project Automation
+name: Add New Issues to Project
 
 on:
   issues:
-    types: [opened, labeled]
-  pull_request:
-    types: [opened, closed]
+    types: [opened]
 
 jobs:
   add-to-project:
+    name: Add issue to project
     runs-on: ubuntu-latest
     steps:
-      - name: Add labeled issues to project
-        if: github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'feature/crop-health')
-        uses: actions/add-to-project@v0.3.0
+      - name: Add new issues to project
+        uses: actions/add-to-project@v1.0.0
         with:
-          project-url: https://github.com/orgs/automotiv/projects/[PROJECT_NUMBER]
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          labeled: 'feature/crop-health'
-          column-name: 'To do'
-```
-
-### 2. Auto-close Issues
-Add to the same workflow:
-
-```yaml
-  close-issues:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Close issues when PR is merged
-        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const issueNumber = context.issue.number;
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              state: 'closed'
-            });
+          # Use the repository-specific URL for your project
+          project-url: https://github.com/automotiv/khetisahayak/projects/3
+          github-token: ${{ secrets.PROJECT_AUTOMATION_TOKEN }} # Use a dedicated PAT
 ```
 
 ## Reporting
