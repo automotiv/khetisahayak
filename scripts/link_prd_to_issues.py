@@ -6,7 +6,7 @@ from pathlib import Path
 # --- Constants ---
 # It's good practice to define constants at the top for easy configuration.
 TRACEABILITY_FILE_PATH = "khetisahayak.wiki/prd/prd_task_traceability.md"
-REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/master/"
+REPO_BASE_URL = "https://github.com/automotiv/khetisahayak/wiki/"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRD_LINK_MARKER = "**[View Full PRD]"
 
@@ -46,7 +46,11 @@ def prd_file_exists(prd_link: str) -> bool:
 
 
 def build_prd_url(prd_link: str) -> str:
-    return f"{REPO_BASE_URL}{prd_url_relative_path(prd_link)}"
+    rel = prd_url_relative_path(prd_link)
+    # Strip .md for canonical wiki page URLs
+    if rel.endswith(".md"):
+        rel = rel[:-3]
+    return f"{REPO_BASE_URL}{rel}"
 
 
 HEADER_BLOCK_RE = re.compile(r"^\*\*\[View Full PRD\]\([^)]+\)\*\*\s*\n+---\s*\n+\n*", re.IGNORECASE)

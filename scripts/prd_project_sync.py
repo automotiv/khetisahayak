@@ -7,11 +7,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TRACEABILITY_FILE = REPO_ROOT / "khetisahayak.wiki" / "prd" / "prd_task_traceability.md"
-PROJECT_OWNER = "automotiv"
 PROJECT_NUMBER = "3"
 PROJECT_TITLE = "Kheti Sahayak MVP"
 REPO_SLUG = "automotiv/khetisahayak"
-REPO_BASE_URL = "https://github.com/automotiv/khetisahayak.wiki/blob/master/"
+REPO_BASE_URL = "https://github.com/automotiv/khetisahayak/wiki/"
 
 ROW_REGEX = re.compile(r"\|\s*\*\*(?P<feature>.*?)\*\*.*?\|\s*\[.*?\]\((?P<prd>.*?)\)\s*\|\s*(?P<issuecol>.*?)\|", re.DOTALL)
 ISSUE_LINK_REGEX = re.compile(r"\[(?P<label>.*?)\]\((?P<url>https?://github.com/[^/]+/[^/]+/issues/(?P<num>\d+))\)")
@@ -38,7 +37,7 @@ def gh_json(cmd):
 
 def get_project_id():
     # Fetch full JSON to reliably access the 'id' field
-    res = run(["gh", "project", "view", PROJECT_NUMBER, "--owner", PROJECT_OWNER, "--format", "json"], capture=True)
+    res = run(["gh", "project", "view", PROJECT_NUMBER, "--repo", REPO_SLUG, "--format", "json"], capture=True)
     data = json.loads(res.stdout or "{}")
     pid = data.get("id")
     if not pid:
@@ -46,66 +45,43 @@ def get_project_id():
     return pid
 
 
-def generate_label_from_feature(feature_name: str) -> str:
-    """Generates a slug-like label from a feature name, e.g., 'Marketplace' -> 'feature/marketplace'."""
-    slug = feature_name.lower().replace(" & ", "-").replace(" ", "-")
-    return f"feature/{slug}"
-
-
 def get_prd_field_id():
-    fields = gh_json(["project", "field-list", PROJECT_NUMBER, "--owner", PROJECT_OWNER]).get("fields", [])
+    fields = gh_json(["project", "field-list", PROJECT_NUMBER, "--repo", REPO_SLUG]).get("fields", [])
     for f in fields:
-        if f.get("name", "").lower() == "prd":
+        if f.get("name") == "PRD":
             return f.get("id")
     return None
 
 
-def ensure_issue(feature_name: str, prd_path_rel: str) -> tuple[int, str]:
-    """Ensures a GitHub issue exists for the feature, creating it if necessary, and returns its number and URL."""
-    title = f"Epic: {feature_name}"
+def ensure_issue(feature_name: str, prd_path_rel: str):
+    title = f"Feature: {feature_name}"
     # search for exact title
     issues = gh_json(["issue", "list", "--repo", REPO_SLUG, "--search", f"in:title \"{title}\"", "--state", "all", "--json", "number,title,url"]) or []
-    issue = None
     for it in issues:
         if it.get("title") == title:
-            issue = it
-            break
-    if issue is None:
-        # Build PRD repo URL
-        prd_exists = prd_file_exists(prd_path_rel)
-        body_parts = []
-        if prd_exists:
-            prd_url = build_prd_url(prd_path_rel)
-            body_parts.append(f"**[View Full PRD]({prd_url})**\n\n---\n\n")
-        body_parts.append(f"This epic tracks the end-to-end implementation of the **{feature_name}** feature.")
-        body = "".join(body_parts)
-        epic_label = "epic"
-        feature_label = generate_label_from_feature(feature_name)
+            return int(it.get("number")), it.get("url")
 
-        # Create issue and add to project by title, capture output to get URL/number
-        create_cmd = [
-            "gh", "issue", "create", "--repo", REPO_SLUG,
-            "--title", title,
-            "--body", body,
-            "--project", PROJECT_TITLE,
-            "--label", epic_label, "--label", feature_label
-        ]
-        res = run(create_cmd, capture=True)
-        out = (res.stdout or "") + (res.stderr or "")
-        murl = re.search(r"https?://github.com/[^/]+/[^/]+/issues/(\d+)", out)
-        if murl:
-            num = int(murl.group(1))
-            url = f"https://github.com/{REPO_SLUG}/issues/{num}"
-            return num, url
-        # Fallback: re-query with higher limit in case search index lags
-        issues = gh_json(["issue", "list", "--repo", REPO_SLUG, "--search", f"in:title \"{title}\"", "--state", "all", "--json", "number,title,url", "-L", "200"]) or []
-        for it in issues:
-            if it.get("title") == title:
-                issue = it
-                break
-        if issue is None:
-            raise RuntimeError(f"Failed to locate newly created issue for '{title}'. Output was:\n{out}")
-    return int(issue["number"]), issue["url"]
+    # Not found: create it
+    prd_url = build_prd_url(prd_path_rel) if prd_file_exists(prd_path_rel) else None
+    if prd_url:
+        body = f"**[View Full PRD]({prd_url})**\n\n---\n\nThis issue tracks implementation of the '{feature_name}' feature."
+    else:
+        body = f"This issue tracks implementation of the '{feature_name}' feature."
+
+    res = run(["gh", "issue", "create", "--repo", REPO_SLUG, "--title", title, "--body", body, "--project", PROJECT_TITLE], capture=True)
+    out = (res.stdout or "").strip()
+    murl = re.search(r"https?://github.com/[^/]+/[^/]+/issues/(\d+)", out)
+    if murl:
+        num = int(murl.group(1))
+        url = f"https://github.com/{REPO_SLUG}/issues/{num}"
+        return num, url
+
+    # Fallback: re-query with higher limit in case search index lags
+    issues = gh_json(["issue", "list", "--repo", REPO_SLUG, "--search", f"in:title \"{title}\"", "--state", "all", "--json", "number,title,url", "-L", "200"]) or []
+    for it in issues:
+        if it.get("title") == title:
+            return int(it.get("number")), it.get("url")
+    raise RuntimeError(f"Failed to locate newly created issue for '{title}'. Output was:\n{out}")
 
 
 def update_matrix(rows_info):
@@ -127,7 +103,7 @@ def update_matrix(rows_info):
 
 
 def list_project_items() -> list:
-    data = gh_json(["project", "item-list", PROJECT_NUMBER, "--owner", PROJECT_OWNER])
+    data = gh_json(["project", "item-list", PROJECT_NUMBER, "--repo", REPO_SLUG])
     return data.get("items", []) if isinstance(data, dict) else []
 
 
@@ -166,7 +142,7 @@ def ensure_item_in_project(issue_number: int, issue_url: str, project_id: str) -
         if content.get("type") == "Issue" and content.get("url") == issue_url:
             return it.get("id", "")
     # Add to project using URL and capture created item id
-    res = run(["gh", "project", "item-add", PROJECT_NUMBER, "--owner", PROJECT_OWNER, "--url", issue_url, "--format", "json"], capture=True)
+    res = run(["gh", "project", "item-add", PROJECT_NUMBER, "--repo", REPO_SLUG, "--url", issue_url, "--format", "json"], capture=True)
     try:
         data = json.loads(res.stdout or "{}")
         if isinstance(data, dict) and data.get("id"):
@@ -181,11 +157,14 @@ def ensure_item_in_project(issue_number: int, issue_url: str, project_id: str) -
         content = it.get("content") or {}
         if content.get("type") == "Issue" and content.get("url") == issue_url:
             return it.get("id", "")
-    return ""
+    # Re-run the link script to ensure issue bodies start with PRD link
 
 
 def build_prd_url(prd_link: str) -> str:
+    # Build canonical GitHub Wiki page URL (strip .md)
     rel_path = prd_url_relative_path(prd_link)
+    if rel_path.endswith(".md"):
+        rel_path = rel_path[:-3]
     return f"{REPO_BASE_URL}{rel_path}"
 
 
