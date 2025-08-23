@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Kheti Sahayak Logo](docs/assets/logo.png)
+![Kheti Sahayak Logo](assets/logo/kheti_sahayak_mark.svg)
 
 *Empowering Indian Farmers through Digital Innovation*
 
