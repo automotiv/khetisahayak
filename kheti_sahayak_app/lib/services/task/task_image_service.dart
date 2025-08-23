@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path';
 
 import '../../models/task/task_image.dart';
 import '../../utils/logger.dart';
+import '../task/image_picker_adapter.dart';
+import '../task/permission_adapter.dart';
+import '../../utils/image_processor.dart';
 
 class TaskImageService {
   static const int maxImageSizeMB = 10; // 10MB max file size
@@ -22,43 +25,95 @@ class TaskImageService {
     'image/webp',
   ];
 
-  final ImagePicker _imagePicker = ImagePicker();
+  final ImagePickerAdapter _imagePickerAdapter;
+  final PermissionAdapter _permissionAdapter;
+
+  TaskImageService({ImagePickerAdapter? imagePickerAdapter, PermissionAdapter? permissionAdapter})
+      : _imagePickerAdapter = imagePickerAdapter ?? ImagePickerAdapterImpl(),
+        _permissionAdapter = permissionAdapter ?? PermissionAdapterImpl();
 
   /// Request gallery permission
   Future<bool> requestGalleryPermission() async {
-    final status = await Permission.photos.status;
-    if (status.isDenied) {
-      final result = await Permission.photos.request();
-      return result.isGranted;
+    try {
+      final photosStatus = await _permissionAdapter.status(Permission.photos);
+      if (photosStatus.isGranted) return true;
+
+      final storageStatus = await _permissionAdapter.status(Permission.storage);
+      if (storageStatus.isGranted) return true;
+
+      final req = await _permissionAdapter.request(Permission.photos);
+      return req.isGranted;
+    } catch (e) {
+      AppLogger.error('Error requesting gallery permission', e);
+      return false;
     }
-    return status.isGranted;
+  }
+
+  /// Request camera permission
+  Future<bool> requestCameraPermission() async {
+    try {
+      final status = await _permissionAdapter.status(Permission.camera);
+      if (status.isDenied) {
+        final result = await _permissionAdapter.request(Permission.camera);
+        return result.isGranted;
+      }
+      return status.isGranted;
+    } catch (e) {
+      AppLogger.error('Error requesting camera permission', e);
+      return false;
+    }
   }
 
   /// Pick multiple images from gallery
   Future<List<TaskImage>> pickImages({
     int maxImages = 5,
     bool allowMultiple = true,
+    ImageSource source = ImageSource.gallery,
   }) async {
     try {
-      // Check and request permission
+      // Choose permission flow based on source
+      if (source == ImageSource.camera) {
+        final hasCamera = await requestCameraPermission();
+        if (!hasCamera) throw Exception('Camera permission not granted');
+
+        final XFile? captured = await _imagePickerAdapter.pickImage(
+          source: ImageSource.camera,
+          maxWidth: maxImageWidth.toDouble(),
+          maxHeight: maxImageHeight.toDouble(),
+          imageQuality: 85,
+        );
+
+        if (captured == null) return [];
+
+        try {
+          final processed = await _processImageFile(captured);
+          return [processed];
+        } catch (e) {
+          AppLogger.error('Error processing captured image', e);
+          return [];
+        }
+      }
+
+      // Gallery flow
       final hasPermission = await requestGalleryPermission();
       if (!hasPermission) {
         throw Exception('Gallery permission not granted');
       }
 
-      // Pick images
-      final List<XFile> pickedFiles = await _imagePicker.pickMultiImage(
+  final List<XFile>? pickedFiles = await _imagePickerAdapter.pickMultiImage(
         maxWidth: maxImageWidth.toDouble(),
         maxHeight: maxImageHeight.toDouble(),
         imageQuality: 85,
       );
 
+      if (pickedFiles == null || pickedFiles.isEmpty) return [];
+
       // Limit the number of images
       final limitedFiles = pickedFiles.take(maxImages).toList();
-      
+
       // Convert to TaskImage list
       final List<TaskImage> taskImages = [];
-      
+
       for (final file in limitedFiles) {
         try {
           final taskImage = await _processImageFile(file);

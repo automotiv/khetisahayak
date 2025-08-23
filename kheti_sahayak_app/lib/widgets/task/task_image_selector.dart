@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../services/task/task_image_service.dart';
 import '../../../models/task/task_image.dart';
 import 'image_gallery.dart';
@@ -53,7 +54,7 @@ class _TaskImageSelectorState extends State<TaskImageSelector> {
     setState(() => _isLoading = true);
     
     try {
-      final remainingSlots = widget.maxImages - _selectedImages.length;
+  final remainingSlots = widget.maxImages - _selectedImages.length;
       if (remainingSlots <= 0) {
         if (mounted) {
           await Dialogs.showInfoDialog(
@@ -65,8 +66,38 @@ class _TaskImageSelectorState extends State<TaskImageSelector> {
         return;
       }
 
+      // Let user choose Camera or Gallery
+      final source = await showModalBottomSheet<ImageSource?>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take Photo'),
+                onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose From Gallery'),
+                onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.close),
+                title: const Text('Cancel'),
+                onTap: () => Navigator.of(ctx).pop(null),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
       final images = await _imageService.pickImages(
         maxImages: remainingSlots,
+        source: source,
       );
 
       if (images.isNotEmpty) {
