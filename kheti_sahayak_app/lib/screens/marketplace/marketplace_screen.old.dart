@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
+import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
+import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
+import 'package:kheti_sahayak_app/widgets/primary_button.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   const MarketplaceScreen({Key? key}) : super(key: key);
@@ -11,14 +15,58 @@ class MarketplaceScreen extends StatefulWidget {
 class _MarketplaceScreenState extends State<MarketplaceScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _categories = [
-    'All',
-    'Seeds',
-    'Fertilizers',
-    'Pesticides',
-    'Tools',
-    'Equipment',
-    'Produce',
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'All', 'icon': Icons.all_inclusive},
+    {'name': 'Seeds', 'icon': Icons.spa},
+    {'name': 'Fertilizers', 'icon': Icons.grass},
+    {'name': 'Pesticides', 'icon': Icons.bug_report},
+    {'name': 'Tools', 'icon': Icons.build},
+    {'name': 'Equipment', 'icon': Icons.agriculture},
+    {'name': 'Produce', 'icon': Icons.shopping_basket},
+  ];
+  
+  // Sample product data - replace with API data
+  final List<Map<String, dynamic>> _products = [
+    {
+      'id': '1',
+      'name': 'Hybrid Wheat Seeds',
+      'price': 120.0,
+      'unit': 'kg',
+      'category': 'Seeds',
+      'imageUrl': 'https://images.unsplash.com/photo-1592921870789-04563d55042c?w=500&auto=format&fit=crop&q=60',
+      'rating': 4.5,
+      'reviews': 24,
+    },
+    {
+      'id': '2',
+      'name': 'Organic Fertilizer',
+      'price': 350.0,
+      'unit': '50kg bag',
+      'category': 'Fertilizers',
+      'imageUrl': 'https://images.unsplash.com/photo-1586771107445-d3ca888129ce?w=500&auto=format&fit=crop&q=60',
+      'rating': 4.2,
+      'reviews': 18,
+    },
+    {
+      'id': '3',
+      'name': 'Hand Tractor',
+      'price': 85000.0,
+      'unit': 'piece',
+      'category': 'Equipment',
+      'imageUrl': 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=500&auto=format&fit=crop&q=60',
+      'rating': 4.8,
+      'reviews': 32,
+    },
+    {
+      'id': '4',
+      'name': 'Pruning Shears',
+      'price': 450.0,
+      'unit': 'piece',
+      'category': 'Tools',
+      'imageUrl': 'https://images.unsplash.com/photo-1593081891731-fda0877988da?w=500&auto=format&fit=crop&q=60',
+      'rating': 4.6,
+      'reviews': 15,
+    },
   ];
   int _selectedCategoryIndex = 0;
 
@@ -26,6 +74,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> with SingleTicker
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _filteredProducts = List.from(_products);
   }
 
   @override
@@ -35,11 +84,19 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> with SingleTicker
     super.dispose();
   }
 
+  // Filter products by selected category
+  List<Map<String, dynamic>> get filteredProducts {
+    if (_selectedCategoryIndex == 0) return _products;
+    final selectedCategory = _categories[_selectedCategoryIndex]['name'] as String;
+    return _products.where((product) => product['category'] == selectedCategory).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+    final textTheme = theme.textTheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Marketplace'),
@@ -94,168 +151,85 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> with SingleTicker
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Categories
           SizedBox(
-            height: 50,
+            height: 60,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
               itemBuilder: (context, index) {
+                final category = _categories[index];
                 final isSelected = _selectedCategoryIndex == index;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(_categories[index]),
+                  child: FilterChip(
+                    label: Text(
+                      category['name'],
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                      ),
+                    ),
+                    avatar: Icon(
+                      category['icon'],
+                      size: 18,
+                      color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
+                    ),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
                         _selectedCategoryIndex = selected ? index : 0;
                       });
                     },
-                    backgroundColor: theme.cardColor,
-                    selectedColor: colorScheme.primary.withOpacity(0.2),
-                    labelStyle: TextStyle(
-                      color: isSelected ? colorScheme.primary : theme.hintColor,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
+                    backgroundColor: colorScheme.surface,
+                    selectedColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected 
-                            ? colorScheme.primary 
-                            : theme.dividerColor,
+                        color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                       ),
                     ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    showCheckmark: false,
                   ),
                 );
               },
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Featured products
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Featured Products',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // View all products
-                },
-                child: const Text('View All'),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Product grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: 4, // Show 4 featured products
-            itemBuilder: (context, index) {
-              return _buildProductCard(theme, colorScheme, index);
-            },
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Deals of the day
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Deals of the Day',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // View all deals
-                },
-                child: const Text('View All'),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Deals horizontal scroll
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5, // Number of deals
-              itemBuilder: (context, index) {
-                return _buildDealCard(theme, colorScheme, index);
-              },
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Top Sellers
-          Text(
-            'Top Sellers',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Sellers list
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 3, // Show top 3 sellers
-            itemBuilder: (context, index) {
-              return _buildSellerCard(theme, index);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildSellTab(ThemeData theme, ColorScheme colorScheme) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Sell product card
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.add_circle_outline,
-                    size: 48,
-                    color: colorScheme.primary,
-                  ),
+          const SizedBox(height: 16),
+
+          // Products Grid
+          if (_filteredProducts.isEmpty)
+            _buildEmptyState(
+              theme,
+              icon: Icons.search_off_rounded,
+              title: 'No products found',
+              subtitle: 'Try adjusting your search or filter criteria',
+              buttonText: 'Reset Filters',
+              onPressed: () {
+                setState(() {
+                  _filteredProducts = List.from(_products);
+                });
+              },
+            )
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: _filteredProducts.length,
+              itemBuilder: (context, index) {
+                final product = _filteredProducts[index];
+                return _buildProductCard(theme, colorScheme, index);
+              },
                   const SizedBox(height: 16),
                   Text(
                     'Sell Your Products',

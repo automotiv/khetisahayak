@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/dashboard_screen.dart';
-import 'package:kheti_sahayak_app/screens/main_sections/marketplace_screen.dart';
+import 'package:kheti_sahayak_app/screens/marketplace/marketplace_screen_new.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/diagnostics_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/educational_content_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/profile_screen.dart';
@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     DashboardScreen(),
-    MarketplaceScreen(),
+    MarketplaceScreenNew(),
     DiagnosticsScreen(),
     EducationalContentScreen(),
     ProfileScreen(),

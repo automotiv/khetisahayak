@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kheti_sahayak_app/theme/app_theme.dart';
-import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
-import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
-import 'package:kheti_sahayak_app/services/educational_content_service.dart';
 import 'package:kheti_sahayak_app/models/educational_content.dart';
+import 'package:kheti_sahayak_app/screens/education/article_detail_screen.dart';
+import 'package:kheti_sahayak_app/screens/education/guide_detail_screen.dart';
+import 'package:kheti_sahayak_app/screens/education/video_detail_screen.dart';
+import 'package:kheti_sahayak_app/services/educational_content_service.dart';
+import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 
 class EducationScreen extends StatefulWidget {
   const EducationScreen({Key? key}) : super(key: key);
@@ -17,9 +18,9 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
   final TextEditingController _searchController = TextEditingController();
   
   // Data
-  List<EducationalContent> _articles = [];
-  List<EducationalContent> _videos = [];
-  List<EducationalContent> _guides = [];
+  final List<EducationalContent> _articles = [];
+  final List<EducationalContent> _videos = [];
+  final List<EducationalContent> _guides = [];
   List<Map<String, dynamic>> _categories = [];
   List<EducationalContent> _popularContent = [];
   
@@ -28,20 +29,44 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
   bool _isLoadingVideos = false;
   bool _isLoadingGuides = false;
   bool _isLoadingCategories = false;
-  bool _isLoadingPopular = false;
+  
+  // Pagination
+  bool _hasMoreArticles = true;
+  bool _hasMoreVideos = true;
+  bool _hasMoreGuides = true;
+  int _articlesPage = 1;
+  int _videosPage = 1;
+  int _guidesPage = 1;
+  final int _perPage = 10;
   
   // Filter options
   String? _selectedCategory;
   String? _selectedDifficulty;
-  String? _searchQuery;
   final List<String> _difficultyOptions = ['All', 'beginner', 'intermediate', 'advanced'];
   
-  // Pagination
-  int _currentPage = 1;
-  bool _hasMoreArticles = true;
-  bool _hasMoreVideos = true;
-  bool _hasMoreGuides = true;
-
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadInitialData();
+    _searchController.addListener(_onSearchChanged);
+  }
+  
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+  
+  Future<void> _loadInitialData() async {
+    await Future.wait([
+      _loadCategories(),
+      _loadPopularContent(),
+      _loadContent(),
+    ]);
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -63,7 +88,7 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
     await Future.wait([
       _loadCategories(),
       _loadPopularContent(),
-      _loadArticles(),
+      _loadContent(),
     ]);
   }
 
@@ -95,175 +120,202 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
   }
 
   Future<void> _loadPopularContent() async {
-    setState(() {
-      _isLoadingPopular = true;
-    });
-
     try {
       final popular = await EducationalContentService.getPopularContent(limit: 5);
-      setState(() {
-        _popularContent = popular;
-        _isLoadingPopular = false;
-      });
+      if (mounted) {
+        setState(() {
+          _popularContent = popular;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoadingPopular = false;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load popular content: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadContent() async {
+    switch (_tabController.index) {
+      case 0:
+        await _loadArticles();
+        break;
+      case 1:
+        await _loadVideos();
+        break;
+      case 2:
+        await _loadGuides();
+        break;
     }
   }
 
   Future<void> _loadArticles({bool refresh = false}) async {
-    if (refresh) {
-      setState(() {
-        _currentPage = 1;
-        _hasMoreArticles = true;
-      });
-    }
-
-    if (!_hasMoreArticles || _isLoadingArticles) return;
-
-    setState(() {
-      _isLoadingArticles = true;
-    });
-
+    if ((_isLoadingArticles && !refresh) || (!_hasMoreArticles && !refresh)) return;
+    
     try {
-      final result = await EducationalContentService.getEducationalContent(
-        page: _currentPage,
-        limit: 10,
+      setState(() => _isLoadingArticles = true);
+      
+      final page = refresh ? 1 : _articlesPage;
+      
+      final response = await EducationalContentService.getEducationalContent(
+        page: page,
+        limit: _perPage,
         category: _selectedCategory == 'All' ? null : _selectedCategory,
         difficultyLevel: _selectedDifficulty == 'All' ? null : _selectedDifficulty,
-        search: _searchQuery,
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
       );
       
-      final newArticles = result['content'] as List<EducationalContent>;
-      final pagination = result['pagination'] as Map<String, dynamic>;
-      
-      setState(() {
-        if (refresh) {
-          _articles = newArticles;
-        } else {
-          _articles.addAll(newArticles);
-        }
-        _hasMoreArticles = pagination['hasNext'] ?? false;
-        _isLoadingArticles = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingArticles = false;
-      });
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => ErrorDialog(
-            title: 'Error',
-            content: 'Failed to load articles: $e',
-          ),
+        setState(() {
+          if (refresh || page == 1) {
+            _articles.clear();
+            _articles.addAll(response['content']);
+          } else {
+            _articles.addAll(response['content']);
+          }
+          
+          _hasMoreArticles = response['pagination']['hasNextPage'] ?? false;
+          _articlesPage = page + 1;
+          _isLoadingArticles = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingArticles = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load articles: ${e.toString()}')),
         );
       }
     }
   }
 
   Future<void> _loadVideos({bool refresh = false}) async {
-    if (refresh) {
-      setState(() {
-        _currentPage = 1;
-        _hasMoreVideos = true;
-      });
-    }
-
-    if (!_hasMoreVideos || _isLoadingVideos) return;
-
-    setState(() {
-      _isLoadingVideos = true;
-    });
-
+    if ((_isLoadingVideos && !refresh) || (!_hasMoreVideos && !refresh)) return;
+    
     try {
-      final result = await EducationalContentService.getEducationalContent(
-        page: _currentPage,
-        limit: 10,
-        category: 'Videos',
+      setState(() => _isLoadingVideos = true);
+      
+      final page = refresh ? 1 : _videosPage;
+      
+      final response = await EducationalContentService.getEducationalContent(
+        page: page,
+        limit: _perPage,
+        category: 'Video',
         difficultyLevel: _selectedDifficulty == 'All' ? null : _selectedDifficulty,
-        search: _searchQuery,
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
       );
       
-      final newVideos = result['content'] as List<EducationalContent>;
-      final pagination = result['pagination'] as Map<String, dynamic>;
-      
-      setState(() {
-        if (refresh) {
-          _videos = newVideos;
-        } else {
-          _videos.addAll(newVideos);
-        }
-        _hasMoreVideos = pagination['hasNext'] ?? false;
-        _isLoadingVideos = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (refresh || page == 1) {
+            _videos.clear();
+            _videos.addAll(response['content']);
+          } else {
+            _videos.addAll(response['content']);
+          }
+          
+          _hasMoreVideos = response['pagination']['hasNextPage'] ?? false;
+          _videosPage = page + 1;
+          _isLoadingVideos = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoadingVideos = false;
-      });
+      if (mounted) {
+        setState(() => _isLoadingVideos = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load videos: ${e.toString()}')),
+        );
+      }
     }
   }
 
   Future<void> _loadGuides({bool refresh = false}) async {
-    if (refresh) {
-      setState(() {
-        _currentPage = 1;
-        _hasMoreGuides = true;
-      });
-    }
-
-    if (!_hasMoreGuides || _isLoadingGuides) return;
-
-    setState(() {
-      _isLoadingGuides = true;
-    });
-
+    if ((_isLoadingGuides && !refresh) || (!_hasMoreGuides && !refresh)) return;
+    
     try {
-      final result = await EducationalContentService.getEducationalContent(
-        page: _currentPage,
-        limit: 10,
-        category: 'Guides',
+      setState(() => _isLoadingGuides = true);
+      
+      final page = refresh ? 1 : _guidesPage;
+      
+      final response = await EducationalContentService.getEducationalContent(
+        page: page,
+        limit: _perPage,
+        category: 'Guide',
         difficultyLevel: _selectedDifficulty == 'All' ? null : _selectedDifficulty,
-        search: _searchQuery,
+        search: _searchController.text.isNotEmpty ? _searchController.text : null,
       );
       
-      final newGuides = result['content'] as List<EducationalContent>;
-      final pagination = result['pagination'] as Map<String, dynamic>;
-      
-      setState(() {
-        if (refresh) {
-          _guides = newGuides;
-        } else {
-          _guides.addAll(newGuides);
-        }
-        _hasMoreGuides = pagination['hasNext'] ?? false;
-        _isLoadingGuides = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (refresh || page == 1) {
+            _guides.clear();
+            _guides.addAll(response['content']);
+          } else {
+            _guides.addAll(response['content']);
+          }
+          
+          _hasMoreGuides = response['pagination']['hasNextPage'] ?? false;
+          _guidesPage = page + 1;
+          _isLoadingGuides = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoadingGuides = false;
-      });
+      if (mounted) {
+        setState(() => _isLoadingGuides = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load guides: ${e.toString()}')),
+        );
+      }
     }
   }
 
   void _onSearchChanged() {
-    _searchQuery = _searchController.text.isEmpty ? null : _searchController.text;
-    _loadArticles(refresh: true);
+    switch (_tabController.index) {
+      case 0:
+        _loadArticles(refresh: true);
+        break;
+      case 1:
+        _loadVideos(refresh: true);
+        break;
+      case 2:
+        _loadGuides(refresh: true);
+        break;
+    }
   }
 
   void _onCategoryChanged(String? category) {
     setState(() {
       _selectedCategory = category;
     });
-    _loadArticles(refresh: true);
+    switch (_tabController.index) {
+      case 0:
+        _loadArticles(refresh: true);
+        break;
+      case 1:
+        _loadVideos(refresh: true);
+        break;
+      case 2:
+        _loadGuides(refresh: true);
+        break;
+    }
   }
 
   void _onDifficultyChanged(String? difficulty) {
     setState(() {
       _selectedDifficulty = difficulty;
     });
-    _loadArticles(refresh: true);
+    switch (_tabController.index) {
+      case 0:
+        _loadArticles(refresh: true);
+        break;
+      case 1:
+        _loadVideos(refresh: true);
+        break;
+      case 2:
+        _loadGuides(refresh: true);
+        break;
+    }
   }
 
   void _onTabChanged() {
@@ -517,105 +569,109 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildArticleCard(ThemeData theme, ColorScheme colorScheme, EducationalContent article) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          // Navigate to article detail
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          article.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          article.category,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (article.hasImage)
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: NetworkImage(article.imageUrl!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (article.hasSummary)
-                Text(
-                  article.summary!,
-                  style: theme.textTheme.bodyMedium,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      article.difficultyDisplay,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${article.viewCount} views',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.hintColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Future<void> _toggleBookmark(EducationalContent content) async {
+    try {
+      // Determine which list contains this content
+      List<EducationalContent> targetList;
+      if (_articles.any((a) => a.id == content.id)) {
+        targetList = _articles;
+      } else if (_videos.any((v) => v.id == content.id)) {
+        targetList = _videos;
+      } else if (_guides.any((g) => g.id == content.id)) {
+        targetList = _guides;
+      } else {
+        return;
+      }
+
+      // Toggle bookmark status locally
+      setState(() {
+        final index = targetList.indexWhere((c) => c.id == content.id);
+        if (index != -1) {
+          targetList[index] = targetList[index].copyWith(
+            isBookmarked: !(targetList[index].isBookmarked ?? false),
+          );
+        }
+      });
+
+      // Call API to update bookmark status
+      final response = await EducationalContentService.toggleBookmark(content.id);
+      
+      // If API call fails, revert the local change
+      if (response == null) {
+        setState(() {
+          final index = targetList.indexWhere((c) => c.id == content.id);
+          if (index != -1) {
+            targetList[index] = targetList[index].copyWith(
+              isBookmarked: !targetList[index].isBookmarked!,
+            );
+          }
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to update bookmark')),
+          );
+        }
+      }
+    } catch (e) {
+      // Revert local change on error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
   }
 
+  Future<void> _rateContent(EducationalContent content, int rating) async {
+    try {
+      // Determine which list contains this content
+      List<EducationalContent> targetList;
+      if (_articles.any((a) => a.id == content.id)) {
+        targetList = _articles;
+      } else if (_videos.any((v) => v.id == content.id)) {
+        targetList = _videos;
+      } else if (_guides.any((g) => g.id == content.id)) {
+        targetList = _guides;
+      } else {
+        return;
+      }
+
+      // Update rating locally
+      setState(() {
+        final index = targetList.indexWhere((c) => c.id == content.id);
+        if (index != -1) {
+          targetList[index] = targetList[index].copyWith(
+            userRating: rating.toInt(),
+          );
+        }
+      });
+
+      // Call API to update rating
+      await EducationalContentService.rateContent(content.id, rating.toInt());
+      
+      // Refresh content to get updated average rating
+      _loadContent();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Thank you for your rating!')),
+        );
+      }
+    } catch (e) {
+      // Revert local change on error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit rating: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Widget _buildArticleCard(ThemeData theme, ColorScheme colorScheme, EducationalContent article) {
+    return _buildContentCard(article);
   Widget _buildVideoCard(ThemeData theme, ColorScheme colorScheme, EducationalContent video) {
-    return Card(
+    return _buildContentCard(video);
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -623,7 +679,16 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
       ),
       child: InkWell(
         onTap: () {
-          // Navigate to video player
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VideoDetailScreen(
+                video: video,
+                onBookmark: _toggleBookmark,
+                onRate: _rateContent,
+              ),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Column(
@@ -641,76 +706,82 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.play_circle_outline,
-                        size: 48,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Video',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    video.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    content.title,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'By ${video.authorFullName}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.hintColor,
+                  const SizedBox(height: 8.0),
+                  if (content.summary != null && content.summary!.isNotEmpty)
+                    Text(
+                      content.summary!,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14.0,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 8.0),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          video.difficultyDisplay,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Text(
+                        content.difficultyLevel.toUpperCase(),
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Spacer(),
-                      Text(
-                        '${video.viewCount} views',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.hintColor,
-                        ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                              color: isBookmarked ? Theme.of(context).primaryColor : null,
+                            ),
+                            onPressed: () => _toggleBookmark(content),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 20.0,
+                          ),
+                          const SizedBox(width: 8.0),
+                          IconButton(
+                            icon: const Icon(Icons.share),
+                            onPressed: () => _shareContent(content),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 20.0,
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  if (userRating != null && userRating > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 16.0),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            userRating.toString(),
+                            style: const TextStyle(fontSize: 14.0),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -719,25 +790,18 @@ class _EducationScreenState extends State<EducationScreen> with SingleTickerProv
       ),
     );
   }
-
-  Widget _buildGuideCard(ThemeData theme, ColorScheme colorScheme, EducationalContent guide) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          // Navigate to guide detail
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 60,
+  
+  void _navigateToDetailScreen(EducationalContent content) {
+    switch (content.category.toLowerCase()) {
+      case 'article':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleDetailScreen(
+              article: content,
+              onBookmark: _toggleBookmark,
+              onRate: _rateContent,
+            ),
                 height: 60,
                 decoration: BoxDecoration(
                   color: colorScheme.primary.withOpacity(0.1),
