@@ -57,3 +57,6 @@ kheti_sahayak_backend/logs/
 # Flutter archives
 flutter_*.zip
 
+
+# Externalized wiki
+khetisahayak.wiki/
