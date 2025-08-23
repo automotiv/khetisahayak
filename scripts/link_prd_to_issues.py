@@ -9,6 +9,8 @@ TRACEABILITY_FILE_PATH = "khetisahayak.wiki/prd/prd_task_traceability.md"
 REPO_BASE_URL = "https://github.com/automotiv/khetisahayak/wiki/"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRD_LINK_MARKER = "**[View Full PRD]"
+PROJECT_BOARD_URL = "https://github.com/users/automotiv/projects/3"
+PROJECT_LINK_MARKER = "**[Project Board]"
 
 def update_issue_body(issue_number, new_body):
     """Updates the body of a GitHub issue."""
@@ -52,8 +54,22 @@ def build_prd_url(prd_link: str) -> str:
         rel = rel[:-3]
     return f"{REPO_BASE_URL}{rel}"
 
+"""
+Header format we want at the very top of the issue body:
 
-HEADER_BLOCK_RE = re.compile(r"^\*\*\[View Full PRD\]\([^)]+\)\*\*\s*\n+---\s*\n+\n*", re.IGNORECASE)
+**[View Full PRD](<url>)**
+**[Project Board](<PROJECT_BOARD_URL>)**
+
+---
+
+(rest of body)
+
+We detect and replace any existing header that has PRD (optionally Project line) followed by an hr.
+"""
+HEADER_BLOCK_RE = re.compile(
+    r"^\*\*\[View Full PRD\]\([^)]+\)\*\*\s*\n(?:\*\*\[Project Board\]\([^)]+\)\*\*\s*\n)?\n?---\s*\n+\n*",
+    re.IGNORECASE,
+)
 
 
 def main():
@@ -96,25 +112,29 @@ def main():
             prd_url = build_prd_url(prd_link)
             current_body = get_issue_body(issue_number)
 
-            # If header exists but URL differs (e.g., local path), replace header block
-            m_header_url = re.match(r"^\*\*\[View Full PRD\]\(([^)]+)\)\*\*", current_body)
-            if m_header_url:
-                existing_url = m_header_url.group(1)
-                if existing_url != prd_url:
-                    body_wo_header = HEADER_BLOCK_RE.sub("", current_body, count=1)
-                    new_body = f"{PRD_LINK_MARKER}({prd_url})**\n\n---\n\n{body_wo_header}"
+            # Build desired header block (always includes PRD + Project Board lines)
+            desired_header = (
+                f"{PRD_LINK_MARKER}({prd_url})**\n"
+                f"{PROJECT_LINK_MARKER}({PROJECT_BOARD_URL})**\n\n---\n\n"
+            )
+
+            # If header exists (with PRD, optionally Project line), replace it wholly with desired header
+            if re.match(r"^\*\*\[View Full PRD\]\(([^)]+)\)\*\*", current_body):
+                body_wo_header = HEADER_BLOCK_RE.sub("", current_body, count=1)
+                new_body = desired_header + body_wo_header
+                if new_body != current_body:
                     update_issue_body(issue_number, new_body)
                     updated_count += 1
-                    print(f"  Replaced incorrect PRD header for issue {issue_number}.")
+                    print(f"  Updated header (PRD/Project) for issue {issue_number}.")
                 else:
-                    print(f"  Skipping issue {issue_number}: Correct PRD header already present.")
+                    print(f"  Header already up-to-date for issue {issue_number}.")
                 continue
 
-            # No header present: prepend
-            new_body = f"{PRD_LINK_MARKER}({prd_url})**\n\n---\n\n{current_body}"
+            # No header present: prepend desired header
+            new_body = desired_header + current_body
             update_issue_body(issue_number, new_body)
             updated_count += 1
-            print(f"  Added PRD header to issue {issue_number}.")
+            print(f"  Added PRD + Project header to issue {issue_number}.")
         except subprocess.CalledProcessError as e:
             print(f"  Failed to process issue {issue_number}: {e}")
             print(f"  Stderr: {e.stderr.decode().strip()}")
