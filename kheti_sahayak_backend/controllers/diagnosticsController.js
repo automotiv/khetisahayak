@@ -1,12 +1,25 @@
 const { uploadFileToS3 } = require('../s3');
 const db = require('../db');
 const asyncHandler = require('express-async-handler');
+const axios = require('axios');
 
-// Enhanced AI/ML service integration with more realistic responses
+const mlService = require('../services/mlService');
+
+// AI/ML service integration using our ML inference service
 const analyzeImageWithAI = async (imageUrl, cropType, issueDescription) => {
-  // In a real application, this would call an external AI/ML service
-  // For now, we'll simulate different responses based on crop type and issue description
-  const mockResponses = {
+  try {
+    // For local files, we need to download the image from S3 first
+    // This is a simplified example - in production, you'd implement proper S3 download
+    const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+    
+    // Call our ML service
+    return await mlService.analyzeImage(imageBuffer, cropType, issueDescription);
+  } catch (error) {
+    console.error('Error in analyzeImageWithAI:', error);
+    
+    // Fallback to mock responses if ML service is unavailable
+    const mockResponses = {
     'tomato': {
       'yellow leaves': {
         disease: 'Early Blight',
@@ -164,6 +177,7 @@ const analyzeImageWithAI = async (imageUrl, cropType, issueDescription) => {
   }
 
   return bestMatch;
+  }
 };
 
 // @desc    Upload image for crop diagnosis

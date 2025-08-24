@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14
+    container_name: kheti-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-kheti_sahayak}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - kheti-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./kheti_sahayak_backend
+      dockerfile: Dockerfile
+    container_name: kheti-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5001
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-kheti_sahayak}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      ML_API_URL: http://ml-inference:8000
+    ports:
+      - "5001:5001"
+    depends_on:
+      - postgres
+      - ml-inference
+    restart: unless-stopped
+    networks:
+      - kheti-network
+
+  # ML Inference Service
+  ml-inference:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile.inference
+    container_name: kheti-ml-inference
+    environment:
+      MODEL_DIR: /app/models
+      MODEL_TYPE: onnx
+    volumes:
+      - ./ml/models:/app/models
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - kheti-network
+
+  # Frontend App
+  frontend:
+    build:
+      context: ./kheti_sahayak_app
+      dockerfile: Dockerfile
+    container_name: kheti-frontend
+    environment:
+      API_URL: http://backend:5001
+    ports:
+      - "3000:80"  # Map host port 3000 to container port 80 (nginx)
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - kheti-network
+
+networks:
+  kheti-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

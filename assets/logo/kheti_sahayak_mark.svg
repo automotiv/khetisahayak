@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title desc">
+  <title id="title">Kheti Sahayak Mark</title>
+  <desc id="desc">A circular agritech emblem combining a leaf, sun, and circuit lines</desc>
+  <defs>
+    <linearGradient id="sunGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDD835"/>
+      <stop offset="100%" stop-color="#F9A825"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#43A047"/>
+      <stop offset="100%" stop-color="#2E7D32"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="230" fill="#ffffff"/>
+  <circle cx="256" cy="256" r="230" fill="none" stroke="#1976D2" stroke-width="16"/>
+
+  <!-- Sun at top -->
+  <circle cx="256" cy="150" r="56" fill="url(#sunGrad)" stroke="#F57F17" stroke-width="4"/>
+  <!-- Sun rays -->
+  <g stroke="#F9A825" stroke-width="6" stroke-linecap="round">
+    <line x1="256" y1="80" x2="256" y2="62"/>
+    <line x1="216" y1="90" x2="203" y2="74"/>
+    <line x1="296" y1="90" x2="309" y2="74"/>
+  </g>
+
+  <!-- Leaf -->
+  <path d="M256 200c-70 28-110 86-110 150 40 18 82 17 110-10 28 27 70 28 110 10 0-64-40-122-110-150z" fill="url(#leafGrad)" stroke="#1B5E20" stroke-width="4"/>
+
+  <!-- Leaf vein (stylized check/circuit) -->
+  <path d="M200 340l40-40 20 20 54-54" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Circuit roots at bottom -->
+  <g stroke="#1976D2" stroke-width="8" stroke-linecap="round">
+    <path d="M256 360v40"/>
+    <path d="M216 360v24"/>
+    <path d="M296 360v24"/>
+  </g>
+  <g fill="#1976D2">
+    <circle cx="256" cy="410" r="10"/>
+    <circle cx="216" cy="392" r="8"/>
+    <circle cx="296" cy="392" r="8"/>
+  </g>
+</svg>
