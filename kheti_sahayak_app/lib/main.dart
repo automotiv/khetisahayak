@@ -7,6 +7,8 @@ import 'package:kheti_sahayak_app/routes/routes.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/utils/logger.dart';
 import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'services/task/upload_queue.dart';
 
 Future<void> main() async {
   // Ensure Flutter binding is initialized
@@ -39,6 +41,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initProviders();
+    _initBackgroundProcessing();
+  }
+
+  void _initBackgroundProcessing() {
+    // Try processing queued uploads at startup
+    UploadQueue.processQueue();
+
+    // Listen for connectivity changes and retry
+    Connectivity().onConnectivityChanged.listen((status) {
+      if (status != ConnectivityResult.none) {
+        UploadQueue.processQueue();
+      }
+    });
   }
 
   Future<void> _initProviders() async {

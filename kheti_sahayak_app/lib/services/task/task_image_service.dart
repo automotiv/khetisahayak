@@ -12,6 +12,8 @@ import '../../utils/logger.dart';
 import '../task/image_picker_adapter.dart';
 import '../task/permission_adapter.dart';
 import '../../utils/image_processor.dart';
+import 'ingest_client.dart';
+import 'upload_queue.dart';
 
 class TaskImageService {
   static const int maxImageSizeMB = 10; // 10MB max file size
@@ -238,5 +240,42 @@ class TaskImageService {
       // Return original file if compression fails
       return file;
     }
+  }
+
+  /// Upload an image file using presigned S3 URL flow
+  Future<Map<String, dynamic>> uploadImageViaPresign(File file, {bool keepLocation = false}) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final contentType = _detectMimeType(file.path);
+      final filename = path.basename(file.path);
+
+      final presign = await IngestClient.presign(filename, contentType);
+      final uploadUrl = presign['uploadUrl'] as String;
+      final key = presign['key'] as String;
+
+      // Upload to presigned URL
+      await IngestClient.uploadToUrl(uploadUrl, bytes, contentType);
+
+      // Finalize ingest on server (strip EXIF by default)
+      final result = await IngestClient.finalize(key, keepLocation: keepLocation);
+      return result;
+    } catch (e) {
+      AppLogger.error('Presigned upload failed, enqueuing for retry', e);
+      try {
+        await UploadQueue.enqueue(file, keepLocation: keepLocation);
+      } catch (queueErr) {
+        AppLogger.error('Failed to enqueue upload', queueErr);
+      }
+      // Return a minimal object so caller can continue; it indicates queued status
+      return {'queued': true, 'path': file.path};
+    }
+  }
+
+  String _detectMimeType(String p) {
+    final ext = path.extension(p).toLowerCase();
+    if (ext == '.jpg' || ext == '.jpeg') return 'image/jpeg';
+    if (ext == '.png') return 'image/png';
+    if (ext == '.webp') return 'image/webp';
+    return 'application/octet-stream';
   }
 }

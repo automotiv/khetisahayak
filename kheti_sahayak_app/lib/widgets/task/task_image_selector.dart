@@ -101,8 +101,33 @@ class _TaskImageSelectorState extends State<TaskImageSelector> {
       );
 
       if (images.isNotEmpty) {
+        // Upload each image via presigned flow and replace local file with remote metadata
+        final List<TaskImage> uploaded = [];
+        for (final t in images) {
+          if (t.isLocal && t.file != null) {
+            try {
+              final result = await _imageService.uploadImageViaPresign(t.file!);
+              // Expecting result to include url and key; create TaskImage from JSON-like map
+              final remote = TaskImage.fromJson({
+                'url': result['url'],
+                'name': result['key']?.split('/')?.last ?? t.name,
+                'size': result['size'],
+                'mimeType': t.mimeType,
+                'uploadedAt': DateTime.now().toIso8601String(),
+              });
+              uploaded.add(remote);
+            } catch (e) {
+              AppLogger.error('Upload failed for ${t.name}', e);
+              // fallback to local image so user can retry
+              uploaded.add(t);
+            }
+          } else {
+            uploaded.add(t);
+          }
+        }
+
         setState(() {
-          _selectedImages.addAll(images);
+          _selectedImages.addAll(uploaded);
           widget.onImagesChanged?.call(List.from(_selectedImages));
         });
       }

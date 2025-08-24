@@ -19,6 +19,7 @@ const educationalContentRoutes = require('./routes/educationalContent');
 const healthRoutes = require('./routes/health');
 const orderRoutes = require('./routes/orders');
 const notificationRoutes = require('./routes/notifications');
+const ingestionRoutes = require('./routes/ingestion');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -48,6 +49,7 @@ app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/educational-content', educationalContentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ingestion', ingestionRoutes);
 
 app.get('/', (req, res) => {
   res.json({
