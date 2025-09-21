@@ -1,137 +1,152 @@
-# Unified Commerce Platform - Development Standards
+# Software Platform - Development Standards
 
-This document defines the coding standards and best practices for the Unified Commerce Platform, serving Tata Group's diverse business verticals including Tata Cliq, Tata 1mg, Tata Jewellery, BigBasket, Tata Croma, and Tata 11.
+## 🚀 Using CodeRabbit for Development
+
+Always use CodeRabbit for:
+- Automated code reviews and suggestions
+- Enforcing coding standards and best practices
+- Detecting bugs, vulnerabilities, and anti-patterns
+- Generating documentation and code comments
+- Refactoring and improving code quality
+- Reviewing pull requests before merging
+
+**Instruction:**
+> Every developer must run CodeRabbit on all new code, changes, and pull requests. Address all issues and suggestions raised by CodeRabbit before finalizing any code merge or deployment.
+
+---
+
+This document defines the coding standards and best practices for building scalable, maintainable, and adaptable software platforms.
 
 ## 🏗️ **Platform Architecture Principles**
 
-### **Universal Commerce Vision**
-- **Multi-Vertical Support:** Every feature must be designed to work across all business verticals (fashion, healthcare, jewelry, grocery, electronics, mobile)
-- **Category Agnostic:** Catalog and commerce features should be universally applicable
-- **Scalable Design:** Architecture must support rapid expansion to new verticals
-- **Consistent Experience:** Maintain uniform user experience across all Tata Group platforms
+### **Universal Platform Vision**
+- **Multi-Domain Support:** Every feature must be designed to work across different business domains.
+- **Category Agnostic:** Features should be universally applicable and not tied to a specific domain.
+- **Scalable Design:** Architecture must support rapid expansion to new domains or use cases.
+- **Consistent Experience:** Maintain uniform user experience across all platform modules.
 
 ### **Environment-First Development**
-- **Environment Separation:** Clear separation between local, dev, sit, and prod environments
-- **Configuration Externalization:** All environment-specific settings must be externalized
-- **Azure Cloud Ready:** Native support for Azure cloud services and integrations
-- **Security by Design:** No hardcoded credentials, proper secret management
+- **Environment Separation:** Clear separation between local, development, staging, and production environments.
+- **Configuration Externalization:** All environment-specific settings must be externalized.
+- **Cloud Ready:** Native support for cloud services and integrations.
+- **Security by Design:** No hardcoded credentials, proper secret management.
 
 ## 📜 **Code Readability and Style**
 
 * **Clarity over cleverness:** Write code that is easy to understand, even if it's not the shortest possible solution.
 * **Meaningful Names:** Use descriptive names for variables, functions, and classes. A good name should explain its purpose without needing extra comments.
-* **Consistency:** Adhere to a consistent coding style throughout the project (e.g., variable naming, indentation, brace placement). Use a linter (like **Checkstyle** for Java, **ESLint** for JavaScript) to enforce style rules automatically.
-* **Domain-Driven Naming:** Use business domain terminology that reflects the unified commerce platform's vocabulary.
- 
-***
- 
-## 🧱 **SOLID Principles for Unified Commerce Platform**
+* **Consistency:** Adhere to a consistent coding style throughout the project (e.g., variable naming, indentation, brace placement). Use a linter to enforce style rules automatically.
+* **Domain-Driven Naming:** Use terminology that reflects the platform's vocabulary.
 
-The SOLID principles are essential for building a maintainable, scalable unified commerce platform that can serve multiple business verticals effectively.
+***
+
+## 🧱 **SOLID Principles for Software Platforms**
+
+The SOLID principles are essential for building maintainable, scalable platforms that can serve multiple domains effectively.
 
 ### **S - Single Responsibility Principle (SRP)**
- 
+
 * **A class should have one, and only one, reason to change.**
-* **Commerce Platform Application:** Each service should handle one specific business capability (e.g., catalog management, order processing, payment handling)
-* **Vertical Agnostic Design:** Services should not be tied to specific business verticals but should be universally applicable
+* **Application:** Each service should handle one specific capability (e.g., catalog management, order processing, payment handling)
+* **Domain Agnostic Design:** Services should not be tied to specific domains but should be universally applicable
 * **File Structure:** If a class's length is increasing, it's a strong indicator that it's taking on too many responsibilities. Refactor these responsibilities into new, focused classes, and place each new class in its own file.
-* **Example:** `TataCliqFeedService` should only handle TataCliq-specific feed generation, while `UniversalFeedService` should handle common feed logic.
+* **Example:** `FeedService` should only handle feed generation logic, while `UniversalFeedService` should handle common feed logic.
 
 ### **O - Open/Closed Principle (OCP)**
- 
+
 * **Software entities should be open for extension but closed for modification.**
-* **Platform Extensibility:** New business verticals should be added without modifying existing core platform code
-* **Feature Extensions:** New commerce features should be pluggable into the existing platform architecture
-* **Implementation:** Use interfaces and abstract classes to define contracts that can be extended for new verticals
-* **Example:** `FeedPublisher` interface can be extended for new verticals without modifying existing implementations.
+* **Platform Extensibility:** New domains should be added without modifying existing core platform code
+* **Feature Extensions:** New features should be pluggable into the existing platform architecture
+* **Implementation:** Use interfaces and abstract classes to define contracts that can be extended for new domains
+* **Example:** `FeedPublisher` interface can be extended for new domains without modifying existing implementations.
 
 ### **L - Liskov Substitution Principle (LSP)**
- 
+
 * **Objects of a superclass should be replaceable with objects of its subclasses without affecting the correctness of the program.**
-* **Vertical Interchangeability:** Any vertical-specific implementation should be replaceable with another without breaking the platform
-* **Service Substitution:** Platform services should work consistently regardless of the specific vertical implementation
-* **Example:** Any `VerticalFeedService` implementation should work seamlessly with the `UniversalFeedProcessor`.
+* **Domain Interchangeability:** Any domain-specific implementation should be replaceable with another without breaking the platform
+* **Service Substitution:** Platform services should work consistently regardless of the specific domain implementation
+* **Example:** Any `DomainFeedService` implementation should work seamlessly with the `UniversalFeedProcessor`.
 
 ### **I - Interface Segregation Principle (ISP)**
- 
+
 * **Clients should not be forced to depend on interfaces they do not use.**
-* **Vertical-Specific Interfaces:** Create specific interfaces for each vertical's unique requirements
+* **Domain-Specific Interfaces:** Create specific interfaces for each domain's unique requirements
 * **Platform Interfaces:** Keep platform-level interfaces focused on common functionality
-* **Example:** `JewelryCatalogService` should not depend on `PharmacyCatalogService` interfaces.
+* **Example:** `CatalogService` should not depend on unrelated domain interfaces.
 
 ### **D - Dependency Inversion Principle (DIP)**
- 
+
 * **High-level modules should not depend on low-level modules. Both should depend on abstractions.**
-* **Platform Independence:** High-level platform services should not depend on specific vertical implementations
+* **Platform Independence:** High-level platform services should not depend on specific domain implementations
 * **Cloud Service Abstraction:** Platform should depend on cloud service abstractions, not specific implementations
 * **Configuration Abstraction:** Services should depend on configuration abstractions, not specific environment implementations
 * **Example:** `FeedProcessor` should depend on `ConfigurationService` interface, not specific YAML or properties implementations.
  
 ***
  
-## ✍️ **Documentation Standards for Unified Commerce Platform**
+## ✍️ **Documentation Standards for Software Platforms**
 
 ### **API Documentation**
 * **OpenAPI/Swagger:** All REST APIs must be documented with OpenAPI 3.0 specifications
-* **Vertical-Specific APIs:** Document APIs that are specific to business verticals separately
-* **Platform APIs:** Document common platform APIs that work across all verticals
-* **Integration Documentation:** Document all external service integrations (Azure Service Bus, Kafka, Cosmos DB)
+* **Domain-Specific APIs:** Document APIs that are specific to business domains separately
+* **Platform APIs:** Document common platform APIs that work across all domains
+* **Integration Documentation:** Document all external service integrations (e.g., Azure Service Bus, Kafka, Cosmos DB)
 
 ### **Code Documentation**
 * **Why, not What:** Comments should explain *why* a piece of code exists, its design choices, or complex business logic. The code itself should explain *what* it does.
-* **Business Context:** Document business rules and vertical-specific logic clearly
+* **Business Context:** Document business rules and domain-specific logic clearly
 * **Class and Method-Level Comments:** Every class and public method should have JavaDoc explaining its purpose, arguments, return values, and any exceptions it might raise.
 * **Configuration Documentation:** Document all environment-specific configurations and their purposes
 * **Integration Points:** Document all external service integration points and their contracts
 
 ### **Architecture Documentation**
-* **Platform Architecture:** Document the overall platform architecture and how different verticals integrate
+* **Platform Architecture:** Document the overall platform architecture and how different domains integrate
 * **Service Dependencies:** Document service dependencies and data flow
 * **Environment Configuration:** Document environment setup and configuration management
 * **Deployment Documentation:** Document deployment procedures for different environments
  
 ***
  
-## 🛡️ **Defensive Coding for Enterprise Commerce Platform**
+## 🛡️ **Defensive Coding for Enterprise Platforms**
 
 ### **Error Handling and Resilience**
 * **Graceful Degradation:** Implement circuit breakers and fallback mechanisms for external service failures
-* **Retry Logic:** Implement exponential backoff for transient failures in Azure services
-* **Error Boundaries:** Use proper error boundaries to prevent cascading failures across verticals
+* **Retry Logic:** Implement exponential backoff for transient failures in cloud services
+* **Error Boundaries:** Use proper error boundaries to prevent cascading failures across domains
 * **Logging and Monitoring:** Implement comprehensive logging for debugging and monitoring across all environments
 
 ### **Input Validation and Security**
 * **Input Sanitization:** Validate and sanitize all inputs, especially for multi-tenant scenarios
-* **Business Rule Validation:** Implement validation for business rules specific to each vertical
-* **Data Privacy:** Ensure compliance with data privacy regulations across all verticals
+* **Business Rule Validation:** Implement validation for business rules specific to each domain
+* **Data Privacy:** Ensure compliance with data privacy regulations across all domains
 * **Security Headers:** Implement proper security headers for all APIs
 
 ### **Testing Strategy**
 * **Unit Testing:** Write comprehensive unit tests for all business logic
-* **Integration Testing:** Test integration with Azure services (Service Bus, Cosmos DB, Event Hubs)
-* **Vertical Testing:** Test functionality across all business verticals
+* **Integration Testing:** Test integration with cloud services (e.g., Service Bus, Cosmos DB, Event Hubs)
+* **Domain Testing:** Test functionality across all business domains
 * **Environment Testing:** Test in all environments (local, dev, sit, prod)
-* **Performance Testing:** Load test the platform for multi-vertical scenarios
+* **Performance Testing:** Load test the platform for multi-domain scenarios
  
-## ☁️ **Azure Cloud and Environment Configuration Standards**
+## ☁️ **Cloud and Environment Configuration Standards**
 
 ### **Environment Management**
 * **Profile-Based Configuration:** Use Spring profiles (local, dev, sit, prod) for environment-specific configurations
 * **Externalized Configuration:** All sensitive data must be externalized using environment variables
-* **Azure Integration:** Leverage Azure Key Vault for production secret management
+* **Cloud Integration:** Leverage cloud provider's secret management for production secret management
 * **Configuration Validation:** Implement startup validation to ensure all required environment variables are present
 
-### **Azure Service Integration**
-* **Service Bus:** Use Azure Service Bus for CDC event processing with proper error handling
+### **Cloud Service Integration**
+* **Service Bus:** Use cloud-native service bus for event processing with proper error handling
 * **Cosmos DB:** Implement proper connection pooling and retry logic for Cosmos DB
-* **Event Hubs/Kafka:** Use Azure Event Hubs or Kafka on Azure for message streaming
-* **Monitoring:** Implement Azure Application Insights for comprehensive monitoring
+* **Event Hubs/Kafka:** Use cloud-native event hubs or Kafka for message streaming
+* **Monitoring:** Implement cloud provider's monitoring solutions for comprehensive monitoring
 
 ### **Security Best Practices**
 * **No Hardcoded Credentials:** Never commit credentials to version control
 * **Environment-Specific Secrets:** Use different secrets for each environment
-* **Azure RBAC:** Implement proper role-based access control for Azure resources
-* **Network Security:** Use Azure Virtual Networks and security groups appropriately
+* **Cloud RBAC:** Implement proper role-based access control for cloud resources
+* **Network Security:** Use cloud provider's virtual networks and security groups appropriately
 
 ## 🔧 **Development Workflow Standards**
 
@@ -157,33 +172,33 @@ The SOLID principles are essential for building a maintainable, scalable unified
 - Treat user workspace as production-level environment
 - Generate and work through solutions systematically until tasks are completed
  
-## 🏪 **Unified Commerce Platform Specific Guidelines**
+## 🏪 **Platform Specific Guidelines**
 
-### **Multi-Vertical Architecture**
-* **Vertical Abstraction:** Design services to be vertical-agnostic where possible
-* **Vertical-Specific Logic:** Isolate vertical-specific business logic in dedicated services
-* **Common Platform Services:** Build reusable services for common commerce functionality
-* **Data Model Design:** Design data models to support multiple verticals with proper categorization
+### **Multi-Domain Architecture**
+* **Domain Abstraction:** Design services to be domain-agnostic where possible
+* **Domain-Specific Logic:** Isolate domain-specific business logic in dedicated services
+* **Common Platform Services:** Build reusable services for common functionality
+* **Data Model Design:** Design data models to support multiple domains with proper categorization
 
-### **Business Vertical Considerations**
-* **Tata Cliq (Fashion):** Product variants, size charts, seasonal collections
-* **Tata 1mg (Healthcare):** Prescription validation, drug interactions, regulatory compliance
-* **Tata Jewellery (Luxury):** Certificate validation, precious metal pricing, authentication
-* **BigBasket (Grocery):** Perishable goods, inventory management, delivery scheduling
-* **Tata Croma (Electronics):** Technical specifications, warranty management, compatibility
-* **Tata 11 (Mobile):** Device specifications, carrier compatibility, activation processes
+### **Business Domain Considerations**
+* **Fashion:** Product variants, size charts, seasonal collections
+* **Healthcare:** Prescription validation, drug interactions, regulatory compliance
+* **Luxury:** Certificate validation, precious metal pricing, authentication
+* **Grocery:** Perishable goods, inventory management, delivery scheduling
+* **Electronics:** Technical specifications, warranty management, compatibility
+* **Mobile:** Device specifications, carrier compatibility, activation processes
 
 ### **Performance and Scalability**
-* **Multi-Tenant Architecture:** Design for multiple verticals sharing the same platform
+* **Multi-Tenant Architecture:** Design for multiple domains sharing the same platform
 * **Caching Strategy:** Implement appropriate caching for different vertical requirements
-* **Database Optimization:** Optimize queries for multi-vertical data access patterns
-* **Load Balancing:** Design for varying load patterns across different verticals
+* **Database Optimization:** Optimize queries for multi-domain data access patterns
+* **Load Balancing:** Design for varying load patterns across different domains
 
 ### **Integration Standards**
 * **External Service Integration:** Standardize integration patterns for external services
-* **API Gateway:** Use API gateway for consistent API management across verticals
+* **API Gateway:** Use API gateway for consistent API management across domains
 * **Event-Driven Architecture:** Implement event-driven patterns for loose coupling
-* **Data Synchronization:** Ensure data consistency across verticals and external systems
+* **Data Synchronization:** Ensure data consistency across domains and external systems
 
 ## 📋 **Commit Message Standards**
 
@@ -217,7 +232,7 @@ The SOLID principles are essential for building a maintainable, scalable unified
 
 ### **Examples**
 ```
-feat(catalog): add multi-vertical product support
+feat(catalog): add multi-domain product support
 fix(azure): resolve Service Bus connection timeout
 docs(config): update environment setup guide
 refactor(feed): extract common feed generation logic
@@ -246,10 +261,10 @@ refactor(feed): extract common feed generation logic
 * **API Documentation:** OpenAPI specifications for all REST APIs
 * **Integration Guide:** How to integrate with external services and systems
 
-### **Vertical-Specific Documentation**
-* **Business Rules:** Document business rules specific to each vertical
+### **Domain-Specific Documentation**
+* **Business Rules:** Document business rules specific to each domain
 * **Data Models:** Document data models and their relationships
-* **Integration Points:** Document how each vertical integrates with the platform
+* **Integration Points:** Document how each domain integrates with the platform
 * **Configuration Guide:** Environment-specific configuration documentation
 
 ### **Development Resources**
@@ -261,19 +276,19 @@ refactor(feed): extract common feed generation logic
 ## 🎯 **Platform Vision and Goals**
 
 ### **Unified Commerce Platform Mission**
-We are building a unified commerce platform for Tata Group that serves multiple business verticals:
+We are building a unified commerce platform that serves multiple business verticals:
 
-- **Tata Cliq** - Fashion and lifestyle e-commerce
-- **Tata 1mg** - Healthcare and pharmaceutical services  
-- **Tata Jewellery** - Luxury jewelry and precious metals
-- **BigBasket** - Grocery and daily essentials
-- **Tata Croma** - Electronics and technology products
-- **Tata 11** - Mobile devices and telecommunications
+- **Fashion and lifestyle e-commerce**
+- **Healthcare and pharmaceutical services**  
+- **Luxury jewelry and precious metals**
+- **Grocery and daily essentials**
+- **Electronics and technology products**
+- **Mobile devices and telecommunications**
 
 ### **Platform Objectives**
 - **Universal Features:** Every feature developed should be available for every category
 - **Scalable Architecture:** Support rapid expansion to new verticals and markets
-- **Consistent Experience:** Maintain uniform user experience across all Tata Group platforms
+- **Consistent Experience:** Maintain uniform user experience across all platforms
 - **Operational Excellence:** Ensure high availability, performance, and reliability
 
 ### **Starting Point: Catalog Service**
@@ -305,14 +320,14 @@ The catalog service is the foundation of our unified commerce platform, providin
 - **Security:** Zero critical security vulnerabilities
 
 ### **Business Metrics**
-- **Vertical Adoption:** Successful deployment across all Tata Group verticals
-- **Feature Reusability:** >70% of features reusable across verticals
+- **Vertical Adoption:** Successful deployment across all business domains
+- **Feature Reusability:** >70% of features reusable across domains
 - **Development Velocity:** Reduced time-to-market for new vertical features
 - **Operational Efficiency:** Reduced maintenance overhead through unified platform
 
 ## 🎉 **Conclusion**
 
-This document serves as the foundation for building a world-class unified commerce platform that will power Tata Group's digital transformation across multiple business verticals. By following these standards and principles, we ensure:
+This document serves as the foundation for building a world-class unified commerce platform that will power digital transformation across multiple business verticals. By following these standards and principles, we ensure:
 
 - **Consistent Quality:** High-quality, maintainable code across all services
 - **Scalable Growth:** Platform that can grow with business needs
