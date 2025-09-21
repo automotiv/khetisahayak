@@ -104,7 +104,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
                   InputProps={{
                     startAdornment: <Phone sx={{ mr: 1, color: 'text.secondary' }} />
                   }}
-                  inputProps={{ maxLength: 10 }}
+                  inputProps={{ 
+                    maxLength: 10,
+                    'aria-describedby': 'phone-helper-text',
+                    'aria-required': true,
+                    type: 'tel',
+                    autoComplete: 'tel'
+                  }}
+                  helperText="Enter your 10-digit mobile number"
+                  id="phone-input"
+                  error={error && error.includes('mobile')}
                 />
                 
                 <Button
@@ -137,7 +146,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
                   InputProps={{
                     startAdornment: <Security sx={{ mr: 1, color: 'text.secondary' }} />
                   }}
-                  inputProps={{ maxLength: 6 }}
+                  inputProps={{ 
+                    maxLength: 6,
+                    'aria-describedby': 'otp-helper-text',
+                    'aria-required': true,
+                    type: 'text',
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    autoComplete: 'one-time-code'
+                  }}
+                  helperText="Enter the 6-digit OTP sent to your mobile"
+                  id="otp-input"
+                  error={error && error.includes('OTP')}
                 />
                 
                 <Button

@@ -1,0 +1,117 @@
+# CodeRabbit Configuration for Kheti Sahayak
+# This file configures CodeRabbit's behavior for your project
+
+# Language and framework detection
+language: "typescript"
+framework: "react"
+backend: "node.js"
+
+# Review focus areas
+reviews:
+  # Focus on these areas during code review
+  focus:
+    - "security"
+    - "performance" 
+    - "accessibility"
+    - "best-practices"
+    - "maintainability"
+    - "type-safety"
+  
+  # Auto-fix suggestions for simple issues
+  auto_fix: true
+  
+  # Review depth (surface, balanced, thorough)
+  depth: "thorough"
+
+# Path filters - what to include/exclude from reviews
+path_filters:
+  # Include these paths
+  - "frontend/src/**"
+  - "kheti_sahayak_backend/**"
+  - "kheti_sahayak_app/lib/**"
+  
+  # Exclude these paths
+  - "!**/node_modules/**"
+  - "!**/build/**"
+  - "!**/dist/**"
+  - "!**/*.min.js"
+  - "!**/*.bundle.js"
+  - "!**/coverage/**"
+  - "!**/.git/**"
+  - "!**/logs/**"
+  - "!**/*.log"
+  - "!**/*.lock"
+  - "!**/*.csv"
+  - "!**/*.sql"
+  - "!**/*.png"
+  - "!**/*.jpg"
+  - "!**/*.jpeg"
+  - "!**/*.gif"
+  - "!**/*.ico"
+  - "!**/*.pdf"
+
+# File type specific settings
+file_types:
+  typescript:
+    - "strict_types"
+    - "no_any_types"
+    - "proper_error_handling"
+  
+  javascript:
+    - "es6_features"
+    - "async_await_patterns"
+    - "proper_error_handling"
+  
+  react:
+    - "hooks_rules"
+    - "accessibility_compliance"
+    - "performance_optimization"
+    - "prop_types_validation"
+
+# Custom review instructions
+instructions: |
+  Please focus on the following areas when reviewing this agricultural technology application:
+  
+  1. **Security**: Check for input validation, authentication, and data sanitization
+  2. **Accessibility**: Ensure WCAG 2.1 AA compliance for farmers with disabilities
+  3. **Performance**: Optimize for mobile devices with limited connectivity
+  4. **Internationalization**: Consider multi-language support for Indian farmers
+  5. **Error Handling**: Robust error handling for agricultural data processing
+  6. **API Design**: RESTful API design with proper status codes
+  7. **Database Security**: SQL injection prevention and data encryption
+  8. **Mobile Responsiveness**: Ensure UI works on various screen sizes
+  9. **Offline Capability**: Consider offline functionality for rural areas
+  10. **Data Privacy**: Protect farmer's sensitive agricultural data
+
+# Ignore patterns for common false positives
+ignore_patterns:
+  - "TODO comments in development files"
+  - "Console.log in development environment"
+  - "Hardcoded test data in mock files"
+  - "Any types in external API response types"
+
+# Integration settings
+integrations:
+  github:
+    auto_merge: false
+    require_approval: true
+    block_on_security_issues: true
+  
+  slack:
+    notify_on_critical: true
+    channel: "#code-reviews"
+
+# Comment settings
+comments:
+  style: "constructive"
+  include_examples: true
+  suggest_alternatives: true
+  explain_reasoning: true
+
+# Severity levels
+severity:
+  security: "high"
+  performance: "medium"
+  accessibility: "high"
+  style: "low"
+  maintainability: "medium"

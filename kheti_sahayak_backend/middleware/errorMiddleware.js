@@ -3,6 +3,7 @@ const logger = require('../utils/logger');
 // Handles requests to routes that don't exist (404)
 const notFound = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
+  error.status = 404;
   res.status(404);
   next(error);
 };
@@ -10,16 +11,49 @@ const notFound = (req, res, next) => {
 // A catch-all for errors passed via next(error)
 const errorHandler = (err, req, res, next) => {
   // Log the error for debugging purposes
-  logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+  const statusCode = err.status || res.statusCode === 200 ? 500 : res.statusCode;
+  
+  // Create structured error log
+  const errorLog = {
+    statusCode,
+    message: err.message,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    userId: req.user?.id || 'anonymous',
+    timestamp: new Date().toISOString(),
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  };
+  
+  logger.error('Request error:', errorLog);
 
-  // If the status code is still 200, it's likely an unhandled error, so set it to 500
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode);
-  res.json({
+  // Determine error type and provide appropriate response
+  let errorResponse = {
+    success: false,
     error: err.message,
-    // Only show the stack trace in development for security reasons
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-  });
+    code: err.code || 'INTERNAL_ERROR',
+    timestamp: new Date().toISOString()
+  };
+
+  // Add stack trace in development
+  if (process.env.NODE_ENV !== 'production') {
+    errorResponse.stack = err.stack;
+  }
+
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    errorResponse.code = 'VALIDATION_ERROR';
+    errorResponse.details = err.details || [];
+  } else if (err.name === 'CastError') {
+    errorResponse.code = 'INVALID_ID';
+    errorResponse.error = 'Invalid resource ID';
+  } else if (err.code === 11000) {
+    errorResponse.code = 'DUPLICATE_ENTRY';
+    errorResponse.error = 'Duplicate entry detected';
+  }
+
+  res.status(statusCode).json(errorResponse);
 };
 
 module.exports = { notFound, errorHandler };

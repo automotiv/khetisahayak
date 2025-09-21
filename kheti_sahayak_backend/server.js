@@ -21,11 +21,39 @@ const orderRoutes = require('./routes/orders');
 const notificationRoutes = require('./routes/notifications');
 const ingestionRoutes = require('./routes/ingestion');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { sanitizeInput, rateLimit } = require('./middleware/validationMiddleware');
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+// Security middleware
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later'
+}));
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Body parsing middleware
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf);
+    } catch (e) {
+      logger.error('Invalid JSON in request body:', e.message);
+      throw new Error('Invalid JSON format');
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization
+app.use(sanitizeInput);
 
 // HTTP request logger middleware
 app.use((req, res, next) => {

@@ -63,24 +63,37 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           <IconButton
             edge="start"
             color="inherit"
-            aria-label="menu"
+            aria-label="Open navigation menu"
             onClick={() => setSideMenuOpen(!sideMenuOpen)}
             sx={{ mr: 2 }}
           >
             <Menu />
           </IconButton>
           
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography 
+            variant="h6" 
+            component="h1" 
+            sx={{ flexGrow: 1 }}
+            role="banner"
+          >
             Kheti Sahayak
           </Typography>
           
-          <IconButton color="inherit">
+          <IconButton 
+            color="inherit"
+            aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
+            onClick={() => onTabChange(11)}
+          >
             <Badge badgeContent={notificationCount} color="error">
               <Notifications />
             </Badge>
           </IconButton>
           
-          <IconButton color="inherit">
+          <IconButton 
+            color="inherit"
+            aria-label="Open user profile"
+            onClick={() => onTabChange(12)}
+          >
             <AccountCircle />
           </IconButton>
         </Toolbar>
@@ -97,6 +110,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           py: 1,
           backgroundColor: 'background.default'
         }}
+        role="main"
+        aria-label="Main content"
+        tabIndex={-1}
+        id="main-content"
       >
         {children}
       </Box>
@@ -106,10 +123,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         anchor="left"
         open={sideMenuOpen}
         onClose={() => setSideMenuOpen(false)}
+        aria-label="Navigation menu"
       >
-        <Box sx={{ width: 280, pt: 8 }}>
+        <Box sx={{ width: 280, pt: 8 }} role="navigation" aria-label="Main navigation">
           <List>
-            <ListItem button onClick={() => handleSideMenuItemClick(0)}>
+            <ListItem 
+              button 
+              onClick={() => handleSideMenuItemClick(0)}
+              aria-label="Go to Dashboard"
+              selected={currentTab === 0}
+            >
               <ListItemIcon><Dashboard /></ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
@@ -185,6 +208,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           borderTop: 1,
           borderColor: 'divider'
         }}
+        role="navigation"
+        aria-label="Bottom navigation"
       >
         <BottomNavigationAction 
           label="Dashboard" 

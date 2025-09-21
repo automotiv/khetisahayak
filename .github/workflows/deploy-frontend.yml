@@ -1,0 +1,78 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps (if any)
+        working-directory: frontend
+        run: |
+          if [ -f package.json ]; then
+            npm ci || npm install
+          fi
+
+      - name: Build (if configured)
+        working-directory: frontend
+        run: |
+          if [ -f package.json ] && jq -e '.scripts.build' package.json > /dev/null 2>&1; then
+            npm run build
+          else
+            echo "No build script found; using static files in frontend/"
+          fi
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          if [ -d frontend/dist ]; then
+            cp -R frontend/dist/* _site/
+          else
+            cp -R frontend/* _site/
+            # Remove dev files not needed in deployment
+            rm -f _site/package.json _site/package-lock.json 2>/dev/null || true
+            rm -rf _site/src 2>/dev/null || true
+            rm -rf _site/node_modules 2>/dev/null || true
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+
