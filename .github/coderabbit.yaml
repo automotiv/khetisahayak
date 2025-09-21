@@ -1,0 +1,7 @@
+# .github/coderabbit.yaml
+# Configuration file for Coderabbit AI.
+# See https://coderabbit.ai/docs/configuration for more options.
+
+# Enable Coderabbit AI for this repository.
+reviews:
+  enabled: true
