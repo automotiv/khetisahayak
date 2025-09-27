@@ -1,0 +1,53 @@
+# This workflow deploys the application to a staging environment on AWS Elastic Beanstalk.
+# It assumes that the CI workflow has already built and pushed a Docker image to Docker Hub.
+
+name: Deploy to Staging
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Triggers the workflow on push events but only for the "staging" branch
+  push:
+    branches: [ "staging" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging # Optional: Define a 'staging' environment in your repo settings for protection rules and secrets
+
+    steps:
+      # Step 1: Configure AWS credentials
+      # This action configures the AWS CLI with credentials stored in GitHub secrets.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # <-- TODO: Change to your desired AWS region
+
+      # Step 2: Generate Dockerrun.aws.json
+      # This file tells Elastic Beanstalk which Docker image to deploy from your registry.
+      - name: Generate Dockerrun.aws.json
+        run: |
+          echo '{
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest",
+              "Update": "true"
+            },
+            "Ports": [
+              { "ContainerPort": 3000 }
+            ]
+          }' > Dockerrun.aws.json
+
+      # Step 3: Deploy to AWS Elastic Beanstalk
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          application_name: kheti-sahayak-backend # <-- TODO: Change to your EB application name
+          environment_name: kheti-sahayak-staging # <-- TODO: Change to your EB environment name
+          region: us-east-1 # <-- TODO: Change to your desired AWS region
+          version_label: staging-${{ github.sha }}
+          deployment_package: Dockerrun.aws.json
+          tags: "Project=kheti-sahayak,Environment=staging"

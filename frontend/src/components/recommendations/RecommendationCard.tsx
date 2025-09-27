@@ -15,9 +15,9 @@ import {
   ThumbDown, 
   CheckCircle, 
   Schedule,
-  PriorityHigh,
+  Priority,
   WaterDrop,
-  Spa,
+  Eco,
   BugReport,
   Agriculture,
   TrendingUp,
@@ -60,7 +60,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       case RecommendationType.IRRIGATION:
         return <WaterDrop sx={{ color: 'info.main' }} />;
       case RecommendationType.FERTILIZATION:
-        return <Spa sx={{ color: 'success.main' }} />;
+        return <Eco sx={{ color: 'success.main' }} />;
       case RecommendationType.PEST_MANAGEMENT:
         return <BugReport sx={{ color: 'error.main' }} />;
       case RecommendationType.CROP_SELECTION:
@@ -70,7 +70,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       case RecommendationType.STORAGE:
         return <Storage sx={{ color: 'warning.main' }} />;
       default:
-        return <PriorityHigh sx={{ color: 'grey.600' }} />;
+        return <Priority sx={{ color: 'grey.600' }} />;
     }
   };
 

@@ -1,7 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import ErrorBoundary from './components/common/ErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import Dashboard from './components/dashboard/Dashboard';
 import WeatherForecast from './components/weather/WeatherForecast';
@@ -25,16 +24,12 @@ const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(true); // Set to false to show login
 
-  const handleLogin = useCallback((phone: string, otp: string) => {
+  const handleLogin = (phone: string, otp: string) => {
     console.log('Login successful:', phone);
     setIsAuthenticated(true);
-  }, []);
+  };
 
-  const handleTabChange = useCallback((newTab: number) => {
-    setCurrentTab(newTab);
-  }, []);
-
-  const renderCurrentTab = useMemo(() => {
+  const renderCurrentTab = () => {
     switch (currentTab) {
       case 0:
         return (
@@ -128,35 +123,29 @@ const App: React.FC = () => {
           />
         );
     }
-  }, [currentTab]);
+  };
 
   if (!isAuthenticated) {
     return (
-      <ErrorBoundary>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <LoginForm onLogin={handleLogin} />
-        </ThemeProvider>
-      </ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LoginForm onLogin={handleLogin} />
+      </ThemeProvider>
     );
   }
 
-  const notificationCount = enhancedMockQuery.notifications.filter(n => !n.isRead).length;
-
   return (
-    <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppLayout
-          currentTab={currentTab}
-          onTabChange={handleTabChange}
-          notificationCount={notificationCount}
-          showExtendedNavigation={true}
-        >
-          {renderCurrentTab}
-        </AppLayout>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppLayout
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        notificationCount={enhancedMockQuery.notifications.filter(n => !n.isRead).length}
+        showExtendedNavigation={true}
+      >
+        {renderCurrentTab()}
+      </AppLayout>
+    </ThemeProvider>
   );
 };
 
