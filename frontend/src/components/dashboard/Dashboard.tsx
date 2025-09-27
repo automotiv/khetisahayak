@@ -19,52 +19,65 @@ const Dashboard: React.FC<DashboardProps> = ({
   const latestDiagnosis = diagnosisHistory[0];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <Box role="main" aria-labelledby="dashboard-title">
+      <Typography 
+        variant="h4" 
+        gutterBottom
+        id="dashboard-title"
+        component="h1"
+        tabIndex={-1}
+      >
         Welcome back, {userName}!
       </Typography>
 
       <Stack spacing={3}>
         {/* Weather Overview */}
-        <WeatherCard
-          temperature={weatherData.current.temperature}
-          humidity={weatherData.current.humidity}
-          windSpeed={weatherData.current.windSpeed}
-          condition={weatherData.current.condition}
-          location="Khandala, Nashik"
-        />
+        <section aria-labelledby="weather-section">
+          <WeatherCard
+            temperature={weatherData.current.temperature}
+            humidity={weatherData.current.humidity}
+            windSpeed={weatherData.current.windSpeed}
+            condition={weatherData.current.condition}
+            location="Khandala, Nashik"
+          />
+        </section>
 
         {/* Quick Actions */}
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Quick Actions
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                startIcon={<LocalHospital />}
-                fullWidth
-              >
-                Diagnose Crop
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<TrendingUp />}
-                fullWidth
-              >
-                Market Prices
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<School />}
-                fullWidth
-              >
-                Learn
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
+        <section aria-labelledby="quick-actions-title">
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom id="quick-actions-title" component="h2">
+                Quick Actions
+              </Typography>
+              <Stack direction="row" spacing={2} role="group" aria-labelledby="quick-actions-title">
+                <Button
+                  variant="outlined"
+                  startIcon={<LocalHospital />}
+                  fullWidth
+                  aria-label="Navigate to crop diagnostics"
+                >
+                  Diagnose Crop
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<TrendingUp />}
+                  fullWidth
+                  aria-label="View current market prices"
+                >
+                  Market Prices
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<School />}
+                  fullWidth
+                  aria-label="Access educational content"
+                >
+                  Learn
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Recent Activity */}
         {latestDiagnosis && (
