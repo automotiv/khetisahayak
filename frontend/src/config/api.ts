@@ -5,27 +5,27 @@
 
 // Environment-based API configuration
 const getApiConfig = () => {
-  const env = import.meta.env.MODE || 'development';
+  const env = (import.meta as any).env?.MODE || 'development';
   
   switch (env) {
     case 'production':
       return {
-        baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.khetisahayak.com',
+        baseURL: (import.meta as any).env?.VITE_API_BASE_URL || 'https://api.khetisahayak.com',
         timeout: 30000,
         withCredentials: true,
       };
     case 'staging':
       return {
-        baseURL: import.meta.env.VITE_API_BASE_URL || 'https://staging-api.khetisahayak.com',
+        baseURL: (import.meta as any).env?.VITE_API_BASE_URL || 'https://staging-api.khetisahayak.com',
         timeout: 30000,
         withCredentials: true,
       };
     case 'development':
     default:
       return {
-        baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+        baseURL: (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8080',
         timeout: 15000,
-        withCredentials: false,
+        withCredentials: true,
       };
   }
 };

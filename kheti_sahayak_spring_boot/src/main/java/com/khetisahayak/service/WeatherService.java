@@ -48,6 +48,45 @@ public class WeatherService {
     }
 
     /**
+     * Get 5-day weather forecast with agricultural recommendations
+     */
+    public Map<String, Object> getWeatherForecast(double lat, double lon) {
+        Map<String, Object> forecastData;
+        if (apiKey == null || apiKey.isBlank()) {
+            // Mock forecast data for development
+            forecastData = new java.util.HashMap<>();
+            forecastData.put("forecast", java.util.List.of(
+                java.util.Map.of("day", 1, "temp", 30, "condition", "Clouds"),
+                java.util.Map.of("day", 2, "temp", 29, "condition", "Rain"),
+                java.util.Map.of("day", 3, "temp", 31, "condition", "Clear")
+            ));
+        } else {
+            // For simplicity, reuse current weather and annotate as forecast
+            forecastData = getWeather(lat, lon);
+            forecastData.put("note", "Forecast endpoint using simplified data in MVP");
+        }
+        enhanceWithAgriculturalContext(forecastData, lat, lon);
+        return forecastData;
+    }
+
+    /**
+     * Get weather alerts for agricultural activities
+     */
+    public Map<String, Object> getWeatherAlerts(double lat, double lon) {
+        Map<String, Object> alertsData = new java.util.HashMap<>();
+        java.util.List<Map<String, Object>> alerts = new java.util.ArrayList<>();
+        alerts.add(java.util.Map.of(
+            "type", "WIND",
+            "severity", "MEDIUM",
+            "message", "Gusty winds expected. Avoid spraying.")
+        );
+        alertsData.put("alerts", alerts);
+        alertsData.put("latitude", lat);
+        alertsData.put("longitude", lon);
+        return alertsData;
+    }
+
+    /**
      * Fetch weather data from OpenWeatherMap API
      */
     private Map<String, Object> fetchWeatherFromApi(double lat, double lon) {

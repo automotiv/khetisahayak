@@ -113,7 +113,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
                   }}
                   helperText="Enter your 10-digit mobile number"
                   id="phone-input"
-                  error={error && error.includes('mobile')}
+                  error={Boolean(error && error.includes('mobile'))}
                 />
                 
                 <Button
@@ -157,7 +157,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
                   }}
                   helperText="Enter the 6-digit OTP sent to your mobile"
                   id="otp-input"
-                  error={error && error.includes('OTP')}
+                  error={Boolean(error && error.includes('OTP'))}
                 />
                 
                 <Button

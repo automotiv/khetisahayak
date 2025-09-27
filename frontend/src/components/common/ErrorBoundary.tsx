@@ -33,7 +33,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     
     this.setState({
       error,
-      errorInfo: errorInfo.componentStack
+      errorInfo: errorInfo.componentStack || undefined
     });
   }
 
@@ -90,7 +90,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </Button>
             </Box>
 
-            {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+            {(import.meta as any).env?.MODE === 'development' && this.state.errorInfo && (
               <Alert severity="info" sx={{ width: '100%', textAlign: 'left', mt: 2 }}>
                 <Typography variant="caption" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
                   {this.state.errorInfo}

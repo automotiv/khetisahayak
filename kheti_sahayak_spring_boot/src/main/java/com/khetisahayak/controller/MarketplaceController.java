@@ -1,23 +1,33 @@
 package com.khetisahayak.controller;
 
+import com.khetisahayak.model.Product;
+import com.khetisahayak.service.ProductService;
+import com.khetisahayak.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Marketplace Controller for Kheti Sahayak Agricultural Platform
  * Handles agricultural product listings, orders, and farmer-to-farmer commerce
- * Implements secure marketplace operations for Indian agricultural products
+ * Implements CodeRabbit security standards for agricultural marketplace operations
  */
 @Tag(name = "Marketplace", description = "Agricultural marketplace operations for buying and selling")
 @RestController
@@ -25,15 +35,49 @@ import java.util.*;
 @Validated
 public class MarketplaceController {
 
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private JwtService jwtService;
+
     /**
-     * Get all agricultural products with filtering and pagination
-     * Supports search by crop type, location, and price range
+     * Create new agricultural product listing
+     * Allows farmers and vendors to list their products for sale
      */
-    @Operation(summary = "Get marketplace products", 
-               description = "Retrieve agricultural products with filtering and pagination")
-    @GetMapping("/products")
+    @Operation(summary = "Create product listing", 
+               description = "Create new agricultural product listing for marketplace")
+    @PostMapping("/products")
     @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
-    public ResponseEntity<Map<String, Object>> getProducts(
+    public ResponseEntity<Map<String, Object>> createProduct(
+            @Parameter(description = "Product details including name, category, price, and agricultural specs")
+            @RequestBody @Valid Map<String, Object> productData) {
+        
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String token = (String) auth.getCredentials();
+            Long userId = Long.valueOf(jwtService.extractUserId(token));
+            
+            Map<String, Object> response = productService.createProduct(userId, productData);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to create product: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Search agricultural products with advanced filtering
+     * Supports filtering by category, location, price range, and agricultural attributes
+     */
+    @Operation(summary = "Search marketplace products", 
+               description = "Search agricultural products with filtering by category, location, price, and quality")
+    @GetMapping("/products")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR') or hasRole('EXPERT')")
+    public ResponseEntity<Map<String, Object>> searchProducts(
             @Parameter(description = "Page number (0-based)")
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             
@@ -43,11 +87,11 @@ public class MarketplaceController {
             @Parameter(description = "Product category filter")
             @RequestParam(required = false) String category,
             
-            @Parameter(description = "Search query for product name")
-            @RequestParam(required = false) @Size(max = 100) String search,
-            
             @Parameter(description = "State filter for local products")
             @RequestParam(required = false) @Size(max = 50) String state,
+            
+            @Parameter(description = "District filter")
+            @RequestParam(required = false) @Size(max = 50) String district,
             
             @Parameter(description = "Minimum price filter")
             @RequestParam(required = false) @DecimalMin("0.0") BigDecimal minPrice,
@@ -55,332 +99,331 @@ public class MarketplaceController {
             @Parameter(description = "Maximum price filter")
             @RequestParam(required = false) @DecimalMin("0.0") BigDecimal maxPrice,
             
+            @Parameter(description = "Organic certified products only")
+            @RequestParam(required = false) Boolean organic,
+            
+            @Parameter(description = "Products with home delivery")
+            @RequestParam(required = false) Boolean delivery,
+            
+            @Parameter(description = "Search query for product name")
+            @RequestParam(required = false) @Size(max = 100) String search,
+            
             @Parameter(description = "Sort by: price, name, date, rating")
             @RequestParam(defaultValue = "date") @Pattern(regexp = "^(price|name|date|rating)$") String sortBy,
             
             @Parameter(description = "Sort direction: asc or desc")
             @RequestParam(defaultValue = "desc") @Pattern(regexp = "^(asc|desc)$") String sortDir) {
         
-        // Mock product data for agricultural marketplace
-        List<Map<String, Object>> products = generateMockProducts(page, size, category, search, state);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", products);
-        response.put("page", page);
-        response.put("size", size);
-        response.put("totalElements", products.size() * 5); // Simulate more products
-        response.put("totalPages", 5);
-        response.put("filters", Map.of(
-            "category", category,
-            "search", search,
-            "state", state,
-            "priceRange", Map.of("min", minPrice, "max", maxPrice)
-        ));
-        
-        return ResponseEntity.ok(response);
+        try {
+            // Create sort configuration
+            Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            String sortField = switch (sortBy) {
+                case "price" -> "pricePerUnit";
+                case "name" -> "name";
+                case "rating" -> "averageRating";
+                default -> "createdAt";
+            };
+            
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+            
+            // Parse category if provided
+            Product.ProductCategory categoryEnum = null;
+            if (category != null && !category.trim().isEmpty()) {
+                try {
+                    categoryEnum = Product.ProductCategory.valueOf(category.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Invalid category: " + category));
+                }
+            }
+            
+            Map<String, Object> response = productService.searchProducts(
+                categoryEnum, state, district, minPrice, maxPrice, 
+                organic, delivery, search, pageable
+            );
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to search products: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     /**
-     * Get specific product details by ID
-     * Provides comprehensive agricultural product information
+     * Get specific agricultural product details by ID
+     * Provides comprehensive product information including seller details and agricultural specs
      */
     @Operation(summary = "Get product details", 
                description = "Retrieve detailed information about a specific agricultural product")
     @GetMapping("/products/{id}")
-    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR') or hasRole('EXPERT')")
     public ResponseEntity<Map<String, Object>> getProductById(
             @Parameter(description = "Product ID")
             @PathVariable @Positive Long id) {
         
-        Map<String, Object> product = new HashMap<>();
-        product.put("id", id);
-        product.put("name", "Premium Basmati Rice Seeds");
-        product.put("category", "SEEDS");
-        product.put("variety", "Pusa Basmati 1121");
-        product.put("description", "High-yield, disease-resistant basmati rice seeds suitable for Kharif season");
-        product.put("price", BigDecimal.valueOf(2500.00));
-        product.put("unit", "KG");
-        product.put("minimumOrder", BigDecimal.valueOf(5.0));
-        product.put("availableQuantity", BigDecimal.valueOf(1000.0));
-        product.put("qualityGrade", "PREMIUM");
-        product.put("isOrganic", false);
-        product.put("origin", "Punjab");
-        product.put("harvestSeason", "Kharif");
-        product.put("shelfLife", "12 months");
-        product.put("certification", "IARI Certified");
-        
-        // Seller information
-        Map<String, Object> seller = new HashMap<>();
-        seller.put("id", "vendor_123");
-        seller.put("name", "Green Valley Seeds");
-        seller.put("rating", 4.5);
-        seller.put("totalSales", 250);
-        seller.put("location", "Ludhiana, Punjab");
-        seller.put("verified", true);
-        
-        product.put("seller", seller);
-        
-        // Agricultural specifications
-        Map<String, Object> specifications = new HashMap<>();
-        specifications.put("seedRate", "20-25 kg per acre");
-        specifications.put("sowingDepth", "2-3 cm");
-        specifications.put("spacing", "20 cm between rows");
-        specifications.put("maturityPeriod", "120-130 days");
-        specifications.put("expectedYield", "25-30 quintals per acre");
-        specifications.put("soilType", "Well-drained loamy soil");
-        specifications.put("waterRequirement", "1200-1500 mm");
-        
-        product.put("specifications", specifications);
-        
-        return ResponseEntity.ok(product);
-    }
-
-    /**
-     * Create new order for agricultural products
-     * Handles farmer purchase orders with agricultural context
-     */
-    @Operation(summary = "Create marketplace order", 
-               description = "Create new order for agricultural products")
-    @PostMapping("/orders")
-    @PreAuthorize("hasRole('FARMER')")
-    public ResponseEntity<Map<String, Object>> createOrder(
-            @Parameter(description = "Order details with items and delivery information")
-            @RequestBody @Valid Map<String, Object> orderData) {
-        
-        // Validate order data
-        List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
-        if (items == null || items.isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(Map.of("error", "Order must contain at least one item"));
+        try {
+            Map<String, Object> product = productService.getProduct(id);
+            return ResponseEntity.ok(product);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Product not found: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        
-        // Generate order
-        String orderNumber = "KS" + System.currentTimeMillis();
-        Map<String, Object> order = new HashMap<>();
-        order.put("orderNumber", orderNumber);
-        order.put("status", "PENDING");
-        order.put("paymentStatus", "PENDING");
-        order.put("items", items);
-        order.put("totalAmount", calculateOrderTotal(items));
-        order.put("currency", "INR");
-        order.put("deliveryAddress", orderData.get("deliveryAddress"));
-        order.put("contactNumber", orderData.get("contactNumber"));
-        order.put("orderNotes", orderData.get("orderNotes"));
-        order.put("expectedDeliveryDays", 3);
-        order.put("createdAt", LocalDateTime.now());
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Order created successfully");
-        response.put("order", order);
-        response.put("paymentUrl", "/api/marketplace/orders/" + orderNumber + "/payment");
-        
-        return ResponseEntity.ok(response);
     }
 
     /**
-     * Get farmer's order history
-     * Returns paginated list of agricultural product orders
+     * Update existing product listing
+     * Allows sellers to update their product information
      */
-    @Operation(summary = "Get order history", 
-               description = "Retrieve farmer's marketplace order history")
-    @GetMapping("/orders")
-    @PreAuthorize("hasRole('FARMER')")
-    public ResponseEntity<Map<String, Object>> getOrderHistory(
+    @Operation(summary = "Update product listing", 
+               description = "Update existing agricultural product listing")
+    @PutMapping("/products/{id}")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
+    public ResponseEntity<Map<String, Object>> updateProduct(
+            @Parameter(description = "Product ID")
+            @PathVariable @Positive Long id,
+            
+            @Parameter(description = "Updated product information")
+            @RequestBody @Valid Map<String, Object> updateData) {
+        
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String token = (String) auth.getCredentials();
+            Long userId = Long.valueOf(jwtService.extractUserId(token));
+            
+            Map<String, Object> response = productService.updateProduct(id, userId, updateData);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to update product: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Delete product listing
+     * Allows sellers to remove their products from marketplace
+     */
+    @Operation(summary = "Delete product listing", 
+               description = "Remove agricultural product from marketplace")
+    @DeleteMapping("/products/{id}")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
+    public ResponseEntity<Map<String, Object>> deleteProduct(
+            @Parameter(description = "Product ID")
+            @PathVariable @Positive Long id) {
+        
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String token = (String) auth.getCredentials();
+            Long userId = Long.valueOf(jwtService.extractUserId(token));
+            
+            Map<String, Object> response = productService.deleteProduct(id, userId);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to delete product: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Get seller's product listings
+     * Returns all products listed by the authenticated seller
+     */
+    @Operation(summary = "Get seller products", 
+               description = "Retrieve all products listed by the authenticated seller")
+    @GetMapping("/my-products")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
+    public ResponseEntity<Map<String, Object>> getMyProducts(
             @Parameter(description = "Page number (0-based)")
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             
             @Parameter(description = "Page size (max 50)")
-            @RequestParam(defaultValue = "20") @Min(1) @Max(50) Integer size,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) Integer size) {
+        
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String token = (String) auth.getCredentials();
+            Long userId = Long.valueOf(jwtService.extractUserId(token));
             
-            @Parameter(description = "Order status filter")
-            @RequestParam(required = false) String status) {
-        
-        List<Map<String, Object>> orders = generateMockOrders(page, size, status);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", orders);
-        response.put("page", page);
-        response.put("size", size);
-        response.put("totalElements", orders.size() * 3);
-        response.put("totalPages", 3);
-        
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Get specific order details by order number
-     */
-    @Operation(summary = "Get order details", 
-               description = "Retrieve detailed information about a specific order")
-    @GetMapping("/orders/{orderNumber}")
-    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
-    public ResponseEntity<Map<String, Object>> getOrderDetails(
-            @Parameter(description = "Order number")
-            @PathVariable @Pattern(regexp = "^KS\\d+$") String orderNumber) {
-        
-        Map<String, Object> order = new HashMap<>();
-        order.put("orderNumber", orderNumber);
-        order.put("status", "CONFIRMED");
-        order.put("paymentStatus", "COMPLETED");
-        order.put("totalAmount", BigDecimal.valueOf(5250.00));
-        order.put("currency", "INR");
-        order.put("createdAt", LocalDateTime.now().minusDays(2));
-        order.put("expectedDeliveryDate", LocalDateTime.now().plusDays(1));
-        
-        // Order items
-        List<Map<String, Object>> items = new ArrayList<>();
-        Map<String, Object> item = new HashMap<>();
-        item.put("productName", "Premium Basmati Rice Seeds");
-        item.put("quantity", BigDecimal.valueOf(10.0));
-        item.put("unit", "KG");
-        item.put("unitPrice", BigDecimal.valueOf(525.00));
-        item.put("totalPrice", BigDecimal.valueOf(5250.00));
-        items.add(item);
-        
-        order.put("items", items);
-        
-        return ResponseEntity.ok(order);
-    }
-
-    /**
-     * Cancel marketplace order
-     */
-    @Operation(summary = "Cancel order", 
-               description = "Cancel marketplace order before processing")
-    @PutMapping("/orders/{orderNumber}/cancel")
-    @PreAuthorize("hasRole('FARMER')")
-    public ResponseEntity<Map<String, Object>> cancelOrder(
-            @Parameter(description = "Order number to cancel")
-            @PathVariable @Pattern(regexp = "^KS\\d+$") String orderNumber,
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Map<String, Object> response = productService.getSellerProducts(userId, pageable);
             
-            @Parameter(description = "Cancellation reason")
-            @RequestParam @NotBlank @Size(max = 500) String reason) {
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Order cancelled successfully");
-        response.put("orderNumber", orderNumber);
-        response.put("cancellationReason", reason);
-        response.put("refundStatus", "PROCESSING");
-        response.put("refundAmount", BigDecimal.valueOf(5250.00));
-        response.put("cancelledAt", LocalDateTime.now());
-        
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to retrieve products: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     /**
-     * Get product categories for agricultural marketplace
+     * Find products near location
+     * Search for agricultural products within specified radius
+     */
+    @Operation(summary = "Find products near location", 
+               description = "Search for agricultural products within specified radius of coordinates")
+    @GetMapping("/products/near")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR') or hasRole('EXPERT')")
+    public ResponseEntity<Map<String, Object>> getProductsNearLocation(
+            @Parameter(description = "Latitude")
+            @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
+            
+            @Parameter(description = "Longitude")
+            @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
+            
+            @Parameter(description = "Search radius in kilometers")
+            @RequestParam(defaultValue = "50.0") @DecimalMin("1.0") @DecimalMax("500.0") Double radiusKm,
+            
+            @Parameter(description = "Page number (0-based)")
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            
+            @Parameter(description = "Page size (max 50)")
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) Integer size) {
+        
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Map<String, Object> response = productService.getProductsNearLocation(
+                latitude, longitude, radiusKm, pageable
+            );
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to find nearby products: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get featured agricultural products
+     * Returns curated list of high-quality products
+     */
+    @Operation(summary = "Get featured products", 
+               description = "Retrieve featured agricultural products with high ratings and quality")
+    @GetMapping("/products/featured")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR') or hasRole('EXPERT')")
+    public ResponseEntity<Map<String, Object>> getFeaturedProducts(
+            @Parameter(description = "Page number (0-based)")
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            
+            @Parameter(description = "Page size (max 50)")
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) Integer size) {
+        
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Map<String, Object> response = productService.getFeaturedProducts(pageable);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to retrieve featured products: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get agricultural product categories
+     * Returns all available product categories with statistics
      */
     @Operation(summary = "Get product categories", 
-               description = "Retrieve all available agricultural product categories")
+               description = "Retrieve all available agricultural product categories with counts")
     @GetMapping("/categories")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR') or hasRole('EXPERT')")
+    public ResponseEntity<Map<String, Object>> getProductCategories() {
+        
+        try {
+            Map<String, Object> response = productService.getProductCategories();
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to retrieve categories: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get marketplace statistics
+     * Returns comprehensive marketplace analytics and insights
+     */
+    @Operation(summary = "Get marketplace statistics", 
+               description = "Retrieve marketplace analytics including product counts and pricing insights")
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('EXPERT')")
+    public ResponseEntity<Map<String, Object>> getMarketplaceStatistics() {
+        
+        try {
+            Map<String, Object> response = productService.getMarketplaceStatistics();
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to retrieve statistics: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get units of measurement for agricultural products
+     * Returns standardized units used in Indian agriculture
+     */
+    @Operation(summary = "Get measurement units", 
+               description = "Retrieve available units of measurement for agricultural products")
+    @GetMapping("/units")
     @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
-    public ResponseEntity<List<Map<String, Object>>> getProductCategories() {
+    public ResponseEntity<Map<String, Object>> getMeasurementUnits() {
         
-        List<Map<String, Object>> categories = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
+        Map<String, String> units = new HashMap<>();
         
-        String[] categoryNames = {"SEEDS", "FERTILIZERS", "PESTICIDES", "TOOLS", 
-                                "FRESH_PRODUCE", "GRAINS", "IRRIGATION", "MACHINERY"};
-        String[] categoryDescriptions = {
-            "Seeds and planting materials for all crops",
-            "Chemical and organic fertilizers",
-            "Pest control and plant protection products",
-            "Farming tools and hand implements",
-            "Fresh fruits and vegetables",
-            "Cereals, pulses, and grains",
-            "Irrigation equipment and systems",
-            "Agricultural machinery and equipment"
-        };
-        
-        for (int i = 0; i < categoryNames.length; i++) {
-            Map<String, Object> category = new HashMap<>();
-            category.put("name", categoryNames[i]);
-            category.put("displayName", categoryNames[i].replace("_", " "));
-            category.put("description", categoryDescriptions[i]);
-            category.put("productCount", 50 + (int)(Math.random() * 200));
-            category.put("icon", categoryNames[i].toLowerCase() + "_icon.png");
-            categories.add(category);
+        for (Product.UnitOfMeasurement unit : Product.UnitOfMeasurement.values()) {
+            units.put(unit.toString(), unit.getDisplayName());
         }
         
-        return ResponseEntity.ok(categories);
+        response.put("units", units);
+        response.put("timestamp", System.currentTimeMillis());
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
-     * Helper method to generate mock products for development
+     * Get quality grades for agricultural products
+     * Returns available quality classifications
      */
-    private List<Map<String, Object>> generateMockProducts(int page, int size, String category, String search, String state) {
-        List<Map<String, Object>> products = new ArrayList<>();
+    @Operation(summary = "Get quality grades", 
+               description = "Retrieve available quality grades for agricultural products")
+    @GetMapping("/quality-grades")
+    @PreAuthorize("hasRole('FARMER') or hasRole('VENDOR')")
+    public ResponseEntity<Map<String, Object>> getQualityGrades() {
         
-        String[] productNames = {
-            "Premium Basmati Rice Seeds", "Organic Wheat Seeds", "Hybrid Cotton Seeds",
-            "NPK Fertilizer 10:26:26", "Organic Compost", "Pesticide Spray",
-            "Drip Irrigation Kit", "Solar Water Pump", "Fresh Tomatoes",
-            "Quality Onions", "Farm Tools Set", "Tractor Attachment"
-        };
+        Map<String, Object> response = new HashMap<>();
+        Map<String, String> grades = new HashMap<>();
         
-        String[] categories = {"SEEDS", "FERTILIZERS", "PESTICIDES", "IRRIGATION", "FRESH_PRODUCE", "TOOLS"};
-        String[] states = {"Maharashtra", "Punjab", "Haryana", "Gujarat", "Karnataka"};
-        
-        for (int i = 0; i < size; i++) {
-            Map<String, Object> product = new HashMap<>();
-            product.put("id", (long) (page * size + i + 1));
-            product.put("name", productNames[i % productNames.length]);
-            product.put("category", categories[i % categories.length]);
-            product.put("price", BigDecimal.valueOf(500 + (Math.random() * 2000)));
-            product.put("unit", "KG");
-            product.put("seller", Map.of(
-                "name", "Farmer " + (i + 1),
-                "location", states[i % states.length],
-                "rating", 4.0 + (Math.random() * 1.0),
-                "verified", true
-            ));
-            product.put("availableQuantity", BigDecimal.valueOf(10 + (Math.random() * 90)));
-            product.put("qualityGrade", "GRADE_A");
-            product.put("isOrganic", Math.random() > 0.7);
-            product.put("imageUrl", "/images/products/product_" + (i + 1) + ".jpg");
-            product.put("inStock", true);
-            products.add(product);
+        for (Product.QualityGrade grade : Product.QualityGrade.values()) {
+            grades.put(grade.toString(), grade.getDisplayName());
         }
         
-        return products;
-    }
-
-    /**
-     * Helper method to generate mock orders for development
-     */
-    private List<Map<String, Object>> generateMockOrders(int page, int size, String status) {
-        List<Map<String, Object>> orders = new ArrayList<>();
+        response.put("qualityGrades", grades);
+        response.put("timestamp", System.currentTimeMillis());
         
-        String[] statuses = {"PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"};
-        
-        for (int i = 0; i < size; i++) {
-            Map<String, Object> order = new HashMap<>();
-            order.put("orderNumber", "KS" + (System.currentTimeMillis() - i * 1000));
-            order.put("status", statuses[i % statuses.length]);
-            order.put("paymentStatus", "COMPLETED");
-            order.put("totalAmount", BigDecimal.valueOf(1000 + (Math.random() * 5000)));
-            order.put("currency", "INR");
-            order.put("itemCount", 1 + (int)(Math.random() * 3));
-            order.put("createdAt", LocalDateTime.now().minusDays(i));
-            order.put("seller", Map.of(
-                "name", "Agricultural Supplier " + (i + 1),
-                "location", "Maharashtra"
-            ));
-            orders.add(order);
-        }
-        
-        return orders;
-    }
-
-    /**
-     * Calculate total order amount from items
-     */
-    private BigDecimal calculateOrderTotal(List<Map<String, Object>> items) {
-        return items.stream()
-            .map(item -> {
-                BigDecimal quantity = new BigDecimal(item.get("quantity").toString());
-                BigDecimal price = new BigDecimal(item.get("unitPrice").toString());
-                return quantity.multiply(price);
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return ResponseEntity.ok(response);
     }
 }

@@ -10,6 +10,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.khetisahayak.filter.JwtAuthenticationFilter;
+import com.khetisahayak.service.JwtService;
+import com.khetisahayak.service.UserService;
 
 /**
  * Security configuration for Kheti Sahayak agricultural platform
@@ -22,7 +32,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService, UserService userService) throws Exception {
         return http
             // Disable CSRF for stateless JWT APIs
             .csrf(csrf -> csrf.disable())
@@ -45,10 +55,6 @@ public class SecurityConfig {
                     "style-src 'self' 'unsafe-inline'"
                 ))
                 .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-                .httpStrictTransportSecurity(hstsConfig -> hstsConfig
-                    .maxAgeInSeconds(31536000)
-                    .includeSubdomains(true)
-                )
             )
             
             // Role-based authorization for agricultural platform
@@ -58,10 +64,11 @@ public class SecurityConfig {
                 .requestMatchers("/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/weather/public").permitAll() // Public weather data
+                .requestMatchers(HttpMethod.GET, "/api/weather", "/api/weather/**").permitAll()
                 
                 // Farmer endpoints - require FARMER role
                 .requestMatchers("/api/diagnostics/**").hasRole("FARMER")
-                .requestMatchers("/api/weather/**").hasRole("FARMER")
+                .requestMatchers(HttpMethod.POST, "/api/weather/**").hasRole("FARMER")
                 .requestMatchers("/api/marketplace/**").hasRole("FARMER")
                 .requestMatchers("/api/education/**").hasRole("FARMER")
                 .requestMatchers("/api/community/**").hasRole("FARMER")
@@ -83,9 +90,27 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             
-            // JWT resource server configuration (to be implemented)
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            // JWT authentication filter
+            .addFilterBefore(jwtAuthenticationFilter(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
             
             .build();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService, UserService userService) {
+        return new JwtAuthenticationFilter(jwtService, userService);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
     }
 }

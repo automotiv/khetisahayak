@@ -1,8 +1,10 @@
 package com.khetisahayak.controller;
-
+    
+import com.khetisahayak.service.MLService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +27,9 @@ import java.util.HashMap;
 @RequestMapping("/api/diagnostics")
 @Validated
 public class DiagnosticsController {
+
+    @Autowired
+    private MLService mlService;
 
     /**
      * Get crop recommendations based on type and location
@@ -75,6 +80,30 @@ public class DiagnosticsController {
         
         return ResponseEntity.ok(stats);
     }
+
+    /**
+     * Get ML model information and capabilities
+     * Provides details about the AI model used for crop diagnosis
+     */
+    @Operation(summary = "Get ML model information", 
+               description = "Get information about the AI model used for crop disease detection")
+    @GetMapping("/model-info")
+    public ResponseEntity<Map<String, Object>> getModelInfo() {
+        try {
+            Map<String, Object> modelInfo = mlService.getModelInfo();
+            modelInfo.put("serviceStatus", mlService.isMLServiceHealthy() ? "online" : "offline");
+            modelInfo.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(modelInfo);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to get model information: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 
     /**
      * Upload crop image for AI-powered diagnosis
@@ -133,20 +162,45 @@ public class DiagnosticsController {
                 .body(Map.of("error", "Only JPEG, PNG, and WebP images are supported for crop diagnosis"));
         }
         
-        // Prepare response with agricultural context
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Crop image uploaded successfully for diagnosis");
-        response.put("fileName", image.getOriginalFilename());
-        response.put("fileSize", image.getSize());
-        response.put("cropType", cropType);
-        response.put("symptoms", symptoms);
-        response.put("location", Map.of("latitude", latitude, "longitude", longitude));
-        response.put("status", "processing");
-        response.put("estimatedTime", "2-3 minutes");
-        
-        return ResponseEntity.ok(response);
+        try {
+            // Process image with ML service for crop disease detection
+            Map<String, Object> mlPrediction = mlService.predictCropDisease(
+                image, cropType, symptoms, latitude, longitude
+            );
+            
+            // Prepare comprehensive response with agricultural context
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Crop diagnosis completed successfully");
+            response.put("fileName", image.getOriginalFilename());
+            response.put("fileSize", image.getSize());
+            response.put("cropType", cropType);
+            response.put("symptoms", symptoms);
+            response.put("location", Map.of("latitude", latitude, "longitude", longitude));
+            response.put("timestamp", System.currentTimeMillis());
+            
+            // ML prediction results
+            response.put("diagnosis", mlPrediction);
+            response.put("status", "completed");
+            
+            // Determine if expert review is needed
+            Object requiresExpertReview = mlPrediction.get("requiresExpertReview");
+            if (requiresExpertReview instanceof Boolean && (Boolean) requiresExpertReview) {
+                response.put("expertReviewRecommended", true);
+                response.put("expertReviewReason", "Low confidence or complex case detected");
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to process crop diagnosis: " + e.getMessage());
+            errorResponse.put("fileName", image.getOriginalFilename());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            errorResponse.put("status", "failed");
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
-
     /**
      * Get diagnostic history for authenticated farmer
      * Returns paginated list of previous crop diagnoses with agricultural insights
@@ -264,3 +318,4 @@ public class DiagnosticsController {
         
         return ResponseEntity.ok(response);
     }
+}

@@ -1,117 +1,115 @@
-# CodeRabbit Configuration for Kheti Sahayak
-# This file configures CodeRabbit's behavior for your project
+# Kheti Sahayak - CodeRabbit Configuration
+# Agricultural Platform Code Quality Standards
 
-# Language and framework detection
-language: "typescript"
-framework: "react"
-backend: "node.js"
+# Project metadata
+project:
+  name: "Kheti Sahayak"
+  description: "Digital Agricultural Platform for Indian Farmers"
+  language: "java"
+  framework: "spring-boot"
+  domain: "agricultural"
 
-# Review focus areas
-reviews:
-  # Focus on these areas during code review
-  focus:
-    - "security"
-    - "performance" 
-    - "accessibility"
-    - "best-practices"
-    - "maintainability"
-    - "type-safety"
+# Code quality focus areas
+focus:
+  - "security"
+  - "performance"
+  - "accessibility"
+  - "agricultural-domain"
+  - "rural-connectivity"
+  - "farmer-data-protection"
+
+# Agricultural domain-specific rules
+agricultural_rules:
+  crop_validation:
+    - "Validate crop types against Indian agricultural standards"
+    - "Ensure seasonal logic for Kharif/Rabi/Zaid cropping patterns"
+    - "Include regional variations for different Indian states"
   
-  # Auto-fix suggestions for simple issues
-  auto_fix: true
+  weather_integration:
+    - "Validate weather data accuracy and sources"
+    - "Implement proper error handling for weather API failures"
+    - "Ensure hyperlocal weather data for farming decisions"
   
-  # Review depth (surface, balanced, thorough)
-  depth: "thorough"
+  farmer_privacy:
+    - "Protect farmer location data with proper anonymization"
+    - "Implement secure data handling for sensitive agricultural information"
+    - "Ensure GDPR compliance for farmer data"
 
-# Path filters - what to include/exclude from reviews
-path_filters:
-  # Include these paths
-  - "frontend/src/**"
-  - "kheti_sahayak_backend/**"
-  - "kheti_sahayak_app/lib/**"
+# Security requirements
+security:
+  input_validation:
+    - "All API endpoints must validate inputs"
+    - "Implement proper sanitization for agricultural data"
+    - "Prevent SQL injection and XSS attacks"
   
-  # Exclude these paths
-  - "!**/node_modules/**"
-  - "!**/build/**"
-  - "!**/dist/**"
-  - "!**/*.min.js"
-  - "!**/*.bundle.js"
-  - "!**/coverage/**"
-  - "!**/.git/**"
-  - "!**/logs/**"
-  - "!**/*.log"
-  - "!**/*.lock"
-  - "!**/*.csv"
-  - "!**/*.sql"
-  - "!**/*.png"
-  - "!**/*.jpg"
-  - "!**/*.jpeg"
-  - "!**/*.gif"
-  - "!**/*.ico"
-  - "!**/*.pdf"
+  authentication:
+    - "JWT token validation for all protected endpoints"
+    - "Role-based access control for farmers, experts, and admins"
+    - "Secure password handling and OTP verification"
 
-# File type specific settings
-file_types:
-  typescript:
-    - "strict_types"
-    - "no_any_types"
-    - "proper_error_handling"
+# Performance optimization for rural networks
+performance:
+  rural_optimization:
+    - "Image compression for crop diagnosis uploads"
+    - "Offline support for critical farming features"
+    - "Optimize for 2G/3G network conditions"
+    - "Implement caching for frequently accessed data"
   
-  javascript:
-    - "es6_features"
-    - "async_await_patterns"
-    - "proper_error_handling"
+  mobile_optimization:
+    - "Bundle size optimization for mobile devices"
+    - "Progressive loading for agricultural content"
+    - "Efficient data synchronization"
+
+# Accessibility compliance
+accessibility:
+  wcag_compliance:
+    - "WCAG 2.1 AA compliance for inclusive design"
+    - "Screen reader support for visually impaired farmers"
+    - "Keyboard navigation for all interactive elements"
+    - "Multi-language support for regional farmers"
+
+# Code quality gates
+quality_gates:
+  security_score: 9  # High security for farmer data
+  performance_score: 8  # Optimized for rural networks
+  accessibility_score: 9  # WCAG 2.1 AA compliance
+  maintainability: 8  # Clean, readable code
+  agricultural_accuracy: 9  # Domain-specific correctness
+
+# File patterns to analyze
+include_patterns:
+  - "**/*.java"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+
+# Exclude patterns
+exclude_patterns:
+  - "**/node_modules/**"
+  - "**/target/**"
+  - "**/build/**"
+  - "**/.git/**"
+  - "**/coverage/**"
+
+# Custom rules for agricultural platform
+custom_rules:
+  - name: "crop_data_validation"
+    pattern: "CropData|CropType|Season"
+    message: "Ensure crop data validation against Indian agricultural standards"
+    severity: "high"
   
-  react:
-    - "hooks_rules"
-    - "accessibility_compliance"
-    - "performance_optimization"
-    - "prop_types_validation"
-
-# Custom review instructions
-instructions: |
-  Please focus on the following areas when reviewing this agricultural technology application:
+  - name: "farmer_privacy_protection"
+    pattern: "location|coordinates|gps"
+    message: "Protect farmer location data with proper anonymization"
+    severity: "critical"
   
-  1. **Security**: Check for input validation, authentication, and data sanitization
-  2. **Accessibility**: Ensure WCAG 2.1 AA compliance for farmers with disabilities
-  3. **Performance**: Optimize for mobile devices with limited connectivity
-  4. **Internationalization**: Consider multi-language support for Indian farmers
-  5. **Error Handling**: Robust error handling for agricultural data processing
-  6. **API Design**: RESTful API design with proper status codes
-  7. **Database Security**: SQL injection prevention and data encryption
-  8. **Mobile Responsiveness**: Ensure UI works on various screen sizes
-  9. **Offline Capability**: Consider offline functionality for rural areas
-  10. **Data Privacy**: Protect farmer's sensitive agricultural data
-
-# Ignore patterns for common false positives
-ignore_patterns:
-  - "TODO comments in development files"
-  - "Console.log in development environment"
-  - "Hardcoded test data in mock files"
-  - "Any types in external API response types"
-
-# Integration settings
-integrations:
-  github:
-    auto_merge: false
-    require_approval: true
-    block_on_security_issues: true
+  - name: "weather_data_security"
+    pattern: "weather|forecast|climate"
+    message: "Implement secure weather data handling"
+    severity: "high"
   
-  slack:
-    notify_on_critical: true
-    channel: "#code-reviews"
-
-# Comment settings
-comments:
-  style: "constructive"
-  include_examples: true
-  suggest_alternatives: true
-  explain_reasoning: true
-
-# Severity levels
-severity:
-  security: "high"
-  performance: "medium"
-  accessibility: "high"
-  style: "low"
-  maintainability: "medium"
+  - name: "mobile_optimization"
+    pattern: "image|upload|file"
+    message: "Optimize for mobile and rural connectivity"
+    severity: "medium"

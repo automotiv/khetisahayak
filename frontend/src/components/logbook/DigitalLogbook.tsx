@@ -14,7 +14,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Card,
+  CardContent
 } from '@mui/material';
 import { Add, Search, GetApp, FilterList } from '@mui/icons-material';
 import LogbookEntry from './LogbookEntry';

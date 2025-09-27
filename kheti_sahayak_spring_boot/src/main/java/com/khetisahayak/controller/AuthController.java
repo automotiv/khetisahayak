@@ -1,10 +1,15 @@
 package com.khetisahayak.controller;
 
+import com.khetisahayak.service.UserService;
+import com.khetisahayak.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +28,12 @@ import java.util.HashMap;
 @RequestMapping("/api/auth")
 @Validated
 public class AuthController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtService jwtService;
 
     /**
      * Register a new farmer user with OTP verification
@@ -61,13 +72,17 @@ public class AuthController {
             @DecimalMax(value = "10000.0", message = "Farm size must be less than 10000 acres")
             Double farmSize) {
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "OTP sent successfully to mobile number");
-        response.put("mobileNumber", mobileNumber);
-        response.put("otpExpiry", "5 minutes");
-        response.put("nextStep", "verify-otp");
-        
-        return ResponseEntity.ok(response);
+        try {
+            Map<String, Object> response = userService.registerFarmer(
+                mobileNumber, fullName, primaryCrop, state, district, farmSize
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**
@@ -82,17 +97,34 @@ public class AuthController {
             @RequestParam @Pattern(regexp = "^[6-9]\\d{9}$") String mobileNumber,
             
             @Parameter(description = "6-digit OTP received on mobile")
-            @RequestParam @Pattern(regexp = "^\\d{6}$", message = "OTP must be 6 digits") String otp) {
+            @RequestParam @Pattern(regexp = "^\\d{6}$", message = "OTP must be 6 digits") String otp,
+            
+            @Parameter(description = "Farmer's full name")
+            @RequestParam @NotBlank @Size(min = 2, max = 100) String fullName,
+            
+            @Parameter(description = "Primary crop type")
+            @RequestParam(required = false) String primaryCrop,
+            
+            @Parameter(description = "State")
+            @RequestParam @NotBlank String state,
+            
+            @Parameter(description = "District")
+            @RequestParam @NotBlank String district,
+            
+            @Parameter(description = "Farm size in acres")
+            @RequestParam(required = false) Double farmSize) {
         
-        // TODO: Implement actual OTP verification logic
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Registration completed successfully");
-        response.put("userId", "farmer_" + System.currentTimeMillis());
-        response.put("token", "jwt_token_placeholder");
-        response.put("expiresIn", "24h");
-        response.put("userType", "FARMER");
-        
-        return ResponseEntity.ok(response);
+        try {
+            Map<String, Object> response = userService.verifyOtpAndCreateUser(
+                mobileNumber, otp, fullName, primaryCrop, state, district, farmSize
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**
@@ -106,13 +138,15 @@ public class AuthController {
             @Parameter(description = "Farmer's registered mobile number")
             @RequestParam @Pattern(regexp = "^[6-9]\\d{9}$") String mobileNumber) {
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "OTP sent successfully");
-        response.put("mobileNumber", mobileNumber);
-        response.put("otpExpiry", "5 minutes");
-        response.put("nextStep", "verify-login-otp");
-        
-        return ResponseEntity.ok(response);
+        try {
+            Map<String, Object> response = userService.loginFarmer(mobileNumber);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**
@@ -129,26 +163,15 @@ public class AuthController {
             @Parameter(description = "6-digit OTP for login")
             @RequestParam @Pattern(regexp = "^\\d{6}$") String otp) {
         
-        // TODO: Implement actual login verification
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Login successful");
-        response.put("token", "jwt_token_placeholder");
-        response.put("refreshToken", "refresh_token_placeholder");
-        response.put("expiresIn", "24h");
-        response.put("userProfile", Map.of(
-            "id", "farmer_123",
-            "name", "Sample Farmer",
-            "mobileNumber", mobileNumber,
-            "userType", "FARMER",
-            "farmProfile", Map.of(
-                "primaryCrop", "Rice",
-                "state", "Maharashtra",
-                "district", "Nashik",
-                "farmSize", 2.5
-            )
-        ));
-        
-        return ResponseEntity.ok(response);
+        try {
+            Map<String, Object> response = userService.verifyLoginOtp(mobileNumber, otp);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**
@@ -161,27 +184,18 @@ public class AuthController {
     @PreAuthorize("hasRole('FARMER') or hasRole('EXPERT') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getFarmerProfile() {
         
-        Map<String, Object> profile = new HashMap<>();
-        profile.put("id", "farmer_123");
-        profile.put("name", "Sample Farmer");
-        profile.put("mobileNumber", "9876543210");
-        profile.put("userType", "FARMER");
-        profile.put("registrationDate", "2024-01-15");
-        profile.put("isVerified", true);
-        
-        Map<String, Object> farmProfile = new HashMap<>();
-        farmProfile.put("primaryCrop", "Rice");
-        farmProfile.put("secondaryCrops", new String[]{"Wheat", "Sugarcane"});
-        farmProfile.put("state", "Maharashtra");
-        farmProfile.put("district", "Nashik");
-        farmProfile.put("village", "Khandala");
-        farmProfile.put("farmSize", 2.5);
-        farmProfile.put("farmingExperience", 15);
-        farmProfile.put("irrigationType", "Drip Irrigation");
-        
-        profile.put("farmProfile", farmProfile);
-        
-        return ResponseEntity.ok(profile);
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String mobileNumber = auth.getName();
+            
+            Map<String, Object> profile = userService.getUserProfileByMobile(mobileNumber);
+            return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**

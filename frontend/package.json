@@ -10,16 +10,16 @@
     "start": "vite"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@mui/material": "^6.1.6",
-    "@mui/icons-material": "^6.1.6",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.6",
+    "@mui/material": "^6.1.6",
     "@reduxjs/toolkit": "^2.0.1",
+    "axios": "^1.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-redux": "^9.0.4",
-    "react-router-dom": "^6.26.2",
-    "axios": "^1.6.2"
+    "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
