@@ -43,27 +43,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <Card 
-      sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-      role="article"
-      aria-labelledby={`product-title-${id}`}
-    >
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardMedia
         component="img"
         height="160"
         image={imageUrl}
-        alt={`${title} - ${category.replace('_', ' ')} product image`}
+        alt={title}
       />
       
       <CardContent sx={{ flexGrow: 1 }}>
         <Stack spacing={1}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Typography 
-              variant="h6" 
-              component="h3" 
-              sx={{ fontSize: '1rem' }}
-              id={`product-title-${id}`}
-            >
+            <Typography variant="h6" component="div" sx={{ fontSize: '1rem' }}>
               {title}
             </Typography>
             <Chip 
@@ -79,13 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Rating 
-              value={rating} 
-              precision={0.1} 
-              size="small" 
-              readOnly 
-              aria-label={`Product rating: ${rating} out of 5 stars`}
-            />
+            <Rating value={rating} precision={0.1} size="small" readOnly />
             <Typography variant="body2" color="text.secondary">
               ({rating})
             </Typography>
@@ -111,10 +96,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
           onClick={handleAddToCart}
           disabled={!inStock}
           fullWidth
-          aria-label={`Add ${title} to cart${!inStock ? ' - Out of stock' : ''}`}
-          aria-describedby={`product-title-${id}`}
         >
-          {inStock ? 'Add to Cart' : 'Out of Stock'}
+          Add to Cart
         </Button>
       </CardActions>
     </Card>
