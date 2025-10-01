@@ -59,7 +59,7 @@ class AuthControllerTest {
                 .param("mobileNumber", "9876543210")
                 .param("otp", "123456")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpected(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", containsString("Registration completed")))
                 .andExpect(jsonPath("$.token", notNullValue()))
                 .andExpect(jsonPath("$.userType", is("FARMER")));
