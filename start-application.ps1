@@ -27,7 +27,7 @@ Write-Host "Port: 8080" -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "`$env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.16.8-hotspot'; `$env:PATH=`"`$env:JAVA_HOME\bin;`$env:PATH`"; cd '$PWD\kheti_sahayak_spring_boot'; Write-Host 'Starting Spring Boot Backend...' -ForegroundColor Green; ./mvnw spring-boot:run"
+    "`$env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.16.8-hotspot'; `$env:PATH=`"`$env:JAVA_HOME\bin;`$env:PATH`"; cd '$PWD\kheti_sahayak_spring_boot'; Write-Host 'Starting Spring Boot Backend with H2 Database...' -ForegroundColor Green; ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 -DskipTests"
 )
 
 Write-Host "✅ Backend starting in new window..." -ForegroundColor Green

@@ -1,0 +1,58 @@
+# H2 In-Memory Database Configuration (for quick testing without PostgreSQL)
+# Use this profile when PostgreSQL is not available
+# Run with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:kheti_sahayak;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  # Disable Flyway for H2 (use Hibernate auto-ddl instead)
+  flyway:
+    enabled: false
+
+  # Redis is optional with H2
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000
+
+# Disable Redis requirement
+management:
+  health:
+    redis:
+      enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.khetisahayak: DEBUG
+    org.springframework.web: INFO
+
+# Note: This configuration uses H2 in-memory database
+# All data will be lost when application stops
+# For production, use PostgreSQL with application.yml
+
