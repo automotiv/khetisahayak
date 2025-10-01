@@ -72,13 +72,6 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
-    
-    <!-- H2 In-Memory Database (for testing without PostgreSQL) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>runtime</scope>
-    </dependency>
 
     <!-- Caching + Redis -->
     <dependency>
