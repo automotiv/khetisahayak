@@ -226,20 +226,20 @@ public interface TreatmentStepRepository extends JpaRepository<TreatmentStep, Lo
     /**
      * Get next step number for a diagnosis
      */
-    @Query("SELECT MAX(ts.stepNumber) FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId")
+    @Query("SELECT MAX(ts.stepNumber) FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId")
     Integer getNextStepNumber(@Param("diagnosisId") Long diagnosisId);
 
     /**
      * Find treatment steps by diagnosis ordered by step number
      */
-    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId " +
+    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId " +
            "ORDER BY ts.stepNumber ASC")
     List<TreatmentStep> findByDiagnosisIdOrderByStepNumber(@Param("diagnosisId") Long diagnosisId);
 
     /**
      * Find treatment steps by diagnosis and category ordered by priority
      */
-    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId " +
+    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId " +
            "AND ts.category = :category ORDER BY " +
            "CASE ts.priority WHEN 'URGENT' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 WHEN 'LOW' THEN 4 END")
     List<TreatmentStep> findByDiagnosisIdAndCategoryOrderByPriority(
@@ -250,14 +250,14 @@ public interface TreatmentStepRepository extends JpaRepository<TreatmentStep, Lo
     /**
      * Find urgent treatment steps for a diagnosis
      */
-    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId " +
+    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId " +
            "AND ts.priority = 'URGENT' ORDER BY ts.stepNumber ASC")
     List<TreatmentStep> findUrgentTreatmentStepsForDiagnosis(@Param("diagnosisId") Long diagnosisId);
 
     /**
      * Find high priority treatment steps for a diagnosis
      */
-    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId " +
+    @Query("SELECT ts FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId " +
            "AND ts.priority IN ('URGENT', 'HIGH') ORDER BY ts.stepNumber ASC")
     List<TreatmentStep> findHighPriorityTreatmentStepsForDiagnosis(@Param("diagnosisId") Long diagnosisId);
 
@@ -303,7 +303,7 @@ public interface TreatmentStepRepository extends JpaRepository<TreatmentStep, Lo
     /**
      * Get total estimated cost for a diagnosis
      */
-    @Query("SELECT SUM(ts.estimatedCost) FROM TreatmentStep ts WHERE ts.diagnosisId = :diagnosisId")
+    @Query("SELECT SUM(ts.estimatedCost) FROM TreatmentStep ts WHERE ts.diagnosis.id = :diagnosisId")
     BigDecimal getTotalEstimatedCostForDiagnosis(@Param("diagnosisId") Long diagnosisId);
 
     /**

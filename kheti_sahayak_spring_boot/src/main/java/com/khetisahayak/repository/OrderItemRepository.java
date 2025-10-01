@@ -262,8 +262,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     /**
      * Find order items by multiple varieties
      */
-    @Query("SELECT oi FROM OrderItem oi WHERE LOWER(oi.variety) IN " +
-           "(SELECT LOWER(v) FROM :varieties v)")
+    @Query("SELECT oi FROM OrderItem oi WHERE LOWER(oi.variety) IN :varieties")
     Page<OrderItem> findByVarieties(
         @Param("varieties") List<String> varieties,
         Pageable pageable

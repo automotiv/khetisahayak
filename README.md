@@ -170,7 +170,7 @@ graph TB
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Frontend** | Flutter 3.10+ | Cross-platform mobile app |
-| **Backend** | Node.js 18+ | RESTful API services |
+| **Backend** | Spring Boot 3.3+ | RESTful API services |
 | **Database** | PostgreSQL 14+ | Primary relational data |
 | **Cache** | Redis 6.2+ | Session & data caching |
 | **Storage** | AWS S3/GCP | Images & documents |
@@ -216,7 +216,7 @@ khetisahayak/
 │   ├── integration_test/             # Integration tests
 │   └── pubspec.yaml                  # Flutter dependencies
 │
-├── 🖥️ kheti_sahayak_backend/          # Node.js Backend API
+├── 🖥️ kheti_sahayak_spring_boot/      # Spring Boot Backend API
 │   ├── 🎯 controllers/               # Route controllers
 │   ├── 🛣️ routes/                    # API route definitions
 │   ├── 📊 models/                    # Database models (Sequelize/Mongoose)
@@ -278,7 +278,7 @@ Before you begin, ensure you have the following installed on your system:
 
 | Requirement | Version | Purpose | Installation Guide |
 |-------------|---------|---------|-------------------|
-| **Node.js** | v18.0+ | Backend runtime | [Download](https://nodejs.org/) |
+| **Java** | v17+ | Backend runtime | [Download](https://adoptium.net/) |
 | **Flutter** | v3.10+ | Mobile app framework | [Install Guide](https://flutter.dev/docs/get-started/install) |
 | **PostgreSQL** | v14+ | Primary database | [Download](https://postgresql.org/download/) |
 | **Redis** | v6.2+ | Caching & sessions | [Install Guide](https://redis.io/download) |
@@ -318,7 +318,7 @@ If you prefer to set up the project manually or encounter issues with the automa
 
 ```bash
 # Navigate to backend directory
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 
 # Install dependencies
 npm install
@@ -485,7 +485,7 @@ Once you have the project running:
 #### Backend Development
 
 ```bash
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 
 # Install dependencies
 npm install
@@ -560,7 +560,7 @@ gitGraph
 
 ```bash
 # Backend Testing
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 npm test                        # Unit tests
 npm run test:integration        # Integration tests
 npm run test:e2e               # End-to-end tests
@@ -589,7 +589,7 @@ flutter drive --target=test_driver/app.dart # E2E tests
 
 ```bash
 # Backend logs
-tail -f kheti_sahayak_backend/logs/app.log
+tail -f kheti_sahayak_spring_boot/logs/application.log
 
 # View Docker logs
 docker-compose logs -f backend
@@ -748,8 +748,8 @@ docker-compose down -v
 
 ```bash
 # Backend only
-docker build -t kheti-sahayak-backend ./kheti_sahayak_backend
-docker run -p 3000:3000 -e NODE_ENV=development kheti-sahayak-backend
+docker build -t kheti-sahayak-backend ./kheti_sahayak_spring_boot
+docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=development kheti-sahayak-backend
 
 # Database only
 docker run -d --name kheti_postgres \
@@ -788,7 +788,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ### 🔬 Backend Testing
 
 ```bash
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 
 # Run all tests
 npm test
@@ -875,7 +875,7 @@ graph LR
 #### Manual Deployment
 
 ```bash
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 
 # Build for production
 npm run build
@@ -1106,7 +1106,7 @@ We welcome contributions from the community! Here's how you can help:
 
 #### Code Standards
 
-- **Backend**: Follow Node.js best practices, use ESLint/Prettier
+- **Backend**: Follow Spring Boot best practices, use Checkstyle/SpotBugs
 - **Frontend**: Follow Flutter/Dart conventions, use `flutter analyze`
 - **Commits**: Use [Conventional Commits](https://conventionalcommits.org/)
 - **Testing**: Write tests for new features

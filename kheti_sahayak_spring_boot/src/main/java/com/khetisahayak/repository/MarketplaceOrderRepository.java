@@ -24,26 +24,32 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Find orders by buyer
      */
-    List<MarketplaceOrder> findByBuyerId(Long buyerId);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId")
+    List<MarketplaceOrder> findByBuyerId(@Param("buyerId") Long buyerId);
     
-    Page<MarketplaceOrder> findByBuyerId(Long buyerId, Pageable pageable);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId")
+    Page<MarketplaceOrder> findByBuyerId(@Param("buyerId") Long buyerId, Pageable pageable);
 
     /**
      * Find orders by seller
      */
-    List<MarketplaceOrder> findBySellerId(Long sellerId);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId")
+    List<MarketplaceOrder> findBySellerId(@Param("sellerId") Long sellerId);
     
-    Page<MarketplaceOrder> findBySellerId(Long sellerId, Pageable pageable);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId")
+    Page<MarketplaceOrder> findBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
 
     /**
      * Find orders by buyer and status
      */
-    List<MarketplaceOrder> findByBuyerIdAndOrderStatus(Long buyerId, MarketplaceOrder.OrderStatus status);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId AND mo.orderStatus = :status")
+    List<MarketplaceOrder> findByBuyerIdAndOrderStatus(@Param("buyerId") Long buyerId, @Param("status") MarketplaceOrder.OrderStatus status);
 
     /**
      * Find orders by seller and status
      */
-    List<MarketplaceOrder> findBySellerIdAndOrderStatus(Long sellerId, MarketplaceOrder.OrderStatus status);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId AND mo.orderStatus = :status")
+    List<MarketplaceOrder> findBySellerIdAndOrderStatus(@Param("sellerId") Long sellerId, @Param("status") MarketplaceOrder.OrderStatus status);
 
     /**
      * Find orders by status
@@ -130,7 +136,7 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Find orders by buyer and date range
      */
-    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyerId = :buyerId " +
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId " +
            "AND mo.createdAt BETWEEN :startDate AND :endDate ORDER BY mo.createdAt DESC")
     Page<MarketplaceOrder> findOrdersByBuyerAndDateRange(
         @Param("buyerId") Long buyerId,
@@ -142,7 +148,7 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Find orders by seller and date range
      */
-    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.sellerId = :sellerId " +
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId " +
            "AND mo.createdAt BETWEEN :startDate AND :endDate ORDER BY mo.createdAt DESC")
     Page<MarketplaceOrder> findOrdersBySellerAndDateRange(
         @Param("sellerId") Long sellerId,
@@ -200,15 +206,15 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Get top buyers by order count
      */
-    @Query("SELECT mo.buyerId, COUNT(mo), SUM(mo.totalAmount) FROM MarketplaceOrder mo " +
-           "GROUP BY mo.buyerId ORDER BY COUNT(mo) DESC")
+    @Query("SELECT mo.buyer.id, COUNT(mo), SUM(mo.totalAmount) FROM MarketplaceOrder mo " +
+           "GROUP BY mo.buyer.id ORDER BY COUNT(mo) DESC")
     Page<Object[]> getTopBuyers(Pageable pageable);
 
     /**
      * Get top sellers by order count
      */
-    @Query("SELECT mo.sellerId, COUNT(mo), SUM(mo.totalAmount) FROM MarketplaceOrder mo " +
-           "GROUP BY mo.sellerId ORDER BY COUNT(mo) DESC")
+    @Query("SELECT mo.seller.id, COUNT(mo), SUM(mo.totalAmount) FROM MarketplaceOrder mo " +
+           "GROUP BY mo.seller.id ORDER BY COUNT(mo) DESC")
     Page<Object[]> getTopSellers(Pageable pageable);
 
     /**
@@ -242,15 +248,15 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Get average order value by buyer
      */
-    @Query("SELECT mo.buyerId, AVG(mo.totalAmount) FROM MarketplaceOrder mo " +
-           "WHERE mo.orderStatus = 'DELIVERED' GROUP BY mo.buyerId")
+    @Query("SELECT mo.buyer.id, AVG(mo.totalAmount) FROM MarketplaceOrder mo " +
+           "WHERE mo.orderStatus = 'DELIVERED' GROUP BY mo.buyer.id")
     List<Object[]> getAverageOrderValueByBuyer();
 
     /**
      * Get average order value by seller
      */
-    @Query("SELECT mo.sellerId, AVG(mo.totalAmount) FROM MarketplaceOrder mo " +
-           "WHERE mo.orderStatus = 'DELIVERED' GROUP BY mo.sellerId")
+    @Query("SELECT mo.seller.id, AVG(mo.totalAmount) FROM MarketplaceOrder mo " +
+           "WHERE mo.orderStatus = 'DELIVERED' GROUP BY mo.seller.id")
     List<Object[]> getAverageOrderValueBySeller();
 
     /**
@@ -276,29 +282,32 @@ public interface MarketplaceOrderRepository extends JpaRepository<MarketplaceOrd
     /**
      * Count orders by buyer and status
      */
-    Long countByBuyerIdAndOrderStatus(Long buyerId, MarketplaceOrder.OrderStatus status);
+    @Query("SELECT COUNT(mo) FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId AND mo.orderStatus = :status")
+    Long countByBuyerIdAndOrderStatus(@Param("buyerId") Long buyerId, @Param("status") MarketplaceOrder.OrderStatus status);
 
     /**
      * Count orders by seller and status
      */
-    Long countBySellerIdAndOrderStatus(Long sellerId, MarketplaceOrder.OrderStatus status);
+    @Query("SELECT COUNT(mo) FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId AND mo.orderStatus = :status")
+    Long countBySellerIdAndOrderStatus(@Param("sellerId") Long sellerId, @Param("status") MarketplaceOrder.OrderStatus status);
 
     /**
      * Find orders by buyer and seller
      */
-    List<MarketplaceOrder> findByBuyerIdAndSellerId(Long buyerId, Long sellerId);
+    @Query("SELECT mo FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId AND mo.seller.id = :sellerId")
+    List<MarketplaceOrder> findByBuyerIdAndSellerId(@Param("buyerId") Long buyerId, @Param("sellerId") Long sellerId);
 
     /**
      * Get total revenue by seller
      */
-    @Query("SELECT SUM(mo.totalAmount) FROM MarketplaceOrder mo WHERE mo.sellerId = :sellerId " +
+    @Query("SELECT SUM(mo.totalAmount) FROM MarketplaceOrder mo WHERE mo.seller.id = :sellerId " +
            "AND mo.paymentStatus = 'COMPLETED'")
     BigDecimal getTotalRevenueBySeller(@Param("sellerId") Long sellerId);
 
     /**
      * Get total spending by buyer
      */
-    @Query("SELECT SUM(mo.totalAmount) FROM MarketplaceOrder mo WHERE mo.buyerId = :buyerId " +
+    @Query("SELECT SUM(mo.totalAmount) FROM MarketplaceOrder mo WHERE mo.buyer.id = :buyerId " +
            "AND mo.paymentStatus = 'COMPLETED'")
     BigDecimal getTotalSpendingByBuyer(@Param("buyerId") Long buyerId);
 

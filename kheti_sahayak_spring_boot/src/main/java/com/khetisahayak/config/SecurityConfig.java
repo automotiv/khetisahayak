@@ -66,13 +66,21 @@ public class SecurityConfig {
                 .requestMatchers("/api/weather/public").permitAll() // Public weather data
                 .requestMatchers(HttpMethod.GET, "/api/weather", "/api/weather/**").permitAll()
                 
+                // Public access to educational content (read-only)
+                .requestMatchers(HttpMethod.GET, "/api/education/content/**", "/api/education/categories").permitAll()
+                
+                // Public access to schemes (read-only)
+                .requestMatchers(HttpMethod.GET, "/api/schemes", "/api/schemes/**").permitAll()
+                
                 // Farmer endpoints - require FARMER role
                 .requestMatchers("/api/diagnostics/**").hasRole("FARMER")
                 .requestMatchers(HttpMethod.POST, "/api/weather/**").hasRole("FARMER")
                 .requestMatchers("/api/marketplace/**").hasRole("FARMER")
                 .requestMatchers("/api/education/**").hasRole("FARMER")
+                .requestMatchers("/api/notifications/**").hasRole("FARMER")
                 .requestMatchers("/api/community/**").hasRole("FARMER")
-                .requestMatchers("/api/schemes/**").hasRole("FARMER")
+                .requestMatchers("/api/schemes/applications/**").hasRole("FARMER")
+                .requestMatchers("/api/experts/**").hasRole("FARMER")
                 .requestMatchers("/api/profile/**").hasRole("FARMER")
                 
                 // Expert endpoints - require EXPERT role

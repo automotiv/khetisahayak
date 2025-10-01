@@ -22,14 +22,17 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Find diagnoses by farmer
      */
-    List<CropDiagnosis> findByFarmerId(Long farmerId);
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId")
+    List<CropDiagnosis> findByFarmerId(@Param("farmerId") Long farmerId);
     
-    Page<CropDiagnosis> findByFarmerId(Long farmerId, Pageable pageable);
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId")
+    Page<CropDiagnosis> findByFarmerId(@Param("farmerId") Long farmerId, Pageable pageable);
 
     /**
      * Find diagnoses by farmer and status
      */
-    List<CropDiagnosis> findByFarmerIdAndStatus(Long farmerId, CropDiagnosis.DiagnosisStatus status);
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId AND cd.status = :status")
+    List<CropDiagnosis> findByFarmerIdAndStatus(@Param("farmerId") Long farmerId, @Param("status") CropDiagnosis.DiagnosisStatus status);
 
     /**
      * Find diagnoses by crop type
@@ -69,13 +72,14 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Find diagnoses by expert
      */
-    List<CropDiagnosis> findByExpertId(Long expertId);
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.expert.id = :expertId")
+    List<CropDiagnosis> findByExpertId(@Param("expertId") Long expertId);
 
     /**
      * Find pending diagnoses for expert
      */
     @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.status = 'EXPERT_REVIEW' " +
-           "AND (cd.expertId IS NULL OR cd.expertId = :expertId)")
+           "AND (cd.expert IS NULL OR cd.expert.id = :expertId)")
     Page<CropDiagnosis> findPendingDiagnosesForExpert(
         @Param("expertId") Long expertId, 
         Pageable pageable
@@ -97,7 +101,7 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Find recent diagnoses for farmer
      */
-    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmerId = :farmerId " +
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId " +
            "AND cd.createdAt >= :since ORDER BY cd.createdAt DESC")
     List<CropDiagnosis> findRecentDiagnosesForFarmer(
         @Param("farmerId") Long farmerId,
@@ -107,7 +111,8 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Find diagnoses by crop type and farmer
      */
-    List<CropDiagnosis> findByFarmerIdAndCropType(Long farmerId, String cropType);
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId AND cd.cropType = :cropType")
+    List<CropDiagnosis> findByFarmerIdAndCropType(@Param("farmerId") Long farmerId, @Param("cropType") String cropType);
 
     /**
      * Find diagnoses requiring follow-up
@@ -120,7 +125,7 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
      * Find completed diagnoses with expert review
      */
     @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.status = 'COMPLETED' " +
-           "AND cd.expertId IS NOT NULL ORDER BY cd.expertReviewedAt DESC")
+           "AND cd.expert IS NOT NULL ORDER BY cd.expertReviewedAt DESC")
     Page<CropDiagnosis> findCompletedDiagnosesWithExpertReview(Pageable pageable);
 
     /**
@@ -157,9 +162,9 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Get expert performance statistics
      */
-    @Query("SELECT cd.expertId, COUNT(cd), AVG(cd.expertConfidence) " +
-           "FROM CropDiagnosis cd WHERE cd.expertId IS NOT NULL " +
-           "GROUP BY cd.expertId")
+    @Query("SELECT cd.expert.id, COUNT(cd), AVG(cd.expertConfidence) " +
+           "FROM CropDiagnosis cd WHERE cd.expert IS NOT NULL " +
+           "GROUP BY cd.expert.id")
     List<Object[]> getExpertPerformanceStats();
 
     /**
@@ -203,12 +208,14 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Count diagnoses by farmer and status
      */
-    Long countByFarmerIdAndStatus(Long farmerId, CropDiagnosis.DiagnosisStatus status);
+    @Query("SELECT COUNT(cd) FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId AND cd.status = :status")
+    Long countByFarmerIdAndStatus(@Param("farmerId") Long farmerId, @Param("status") CropDiagnosis.DiagnosisStatus status);
 
     /**
      * Count diagnoses by expert and status
      */
-    Long countByExpertIdAndStatus(Long expertId, CropDiagnosis.DiagnosisStatus status);
+    @Query("SELECT COUNT(cd) FROM CropDiagnosis cd WHERE cd.expert.id = :expertId AND cd.status = :status")
+    Long countByExpertIdAndStatus(@Param("expertId") Long expertId, @Param("status") CropDiagnosis.DiagnosisStatus status);
 
     /**
      * Find similar diagnoses (same crop type, similar symptoms)
@@ -256,10 +263,11 @@ public interface CropDiagnosisRepository extends JpaRepository<CropDiagnosis, Lo
     /**
      * Find diagnoses by farmer and crop type with pagination
      */
+    @Query("SELECT cd FROM CropDiagnosis cd WHERE cd.farmer.id = :farmerId AND cd.cropType = :cropType AND cd.status = :status")
     Page<CropDiagnosis> findByFarmerIdAndCropTypeAndStatus(
-        Long farmerId, 
-        String cropType, 
-        CropDiagnosis.DiagnosisStatus status,
+        @Param("farmerId") Long farmerId, 
+        @Param("cropType") String cropType, 
+        @Param("status") CropDiagnosis.DiagnosisStatus status,
         Pageable pageable
     );
 }

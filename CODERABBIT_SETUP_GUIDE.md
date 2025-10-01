@@ -88,7 +88,7 @@ Since CodeRabbit CLI doesn't exist, I performed a comprehensive manual analysis 
 # Comprehensive configuration for your agricultural app
 language: "typescript"
 framework: "react"
-backend: "node.js"
+backend: "spring-boot"
 
 reviews:
   focus:

@@ -59,7 +59,7 @@ git checkout -b docs/documentation-update
 
 ```bash
 # Backend tests
-cd kheti_sahayak_backend
+cd kheti_sahayak_spring_boot
 npm test
 npm run test:coverage
 
@@ -96,7 +96,7 @@ git push origin feature/your-feature-name
 
 ## 📝 Coding Standards
 
-### 🖥️ Backend (Node.js)
+### 🖥️ Backend (Spring Boot)
 
 ```javascript
 // Use meaningful variable names

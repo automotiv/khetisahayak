@@ -74,9 +74,9 @@ docker run -p 8000:8000 -v $(pwd)/models:/app/models kheti-ml-inference
 #### Backend
 
 ```bash
-cd kheti_sahayak_backend
-npm install
-npm start
+cd kheti_sahayak_spring_boot
+./mvnw clean install
+./mvnw spring-boot:run
 ```
 
 #### Frontend

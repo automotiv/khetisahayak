@@ -86,7 +86,7 @@ check_prerequisites() {
 setup_backend() {
     print_status "Setting up backend..."
     
-    cd kheti_sahayak_backend
+    cd kheti_sahayak_spring_boot
     
     # Install dependencies
     print_status "Installing backend dependencies..."
@@ -185,7 +185,7 @@ setup_database() {
         print_status "Setting up database with Docker..."
         
         # Start PostgreSQL and Redis
-        cd kheti_sahayak_backend
+        cd kheti_sahayak_spring_boot
         docker-compose up -d postgres redis
         
         # Wait for database to be ready
@@ -207,7 +207,7 @@ setup_database() {
         echo "1. Install PostgreSQL and create database 'kheti_sahayak'"
         echo "2. Install Redis"
         echo "3. Update .env file with correct database credentials"
-        echo "4. Run: cd kheti_sahayak_backend && npm run migrate && npm run seed"
+        echo "4. Run: cd kheti_sahayak_spring_boot && ./mvnw spring-boot:run"
     fi
 }
 
@@ -238,10 +238,10 @@ main() {
     echo "=============="
     echo ""
     echo "1. Backend:"
-    echo "   cd kheti_sahayak_backend"
-    echo "   npm run dev"
-    echo "   API will be available at: http://localhost:3000"
-    echo "   API docs at: http://localhost:3000/api-docs/"
+    echo "   cd kheti_sahayak_spring_boot"
+    echo "   ./mvnw spring-boot:run"
+    echo "   API will be available at: http://localhost:8080"
+    echo "   API docs at: http://localhost:8080/api-docs/"
     echo ""
     
     if [ "$FRONTEND_AVAILABLE" = true ]; then
@@ -253,7 +253,7 @@ main() {
     
     echo "3. Documentation:"
     echo "   - Main README: README.md"
-    echo "   - Backend README: kheti_sahayak_backend/README.md"
+    echo "   - Backend README: kheti_sahayak_spring_boot/README.md"
     if [ "$FRONTEND_AVAILABLE" = true ]; then
         echo "   - Frontend README: kheti_sahayak_app/README.md"
     fi
