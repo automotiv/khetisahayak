@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Information -->
+    <string name="app_name">खेती सहायक</string>
+    <string name="app_description">तुमचा AI-चालित शेती सहकारी</string>
+
+    <!-- Common Actions -->
+    <string name="action_ok">ठीक आहे</string>
+    <string name="action_cancel">रद्द करा</string>
+    <string name="action_yes">होय</string>
+    <string name="action_no">नाही</string>
+    <string name="action_save">जतन करा</string>
+    <string name="action_delete">हटवा</string>
+    <string name="action_edit">संपादित करा</string>
+    <string name="action_share">शेअर करा</string>
+    <string name="action_retry">पुन्हा प्रयत्न करा</string>
+
+    <!-- Permission Messages -->
+    <string name="permission_camera_required">पीक चित्रे घेण्यासाठी कॅमेरा परवानगी आवश्यक आहे</string>
+    <string name="permission_storage_required">गॅलरीमधून चित्रे निवडण्यासाठी स्टोरेज परवानगी आवश्यक आहे</string>
+    <string name="permission_location_required">हवामान अद्यतने आणि स्थानिक शिफारसींसाठी स्थान परवानगी आवश्यक आहे</string>
+    <string name="permission_notification_required">सूचना आणि स्मरणपत्रे प्राप्त करण्यासाठी सूचना परवानगी आवश्यक आहे</string>
+    <string name="permission_denied">परवानगी नाकारली. कृपया सेटिंग्जमधून सक्षम करा.</string>
+
+    <!-- Error Messages -->
+    <string name="error_network">नेटवर्क त्रुटी. कृपया तुमचे इंटरनेट कनेक्शन तपासा.</string>
+    <string name="error_generic">काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.</string>
+    <string name="error_no_camera">या डिव्हाइसवर कोणताही कॅमेरा आढळला नाही</string>
+    <string name="error_image_processing">प्रतिमा प्रक्रिया अयशस्वी. कृपया पुन्हा प्रयत्न करा.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_alerts">शेत सूचना</string>
+    <string name="notification_channel_reminders">कार्य स्मरणपत्रे</string>
+    <string name="notification_channel_weather">हवामान अद्यतने</string>
+
+    <!-- Main Sections -->
+    <string name="section_dashboard">डॅशबोर्ड</string>
+    <string name="section_diagnostics">निदान</string>
+    <string name="section_marketplace">बाजार</string>
+    <string name="section_weather">हवामान</string>
+    <string name="section_profile">प्रोफाइल</string>
+</resources>

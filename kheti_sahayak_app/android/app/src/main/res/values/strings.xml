@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Information -->
+    <string name="app_name">Kheti Sahayak</string>
+    <string name="app_description">Your AI-powered farming companion</string>
+
+    <!-- Common Actions -->
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_share">Share</string>
+    <string name="action_retry">Retry</string>
+
+    <!-- Permission Messages -->
+    <string name="permission_camera_required">Camera permission is required to capture crop images</string>
+    <string name="permission_storage_required">Storage permission is required to select images from gallery</string>
+    <string name="permission_location_required">Location permission is required for weather updates and local recommendations</string>
+    <string name="permission_notification_required">Notification permission is required to receive alerts and reminders</string>
+    <string name="permission_denied">Permission denied. Please enable from settings.</string>
+
+    <!-- Error Messages -->
+    <string name="error_network">Network error. Please check your internet connection.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_no_camera">No camera found on this device</string>
+    <string name="error_image_processing">Failed to process image. Please try again.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_alerts">Farm Alerts</string>
+    <string name="notification_channel_reminders">Task Reminders</string>
+    <string name="notification_channel_weather">Weather Updates</string>
+
+    <!-- Main Sections -->
+    <string name="section_dashboard">Dashboard</string>
+    <string name="section_diagnostics">Diagnostics</string>
+    <string name="section_marketplace">Marketplace</string>
+    <string name="section_weather">Weather</string>
+    <string name="section_profile">Profile</string>
+</resources>

@@ -1,6 +1,7 @@
 import 'package:kheti_sahayak_app/services/api_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
+import 'package:kheti_sahayak_app/models/treatment.dart';
 import 'dart:io';
 
 class DiagnosticService {
@@ -148,5 +149,16 @@ class DiagnosticService {
   static Future<Map<String, dynamic>> getDiagnosticStats() async {
     final response = await ApiService.get('diagnostics/stats');
     return response['stats'];
+  }
+
+  // Get treatment recommendations for a diagnostic
+  static Future<TreatmentResponse> getTreatmentRecommendations(String diagnosticId) async {
+    try {
+      final response = await ApiService.get('diagnostics/$diagnosticId/treatments');
+      return TreatmentResponse.fromJson(response);
+    } catch (e) {
+      print('Error in getTreatmentRecommendations: $e');
+      rethrow;
+    }
   }
 }

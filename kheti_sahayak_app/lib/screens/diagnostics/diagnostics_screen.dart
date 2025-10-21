@@ -10,6 +10,7 @@ import 'package:kheti_sahayak_app/widgets/success_dialog.dart';
 import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
+import 'package:kheti_sahayak_app/screens/diagnostics/treatment_details_screen.dart';
 
 class DiagnosticsScreen extends StatefulWidget {
   const DiagnosticsScreen({super.key});
@@ -839,6 +840,34 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
               // Disease details if available
               if (aiAnalysis != null && aiAnalysis['disease'] != null)
                 _buildDiseaseDetails(aiAnalysis, theme, colorScheme),
+
+              // View Treatments Button
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TreatmentDetailsScreen(
+                          diagnosticId: diagnostic.id.toString(),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.medical_services),
+                  label: const Text('View Treatment Recommendations'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                    backgroundColor: Colors.green[600],
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
 
               // Treatment recommendations
               if (aiAnalysis != null && aiAnalysis['treatment'] != null) ...[

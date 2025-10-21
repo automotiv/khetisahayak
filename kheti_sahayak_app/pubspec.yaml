@@ -46,6 +46,9 @@ dependencies:
   dio:
   flutter_secure_storage:
   shared_preferences:
+  sqflite:
+  path_provider:
+  connectivity_plus:
   
   # Form Validation
   form_validator:
