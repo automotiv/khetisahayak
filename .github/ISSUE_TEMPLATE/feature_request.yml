@@ -1,0 +1,173 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for Kheti Sahayak
+title: "[Feature]: "
+labels: ["enhancement", "needs-discussion"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please help us understand your idea better.
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - New Feature
+        - Enhancement to Existing Feature
+        - AI/ML Improvement
+        - UI/UX Improvement
+        - Performance Optimization
+        - Documentation
+        - Developer Experience
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component/Module
+      description: Which part of the application would this affect?
+      multiple: true
+      options:
+        - Crop Diagnostics
+        - Marketplace
+        - Weather Forecast
+        - Expert Connect
+        - Educational Content
+        - Community Forum
+        - Government Schemes
+        - Digital Logbook
+        - Mobile App
+        - Backend API
+        - AI/ML Models
+        - Infrastructure
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - P0 - Critical (Blocker for launch)
+        - P1 - High (Important for user experience)
+        - P2 - Medium (Nice to have)
+        - P3 - Low (Future consideration)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? Who is affected by this problem?
+      placeholder: |
+        As a [farmer/vendor/admin/developer], I face the following challenge...
+        This affects approximately X users who...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution in detail
+      placeholder: |
+        I propose that we...
+        This would work by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions?
+      placeholder: |
+        Alternative 1: ...
+        Alternative 2: ...
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Write a user story for this feature
+      placeholder: |
+        As a [type of user],
+        I want to [action/goal],
+        So that [benefit/value].
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What defines "done" for this feature?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: Business Value
+      description: What is the expected impact on users and the business?
+      placeholder: |
+        - Expected to increase user engagement by X%
+        - Reduces farmer crop loss by Y%
+        - Improves conversion rate by Z%
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Screenshots
+      description: If applicable, add mockups, wireframes, or reference screenshots
+      placeholder: Drag and drop images here
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Considerations
+      description: Any technical constraints, dependencies, or implementation notes?
+      placeholder: |
+        - Requires integration with X API
+        - Dependencies: Library Y, Service Z
+        - Performance considerations: ...
+
+  - type: dropdown
+    id: help-wanted
+    attributes:
+      label: Are you willing to contribute?
+      description: Would you like to help implement this feature?
+      options:
+        - Yes, I can implement this
+        - Yes, I can help with design/documentation
+        - Yes, I can test this
+        - No, but I'd like to see it implemented
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, research, or links about the feature
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this isn't a duplicate
+          required: true
+        - label: I have reviewed the [project roadmap](https://github.com/automotiv/khetisahayak/wiki/PRODUCTION_ROADMAP) to see if this is already planned
+          required: true
+        - label: I agree to follow this project's Code of Conduct
+          required: true

@@ -1,0 +1,273 @@
+name: 📋 PRD Proposal
+description: Propose a detailed Product Requirements Document for a major feature
+title: "[PRD]: "
+labels: ["prd", "needs-review", "documentation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a detailed PRD! This template helps structure major feature requirements.
+
+        For smaller features, please use the Feature Request template instead.
+
+  - type: input
+    id: feature-name
+    attributes:
+      label: Feature Name
+      description: What is the name of this feature?
+      placeholder: e.g., "Soil Health Monitoring"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      options:
+        - Core Functionality
+        - Marketplace & Commerce
+        - Information & Advisory
+        - Community & Social
+        - Infrastructure & Platform
+        - Analytics & Reporting
+    validations:
+      required: true
+
+  - type: textarea
+    id: executive-summary
+    attributes:
+      label: Executive Summary
+      description: Brief overview of the feature (2-3 paragraphs)
+      placeholder: |
+        This feature aims to...
+        It will benefit farmers by...
+        The expected impact is...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: Detailed description of the problem this feature solves
+      placeholder: |
+        **Current Situation:**
+        - Pain point 1
+        - Pain point 2
+
+        **Impact:**
+        - Affects X% of users
+        - Results in Y losses/inefficiencies
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals & Objectives
+      description: What are the primary goals of this feature?
+      placeholder: |
+        1. **Primary Goal:** ...
+        2. **Secondary Goal:** ...
+        3. **Business Value:** ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: target-users
+    attributes:
+      label: Target Users
+      description: Who will use this feature?
+      placeholder: |
+        **Primary Users:**
+        - Farmers (smallholder, 1-5 acres)
+        - ...
+
+        **Secondary Users:**
+        - Agricultural experts
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: Key User Stories
+      description: Main user stories for this feature (3-5 stories)
+      placeholder: |
+        1. As a farmer, I want to... so that...
+        2. As an expert, I want to... so that...
+        3. As an admin, I want to... so that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: functional-requirements
+    attributes:
+      label: Functional Requirements
+      description: Detailed functional requirements
+      placeholder: |
+        **FR1: Core Functionality**
+        - FR1.1: The system must...
+        - FR1.2: Users must be able to...
+
+        **FR2: User Interface**
+        - FR2.1: The UI should display...
+        - FR2.2: Users can interact by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be true for this feature to be considered complete?
+      placeholder: |
+        - [ ] Criterion 1: ...
+        - [ ] Criterion 2: ...
+        - [ ] Criterion 3: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-requirements
+    attributes:
+      label: Technical Requirements
+      description: Technical implementation details
+      placeholder: |
+        **Backend:**
+        - API endpoints required
+        - Database schema changes
+        - Third-party integrations
+
+        **Frontend:**
+        - New screens/components
+        - State management
+
+        **Infrastructure:**
+        - Scalability requirements
+        - Performance targets
+    validations:
+      required: true
+
+  - type: textarea
+    id: nfr
+    attributes:
+      label: Non-Functional Requirements
+      description: Performance, security, usability requirements
+      placeholder: |
+        **Performance:**
+        - Response time: <2 seconds
+        - Throughput: X requests/second
+
+        **Security:**
+        - Data encryption requirements
+        - Authentication/authorization
+
+        **Usability:**
+        - Accessibility standards
+        - Multi-language support
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: Success Metrics & KPIs
+      description: How will success be measured?
+      placeholder: |
+        **Adoption Metrics:**
+        - X users within first month
+        - Y% monthly active users
+
+        **Impact Metrics:**
+        - Z% improvement in [metric]
+        - Reduction in [problem] by W%
+
+        **Business Metrics:**
+        - ROI target
+        - Revenue impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-phases
+    attributes:
+      label: Implementation Phases
+      description: Proposed rollout plan
+      placeholder: |
+        **Phase 1: MVP (Timeline: X months)**
+        - Feature A
+        - Feature B
+
+        **Phase 2: Enhancement (Timeline: Y months)**
+        - Feature C
+        - Feature D
+
+        **Phase 3: Scale (Timeline: Z months)**
+        - Feature E
+        - Feature F
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Mitigation
+      description: Potential risks and how to address them
+      placeholder: |
+        **Risk 1:** [Description]
+        - *Mitigation:* [Strategy]
+
+        **Risk 2:** [Description]
+        - *Mitigation:* [Strategy]
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What other features, services, or projects does this depend on?
+      placeholder: |
+        - Depends on Feature X (#issue)
+        - Requires API integration with Y
+        - Needs infrastructure upgrade Z
+
+  - type: textarea
+    id: research
+    attributes:
+      label: Research & References
+      description: Links to research, competitor analysis, user feedback
+      placeholder: |
+        **Research:**
+        - Link to user research
+        - Market analysis
+
+        **References:**
+        - Similar features in other apps
+        - Academic papers
+        - Industry best practices
+
+  - type: dropdown
+    id: help-wanted
+    attributes:
+      label: Contribution Interest
+      description: How would you like to contribute to this PRD?
+      multiple: true
+      options:
+        - I can write the detailed PRD
+        - I can create mockups/designs
+        - I can research technical implementation
+        - I can gather user feedback
+        - I can help implement this feature
+        - I'm just proposing the idea
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have reviewed existing PRDs to avoid duplication
+          required: true
+        - label: I have checked the project roadmap for similar planned features
+          required: true
+        - label: This feature aligns with the project's mission and vision
+          required: true
+        - label: I agree to follow this project's Code of Conduct
+          required: true

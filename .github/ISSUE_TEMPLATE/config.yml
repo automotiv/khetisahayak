@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/automotiv/khetisahayak/discussions
+    about: Ask questions, share ideas, and engage with the community
+  - name: 📚 Wiki & Documentation
+    url: https://github.com/automotiv/khetisahayak/wiki
+    about: Browse our comprehensive documentation and PRDs
+  - name: 🎯 Project Board
+    url: https://github.com/users/automotiv/projects/3
+    about: View our project roadmap and current priorities
+  - name: 🤝 Contributing Guide
+    url: https://github.com/automotiv/khetisahayak/blob/main/CONTRIBUTING.md
+    about: Learn how to contribute to Kheti Sahayak
+  - name: 📧 Contact Team
+    url: mailto:support@khetisahayak.com
+    about: Reach out to the team for sensitive matters
