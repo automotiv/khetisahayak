@@ -584,6 +584,58 @@ const getCropRecommendations = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get treatment recommendations for a diagnostic
+// @route   GET /api/diagnostics/:id/treatments
+// @access  Private
+const getTreatmentRecommendations = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  // Get the diagnostic record
+  const diagnosticResult = await db.query(
+    'SELECT * FROM diagnostics WHERE id = $1 AND user_id = $2',
+    [id, req.user.id]
+  );
+
+  if (diagnosticResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Diagnostic record not found');
+  }
+
+  const diagnostic = diagnosticResult.rows[0];
+
+  // Get treatment recommendations based on disease_id
+  if (diagnostic.disease_id) {
+    const treatmentsResult = await db.query(
+      `SELECT t.*, d.disease_name, d.symptoms, d.prevention
+       FROM treatment_recommendations t
+       JOIN crop_diseases d ON t.disease_id = d.id
+       WHERE t.disease_id = $1
+       ORDER BY t.effectiveness_rating DESC, t.treatment_type`,
+      [diagnostic.disease_id]
+    );
+
+    res.json({
+      success: true,
+      diagnostic_id: id,
+      disease: {
+        id: diagnostic.disease_id,
+        name: treatmentsResult.rows[0]?.disease_name,
+        symptoms: treatmentsResult.rows[0]?.symptoms,
+        prevention: treatmentsResult.rows[0]?.prevention
+      },
+      treatments: treatmentsResult.rows
+    });
+  } else {
+    // No specific disease matched, return generic recommendations
+    res.json({
+      success: true,
+      diagnostic_id: id,
+      message: 'No specific disease identified. General recommendations provided.',
+      treatments: []
+    });
+  }
+});
+
 // @desc    Get diagnostic statistics
 // @route   GET /api/diagnostics/stats
 // @access  Private
@@ -639,6 +691,7 @@ module.exports = {
   uploadForDiagnosis,
   getDiagnosticHistory,
   getDiagnosticById,
+  getTreatmentRecommendations,
   requestExpertReview,
   submitExpertReview,
   getExpertAssignedDiagnostics,

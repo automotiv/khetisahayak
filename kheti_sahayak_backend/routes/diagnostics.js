@@ -5,6 +5,7 @@ const {
   uploadForDiagnosis,
   getDiagnosticHistory,
   getDiagnosticById,
+  getTreatmentRecommendations,
   requestExpertReview,
   submitExpertReview,
   getExpertAssignedDiagnostics,
@@ -231,6 +232,29 @@ router.get('/', protect, getDiagnosticHistory);
  *         description: Diagnostic not found
  */
 router.get('/:id', protect, getDiagnosticById);
+
+/**
+ * @swagger
+ * /api/diagnostics/{id}/treatments:
+ *   get:
+ *     summary: Get treatment recommendations for a diagnostic
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Diagnostic ID
+ *     responses:
+ *       200:
+ *         description: Treatment recommendations retrieved successfully
+ *       404:
+ *         description: Diagnostic not found
+ */
+router.get('/:id/treatments', protect, getTreatmentRecommendations);
 
 /**
  * @swagger
