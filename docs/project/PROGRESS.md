@@ -8,7 +8,7 @@
 
 **Last Updated**: October 22, 2025
 
-[🏠 Back to README](README.md) • [🤝 Contributing](CONTRIBUTING.md) • [📖 Documentation](docs/)
+[🏠 Back to README](../../README.md) • [🤝 Contributing](../../CONTRIBUTING.md) • [📖 Documentation](../)
 
 </div>
 
@@ -513,12 +513,12 @@
 
 ## 🔗 Quick Links
 
-- [Main README](README.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [API Documentation](docs/api/README.md)
-- [Development Setup](docs/development/README.md)
-- [Android Setup](kheti_sahayak_app/android/README.md)
-- [Changelog](CHANGELOG.md)
+- [Main README](../../README.md)
+- [Contributing Guidelines](../../CONTRIBUTING.md)
+- [API Documentation](../api/README.md)
+- [Development Setup](../../kheti_sahayak_app/android/README.md)
+- [Android Setup](../../kheti_sahayak_app/android/README.md)
+- [Changelog](../../CHANGELOG.md)
 
 ---
 

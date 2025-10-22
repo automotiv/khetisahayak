@@ -11,7 +11,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/your-repo/actions)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web-lightgrey.svg)](https://flutter.dev)
 
-[📱 Demo](#-demo) • [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [📊 Progress](PROGRESS.md) • [🤝 Contributing](CONTRIBUTING.md)
+[📱 Demo](#-demo) • [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [📊 Progress](docs/project/PROGRESS.md) • [🤝 Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -1096,7 +1096,7 @@ npm run lint:security  # Security-focused linting
 
 Track our development journey and see what's coming next! We maintain a comprehensive progress tracker with detailed information about completed features, current development, and future plans.
 
-**📍 View Full Progress**: [PROGRESS.md](PROGRESS.md)
+**📍 View Full Progress**: [PROGRESS.md](docs/project/PROGRESS.md)
 
 ### 📈 Quick Overview
 
@@ -1192,7 +1192,7 @@ For comprehensive information including:
 - **Weekly progress metrics**
 - **Technology stack updates**
 
-👉 **[View Full Progress & Roadmap →](PROGRESS.md)**
+👉 **[View Full Progress & Roadmap →](docs/project/PROGRESS.md)**
 
 ---
 
