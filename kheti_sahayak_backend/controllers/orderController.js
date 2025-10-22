@@ -387,8 +387,129 @@ const getSellerOrders = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Create order from user's cart
+// @route   POST /api/orders/from-cart
+// @access  Private
+const createOrderFromCart = asyncHandler(async (req, res) => {
+  const { shipping_address, payment_method } = req.body;
+
+  if (!shipping_address) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
+  // Start transaction
+  const client = await db.pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Get cart items
+    const cartResult = await client.query(
+      `SELECT ci.*, p.name, p.price, p.stock_quantity, p.is_available
+       FROM cart_items ci
+       JOIN products p ON ci.product_id = p.id
+       WHERE ci.user_id = $1`,
+      [req.user.id]
+    );
+
+    if (cartResult.rows.length === 0) {
+      throw new Error('Cart is empty');
+    }
+
+    let totalAmount = 0;
+    const orderItems = [];
+
+    // Validate items and calculate total
+    for (const item of cartResult.rows) {
+      if (!item.is_available) {
+        throw new Error(`Product ${item.name} is no longer available`);
+      }
+
+      if (item.stock_quantity < item.quantity) {
+        throw new Error(`Insufficient stock for ${item.name}. Available: ${item.stock_quantity}`);
+      }
+
+      const itemTotal = item.unit_price * item.quantity;
+      totalAmount += itemTotal;
+
+      orderItems.push({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: itemTotal,
+        product_name: item.name
+      });
+    }
+
+    // Create order
+    const orderResult = await client.query(
+      `INSERT INTO orders (user_id, total_amount, shipping_address, payment_method)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [req.user.id, totalAmount, shipping_address, payment_method]
+    );
+
+    const order = orderResult.rows[0];
+
+    // Create order items and update stock
+    for (const item of orderItems) {
+      await client.query(
+        `INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [order.id, item.product_id, item.quantity, item.unit_price, item.total_price]
+      );
+
+      // Update product stock
+      await client.query(
+        'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
+        [item.quantity, item.product_id]
+      );
+    }
+
+    // Clear the cart
+    await client.query('DELETE FROM cart_items WHERE user_id = $1', [req.user.id]);
+
+    await client.query('COMMIT');
+
+    // Get complete order details
+    const completeOrderResult = await db.query(
+      `SELECT o.*,
+              json_agg(
+                json_build_object(
+                  'id', oi.id,
+                  'product_id', oi.product_id,
+                  'quantity', oi.quantity,
+                  'unit_price', oi.unit_price,
+                  'total_price', oi.total_price,
+                  'product_name', p.name,
+                  'product_image', p.image_urls
+                )
+              ) as items
+       FROM orders o
+       JOIN order_items oi ON o.id = oi.order_id
+       JOIN products p ON oi.product_id = p.id
+       WHERE o.id = $1
+       GROUP BY o.id`,
+      [order.id]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully from cart',
+      data: completeOrderResult.rows[0]
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = {
   createOrder,
+  createOrderFromCart,
   getUserOrders,
   getOrderById,
   updateOrderStatus,

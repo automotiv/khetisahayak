@@ -2,6 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const {
   createOrder,
+  createOrderFromCart,
   getUserOrders,
   getOrderById,
   updateOrderStatus,
@@ -26,11 +27,18 @@ const statusUpdateValidationRules = [
   body('status', 'Valid status is required').isIn(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']),
 ];
 
+// Validation rules for cart checkout
+const cartCheckoutValidationRules = [
+  body('shipping_address', 'Shipping address is required').not().isEmpty().trim(),
+  body('payment_method', 'Payment method is required').not().isEmpty().trim(),
+];
+
 // All routes are protected
 router.use(protect);
 
 // Order management routes
 router.post('/', orderValidationRules, createOrder);
+router.post('/from-cart', cartCheckoutValidationRules, createOrderFromCart);
 router.get('/', getUserOrders);
 router.get('/seller', getSellerOrders);
 router.get('/:id', getOrderById);
