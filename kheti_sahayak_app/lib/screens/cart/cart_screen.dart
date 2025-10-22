@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:kheti_sahayak_app/models/cart.dart';
+import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/widgets/primary_button.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
-import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -13,503 +13,206 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  bool _isLoading = false;
-  bool _isCheckingOut = false;
-  
-  // Mock cart data - replace with actual cart provider
-  List<Map<String, dynamic>> _cartItems = [
-    {
-      'id': 'prod_123',
-      'name': 'Organic Tomato Seeds',
-      'seller': 'Green Valley Farms',
-      'price': 120.0,
-      'originalPrice': 150.0,
-      'image': 'https://example.com/tomato_seeds.jpg',
-      'quantity': 2,
-      'inStock': true,
-    },
-    {
-      'id': 'prod_456',
-      'name': 'NPK Fertilizer 20-20-20',
-      'seller': 'Agri Solutions',
-      'price': 450.0,
-      'originalPrice': 500.0,
-      'image': 'https://example.com/fertilizer.jpg',
-      'quantity': 1,
-      'inStock': true,
-    },
-    {
-      'id': 'prod_789',
-      'name': 'Garden Trowel Set',
-      'seller': 'Garden Tools Co.',
-      'price': 350.0,
-      'image': 'https://example.com/trowel_set.jpg',
-      'quantity': 1,
-      'inStock': false,
-    },
-  ];
+  bool _isLoading = true;
+  bool _isUpdating = false;
+  Cart? _cart;
+  String? _error;
 
-  // Calculate subtotal
-  double get _subtotal {
-    return _cartItems.fold(0, (sum, item) {
-      return sum + (item['price'] * item['quantity']);
+  @override
+  void initState() {
+    super.initState();
+    _loadCart();
+  }
+
+  Future<void> _loadCart() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
     });
-  }
 
-  // Calculate total savings
-  double get _totalSavings {
-    return _cartItems.fold(0, (sum, item) {
-      final originalPrice = item['originalPrice'] ?? item['price'];
-      return sum + ((originalPrice - item['price']) * item['quantity']);
-    });
-  }
-
-  // Calculate delivery charge
-  double get _deliveryCharge {
-    // Free delivery for orders above ₹500
-    return _subtotal > 500 ? 0 : 50;
-  }
-
-  // Calculate total
-  double get _total {
-    return _subtotal + _deliveryCharge;
-  }
-
-  void _updateQuantity(int index, int newQuantity) {
-    if (newQuantity > 0) {
+    try {
+      final cart = await CartService.getCart();
       setState(() {
-        _cartItems[index]['quantity'] = newQuantity;
+        _cart = cart;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+        _cart = Cart.empty();
       });
     }
   }
 
-  void _removeItem(int index) {
-    showDialog(
+  Future<void> _updateQuantity(CartItem item, int newQuantity) async {
+    if (newQuantity < 1 || _isUpdating) return;
+
+    setState(() => _isUpdating = true);
+
+    try {
+      if (newQuantity > item.quantity) {
+        // Increment
+        await CartService.incrementQuantity(item);
+      } else {
+        // Decrement
+        await CartService.decrementQuantity(item);
+      }
+      await _loadCart();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update quantity: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isUpdating = false);
+    }
+  }
+
+  Future<void> _removeItem(CartItem item) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Item'),
-        content: const Text('Are you sure you want to remove this item from your cart?'),
+        content: Text('Remove ${item.productName} from your cart?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                _cartItems.removeAt(index);
-              });
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Item removed from cart')),
-              );
-            },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Remove'),
           ),
         ],
       ),
     );
+
+    if (confirmed != true) return;
+
+    setState(() => _isUpdating = true);
+
+    try {
+      await CartService.removeCartItem(item.id);
+      await _loadCart();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item removed from cart')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to remove item: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isUpdating = false);
+    }
   }
 
-  void _saveForLater(int index) {
-    // TODO: Implement save for later functionality
-    setState(() {
-      final item = _cartItems.removeAt(index);
-      // Add to saved items
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Item saved for later')),
+  Future<void> _clearCart() async {
+    if (_cart == null || _cart!.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Cart'),
+        content: const Text('Remove all items from your cart?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
     );
+
+    if (confirmed != true) return;
+
+    setState(() => _isUpdating = true);
+
+    try {
+      await CartService.clearCart();
+      await _loadCart();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cart cleared')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to clear cart: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isUpdating = false);
+    }
   }
 
   void _proceedToCheckout() {
-    setState(() => _isCheckingOut = true);
-    // TODO: Implement checkout process
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() => _isCheckingOut = false);
-      Navigator.pushNamed(context, '/checkout');
-    });
+    if (_cart == null || _cart!.isEmpty) return;
+
+    // TODO: Navigate to checkout screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Checkout feature coming soon!')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: LoadingIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Cart'),
+        title: const Text('Shopping Cart'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _cartItems.isEmpty ? null : () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Clear Cart'),
-                  content: const Text('Are you sure you want to remove all items from your cart?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() => _cartItems.clear());
-                        Navigator.of(ctx).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Cart cleared')),
-                        );
-                      },
-                      child: const Text('Clear', style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          if (_cart != null && _cart!.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _clearCart,
+              tooltip: 'Clear cart',
+            ),
         ],
       ),
-      body: _cartItems.isEmpty
-          ? _buildEmptyCart(theme)
-          : Column(
-              children: [
-                // Cart items list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _cartItems.length,
-                    itemBuilder: (context, index) => _buildCartItem(
-                      context,
-                      _cartItems[index],
-                      index,
-                    ),
-                  ),
-                ),
-                
-                // Order summary
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
-                    border: Border(
-                      top: BorderSide(
-                        color: theme.dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Price details
-                      _buildPriceRow(
-                        'Subtotal',
-                        _formatCurrency(_subtotal),
-                      ),
-                      if (_totalSavings > 0)
-                        _buildPriceRow(
-                          'Total Savings',
-                          '-${_formatCurrency(_totalSavings)}',
-                        ),
-                      _buildPriceRow(
-                        'Delivery Charge',
-                        _deliveryCharge == 0
-                            ? 'FREE'
-                            : _formatCurrency(_deliveryCharge),
-                      ),
-                      const Divider(height: 24),
-                      _buildPriceRow(
-                        'Total Amount',
-                        _formatCurrency(_total),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Checkout button
-                      PrimaryButton(
-                        onPressed: _isCheckingOut ? null : _proceedToCheckout,
-                        text: _isCheckingOut
-                            ? 'Processing...'
-                            : 'Proceed to Checkout (${_formatCurrency(_total)})',
-                        isLoading: _isCheckingOut,
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Payment methods
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildPaymentIcon('assets/images/visa.png'),
-                          const SizedBox(width: 8),
-                          _buildPaymentIcon('assets/images/mastercard.png'),
-                          const SizedBox(width: 8),
-                          _buildPaymentIcon('assets/images/upi.png'),
-                          const SizedBox(width: 8),
-                          _buildPaymentIcon('assets/images/cod.png'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      body: _isLoading
+          ? const Center(child: LoadingIndicator())
+          : _error != null
+              ? _buildError()
+              : _cart == null || _cart!.isEmpty
+                  ? _buildEmptyCart()
+                  : _buildCartContent(),
     );
   }
 
-  Widget _buildCartItem(
-    BuildContext context,
-    Map<String, dynamic> item,
-    int index,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.dividerColor,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product image
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: colorScheme.surfaceVariant,
-                    image: DecorationImage(
-                      image: NetworkImage(item['image']),
-                      fit: BoxFit.cover,
-                      onError: (_, __) => const Icon(Icons.image_not_supported_outlined),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(width: 12),
-                
-                // Product details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Product name and price
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item['name'],
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '₹${item['price']}'
-                                .replaceAllMapped(
-                                  RegExp(r'(\d)(?=(\d{2})+(?!\d))'),
-                                  (match) => '${match[1]},',
-                                ),
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Seller
-                      Text(
-                        'Sold by: ${item['seller']}',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: theme.hintColor,
-                        ),
-                      ),
-                      
-                      // Out of stock warning
-                      if (item['inStock'] == false)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline, size: 14, color: Colors.orange),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Out of stock',
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: Colors.orange,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      
-                      // Quantity selector
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          // Quantity controls
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: theme.dividerColor),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove, size: 18),
-                                  onPressed: item['quantity'] > 1
-                                      ? () => _updateQuantity(
-                                          index, item['quantity'] - 1)
-                                      : null,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                                SizedBox(
-                                  width: 30,
-                                  child: Text(
-                                    '${item['quantity']}',
-                                    textAlign: TextAlign.center,
-                                    style: textTheme.bodyMedium,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add, size: 18),
-                                  onPressed: () => _updateQuantity(
-                                      index, item['quantity'] + 1),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          const Spacer(),
-                          
-                          // Total price
-                          Text(
-                            '₹${(item['price'] * item['quantity']).toStringAsFixed(2)}'
-                                .replaceAllMapped(
-                                  RegExp(r'(\d)(?=(\d{2})+(?!\d))'),
-                                  (match) => '${match[1]},',
-                                ),
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Action buttons
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                TextButton.icon(
-                  onPressed: () => _saveForLater(index),
-                  icon: const Icon(Icons.bookmark_border, size: 18),
-                  label: const Text('Save for later'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 36),
-                  ),
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () => _removeItem(index),
-                  icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                  label: const Text('Remove', style: TextStyle(color: Colors.red)),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 36),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyCart(ThemeData theme) {
+  Widget _buildError() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.shopping_cart_outlined,
-              size: 80,
-              color: theme.hintColor.withOpacity(0.5),
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
-              'Your cart is empty',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+              'Failed to load cart',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Looks like you haven\'t added anything to your cart yet',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.hintColor,
-              ),
+              _error ?? 'Unknown error',
+              style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             PrimaryButton(
-              onPressed: () {
-                // Navigate to home or marketplace
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              text: 'Continue Shopping',
+              text: 'Retry',
+              onPressed: _loadCart,
             ),
           ],
         ),
@@ -517,52 +220,320 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildPriceRow(
-    String label,
-    String value,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).hintColor,
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.shopping_cart_outlined,
+              size: 100,
+              color: Colors.grey[400],
             ),
-          ),
-          Text(
-            value.startsWith('₹') ? value : '₹$value',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+            const SizedBox(height: 24),
+            Text(
+              'Your cart is empty',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentIcon(String assetPath) {
-    return Container(
-      width: 40,
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey.shade200),
-        image: DecorationImage(
-          image: AssetImage(assetPath),
-          fit: BoxFit.contain,
+            const SizedBox(height: 12),
+            Text(
+              'Add items from the marketplace to get started',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            PrimaryButton(
+              text: 'Browse Products',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatCurrency(double amount) {
-    return amount.toStringAsFixed(2).replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{2})+(?!\d))'),
-      (match) => '${match[1]},',
+  Widget _buildCartContent() {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _cart!.items.length,
+                itemBuilder: (context, index) {
+                  final item = _cart!.items[index];
+                  return _buildCartItem(item);
+                },
+              ),
+            ),
+            _buildCartSummary(),
+          ],
+        ),
+        if (_isUpdating)
+          Container(
+            color: Colors.black26,
+            child: const Center(child: LoadingIndicator()),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCartItem(CartItem item) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 80,
+                height: 80,
+                color: Colors.grey[200],
+                child: item.productImages != null && item.productImages!.isNotEmpty
+                    ? Image.network(
+                        item.productImages!.first,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                      )
+                    : _buildPlaceholderImage(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Product Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.productName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (item.brand != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      item.brand!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                  ],
+                  if (item.category != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      item.category!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        '₹${item.unitPrice.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const Spacer(),
+                      if (!item.isAvailable)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red[50],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Out of Stock',
+                            style: TextStyle(
+                              color: Colors.red[700],
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      // Quantity Controls
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove, size: 18),
+                              onPressed: _isUpdating
+                                  ? null
+                                  : () => _updateQuantity(item, item.quantity - 1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                '${item.quantity}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add, size: 18),
+                              onPressed: _isUpdating ||
+                                      (item.stockQuantity != null &&
+                                          item.quantity >= item.stockQuantity!)
+                                  ? null
+                                  : () => _updateQuantity(item, item.quantity + 1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      // Total Price
+                      Text(
+                        '₹${item.totalPrice.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Remove Button
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: _isUpdating ? null : () => _removeItem(item),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Icon(
+      Icons.image_outlined,
+      size: 40,
+      color: Colors.grey[400],
+    );
+  }
+
+  Widget _buildCartSummary() {
+    final summary = _cart!.summary;
+    final deliveryCharge = summary.subtotal > 500 ? 0.0 : 50.0;
+    final total = summary.subtotal + deliveryCharge;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSummaryRow('Subtotal', summary.subtotal),
+            const SizedBox(height: 8),
+            _buildSummaryRow(
+              'Delivery',
+              deliveryCharge,
+              isFree: deliveryCharge == 0,
+            ),
+            const Divider(height: 24),
+            _buildSummaryRow(
+              'Total',
+              total,
+              isTotal: true,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: PrimaryButton(
+                text: 'Proceed to Checkout',
+                onPressed: _proceedToCheckout,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(
+    String label,
+    double amount, {
+    bool isTotal = false,
+    bool isFree = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+                fontSize: isTotal ? 18 : null,
+              ),
+        ),
+        if (isFree)
+          Text(
+            'FREE',
+            style: TextStyle(
+              color: Colors.green[700],
+              fontWeight: FontWeight.bold,
+            ),
+          )
+        else
+          Text(
+            '₹${amount.toStringAsFixed(2)}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+                  color: isTotal ? Theme.of(context).primaryColor : null,
+                  fontSize: isTotal ? 18 : null,
+                ),
+          ),
+      ],
     );
   }
 }

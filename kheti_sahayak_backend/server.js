@@ -21,6 +21,7 @@ const orderRoutes = require('./routes/orders');
 const notificationRoutes = require('./routes/notifications');
 const ingestionRoutes = require('./routes/ingestion');
 const reviewsRoutes = require('./routes/reviews');
+const cartRoutes = require('./routes/cart');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -52,6 +53,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ingestion', ingestionRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -68,7 +70,8 @@ app.get('/', (req, res) => {
       educationalContent: '/api/educational-content',
       orders: '/api/orders',
       notifications: '/api/notifications',
-      reviews: '/api/reviews'
+      reviews: '/api/reviews',
+      cart: '/api/cart'
     }
   });
 });

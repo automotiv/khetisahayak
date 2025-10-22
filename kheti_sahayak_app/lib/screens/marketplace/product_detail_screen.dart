@@ -3,6 +3,7 @@ import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 import 'package:kheti_sahayak_app/widgets/primary_button.dart';
+import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:readmore/readmore.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -113,11 +114,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _addToCart() {
-    // TODO: Implement add to cart functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Added to cart')),
-    );
+  Future<void> _addToCart() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await CartService.addToCart(
+        productId: widget.productId,
+        quantity: _quantity,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $_quantity item(s) to cart'),
+            action: SnackBarAction(
+              label: 'View Cart',
+              onPressed: () {
+                Navigator.pushNamed(context, '/cart');
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add to cart: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   void _buyNow() {
