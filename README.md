@@ -31,6 +31,7 @@
 - [🚀 Deployment](#-deployment)
 - [📱 Platform Support](#-platform-support)
 - [🔒 Security](#-security)
+- [📊 Progress](#-progress)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 
@@ -1089,6 +1090,112 @@ npm run lint:security  # Security-focused linting
 
 ---
 
+## 📊 Progress
+
+### 🎯 Project Status & Roadmap
+
+Track our development journey and see what's coming next! We maintain a comprehensive progress tracker with detailed information about completed features, current development, and future plans.
+
+**📍 View Full Progress**: [PROGRESS.md](PROGRESS.md)
+
+### 📈 Quick Overview
+
+![Progress](https://img.shields.io/badge/Overall_Progress-45%25-yellow.svg)
+![Phase](https://img.shields.io/badge/Current_Phase-2-blue.svg)
+![Status](https://img.shields.io/badge/Status-In_Development-green.svg)
+
+**Last Updated**: October 22, 2025 | **Version**: 1.4.0
+
+### 🎯 Current Phase: Core Features Development (45% Complete)
+
+We're actively working on Phase 2, focusing on building out the core functionality:
+
+<table>
+<tr>
+<td width="50%">
+
+**✅ Completed in Phase 2**
+- ✅ User authentication & management (80%)
+- ✅ Marketplace product listings (65%)
+- ✅ Reviews & ratings system (100%)
+- ✅ AI-powered crop diagnostics (60%)
+- ✅ Educational content system (55%)
+- ✅ Weather integration (70%)
+
+</td>
+<td width="50%">
+
+**🔄 Currently Working On**
+- 🔄 Shopping cart implementation
+- 🔄 Order management system
+- 🔄 Payment gateway integration
+- 🔄 Email verification system
+- 🔄 Real ML model integration
+- 🔄 Expert consultation features
+
+</td>
+</tr>
+</table>
+
+### 🏆 Recent Milestones (October 2025)
+
+| Milestone | Date | Status |
+|-----------|------|--------|
+| **Reviews System** | Oct 15, 2025 | ✅ Complete |
+| **Frontend Compilation** | Oct 22, 2025 | ✅ Complete |
+| **Android Production Ready** | Oct 22, 2025 | ✅ Complete |
+| **Database Seeding** | Oct 22, 2025 | ✅ Complete |
+| **Backend Health Monitoring** | Oct 22, 2025 | ✅ Complete |
+
+### 🎯 Next Sprint Goals (Oct 22 - Nov 5, 2025)
+
+**Sprint Focus**: Marketplace Checkout & Payment Integration
+
+Priority tasks for the next 2 weeks:
+
+1. **Shopping Cart** (8 story points)
+   - Create cart model and database
+   - Implement cart APIs
+   - Build cart UI in Flutter
+
+2. **Order Management** (13 story points)
+   - Design order database schema
+   - Create order placement APIs
+   - Build checkout and tracking screens
+
+3. **Payment Integration** (13 story points)
+   - Integrate Razorpay/Stripe
+   - Create payment processing flow
+   - Add payment history tracking
+
+4. **Email Notifications** (5 story points)
+   - Set up email service
+   - Create order confirmation templates
+   - Implement notification triggers
+
+### 📊 Development Metrics
+
+| Metric | Current | Target | Progress |
+|--------|---------|--------|----------|
+| **Backend APIs** | 25 | 50 | 🟢 50% |
+| **Test Coverage** | 85% | 90% | 🟡 94% |
+| **UI Screens** | 15 | 30 | 🟢 50% |
+| **User Stories** | 45 | 100 | 🟢 45% |
+
+### 🔗 Detailed Progress Documentation
+
+For comprehensive information including:
+- **Development phases breakdown**
+- **Detailed feature checklists**
+- **Sprint planning and burndown**
+- **Android implementation status**
+- **Weekly progress metrics**
+- **Technology stack updates**
+
+👉 **[View Full Progress & Roadmap →](PROGRESS.md)**
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Here's how you can help:
@@ -1197,373 +1304,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 📊 Project Progress & Roadmap
-
-### 🎯 Development Phases
-
-#### Phase 1: Foundation & Core Infrastructure ✅ **COMPLETED**
-
-**Backend Infrastructure**
-- [x] Node.js Express server setup with hot-reload (nodemon)
-- [x] PostgreSQL 15 database configuration and connection
-- [x] Database schema design and migrations (10+ tables)
-- [x] Redis caching integration for weather and sessions
-- [x] AWS SDK integration (S3, presigned URLs)
-- [x] Environment configuration (.env setup)
-- [x] Database seeding with test data
-- [x] Swagger/OpenAPI 3.0 documentation (320+ lines)
-- [x] Comprehensive error handling middleware (290 lines)
-- [x] JWT authentication and session management
-- [x] CORS and security middleware
-
-**Test Users Created**
-- [x] Admin user: `admin@khetisahayak.com` / `admin123`
-- [x] Expert user: `expert@khetisahayak.com` / `expert123`
-- [x] Content creator: `creator@khetisahayak.com` / `creator123`
-- [x] Farmer user: `farmer@khetisahayak.com` / `user123`
-
-**Frontend Foundation**
-- [x] Flutter 3.35.6 setup with Material Design 3
-- [x] Cross-platform support (Android, iOS, Web)
-- [x] Provider state management integration
-- [x] HTTP API client service with authentication
-- [x] Custom Material Design 3 theme configuration
-- [x] Reusable UI widget library (GradientCard, ModernStatsCard, FeatureCard, InfoCard)
-- [x] Routing and navigation system
-- [x] Image picker and upload functionality
-- [x] Background upload queue with retry logic
-
----
-
-#### Phase 2: Core Features Development 🔄 **IN PROGRESS**
-
-**Authentication & User Management**
-- [x] User registration and login
-- [x] JWT token-based authentication
-- [x] User profile management
-- [x] Password change functionality
-- [x] Session management with expiry
-- [ ] Email verification
-- [ ] SMS OTP verification
-- [ ] Social login (Google, Facebook)
-- [ ] Forgot password flow
-
-**Marketplace System**
-- [x] Product listing CRUD operations
-- [x] Product categories and filtering
-- [x] Search functionality with pagination
-- [x] Product images and descriptions
-- [x] Reviews and ratings system (22 unit tests, 100% pass rate)
-  - [x] CRUD operations for reviews
-  - [x] Verified purchase detection
-  - [x] Image upload support (up to 5 images)
-  - [x] Helpful marks with toggle
-  - [x] Rating statistics and filtering
-- [ ] Shopping cart functionality
-- [ ] Order placement and tracking
-- [ ] Payment gateway integration
-- [ ] Seller dashboard
-- [ ] Order history and invoices
-
-**Crop Diagnostics (AI-Powered)**
-- [x] Image upload for disease detection
-- [x] ML inference service integration (FastAPI)
-- [x] Support for tomato, potato, corn, wheat crops
-- [x] Mock disease detection with 95%+ accuracy
-- [x] Treatment recommendations API
-- [x] Diagnostic history tracking
-- [x] Treatment details screen with filtering
-- [ ] Real ML model integration
-- [ ] Expand to 20+ crop types
-- [ ] Multilingual diagnostic reports
-- [ ] Expert consultation integration
-- [ ] Pesticide and fertilizer recommendations
-
-**Educational Content**
-- [x] Content management system
-- [x] Categories: Farming Methods, Pest Management, Soil Management, Irrigation
-- [x] Educational content API endpoints
-- [x] Content filtering and pagination
-- [ ] Video tutorial integration
-- [ ] Interactive learning modules
-- [ ] Government scheme notifications
-- [ ] Expert-curated content library
-- [ ] Multilingual content support
-
-**Weather Integration**
-- [x] Weather API with Redis caching
-- [x] Current weather conditions
-- [x] 5-day forecast
-- [ ] Hyperlocal village-level forecasts
-- [ ] Weather alerts and notifications
-- [ ] Seasonal farming advisories
-- [ ] Integration with crop recommendations
-
----
-
-#### Phase 3: Advanced Features 📅 **PLANNED**
-
-**Expert Network**
-- [ ] Expert registration and verification
-- [ ] Direct consultation booking system
-- [ ] Video/audio call integration
-- [ ] Community Q&A platform
-- [ ] Expert-verified solutions library
-- [ ] Rating and review system for experts
-
-**Smart Tools**
-- [ ] Digital farm logbook
-- [ ] Crop planning assistant
-- [ ] Expense tracking dashboard
-- [ ] Profit/loss calculator
-- [ ] Harvest prediction models
-- [ ] Soil health tracking
-
-**Advanced Marketplace**
-- [ ] Auction system for produce
-- [ ] Bulk ordering for inputs
-- [ ] Quality certification system
-- [ ] Direct farmer-to-consumer channel
-- [ ] Logistics integration
-- [ ] Price trend analytics
-
-**Analytics & Insights**
-- [ ] Farm performance dashboard
-- [ ] Crop yield prediction
-- [ ] Market price trends
-- [ ] Seasonal recommendations
-- [ ] Pest outbreak alerts
-- [ ] Soil health analysis
-
----
-
-#### Phase 4: Scale & Optimization ⏳ **FUTURE**
-
-**Performance & Scalability**
-- [ ] Microservices architecture migration
-- [ ] Kubernetes deployment
-- [ ] CDN integration for media
-- [ ] Database sharding
-- [ ] Load balancing setup
-- [ ] Caching optimization
-
-**Localization**
-- [ ] Hindi language support
-- [ ] Regional language support (10+ languages)
-- [ ] Voice commands in local languages
-- [ ] Text-to-speech for illiterate users
-- [ ] Cultural adaptation for different regions
-
-**Mobile App Optimization**
-- [ ] Offline mode support
-- [ ] Progressive Web App (PWA)
-- [ ] App size optimization
-- [ ] Battery optimization
-- [ ] Low-bandwidth mode
-
-**Security & Compliance**
-- [ ] Advanced fraud detection
-- [ ] Two-factor authentication
-- [ ] Biometric authentication
-- [ ] GDPR compliance
-- [ ] Indian IT Act compliance
-- [ ] Security audit and penetration testing
-
----
-
-### ✅ Recently Completed Tasks (Oct 22, 2025)
-
-**Backend**
-- [x] Fixed PostgreSQL database connection (user: prakash.ponali)
-- [x] Created `.gitignore` to exclude node_modules
-- [x] Ran database migrations successfully
-- [x] Seeded database with comprehensive test data
-- [x] Verified login functionality with test users
-- [x] Added backend health monitoring logs
-
-**Frontend**
-- [x] Fixed ProductService API call signature errors
-  - [x] Removed invalid `headers` parameters from GET/DELETE
-  - [x] Updated POST/PUT to use positional data parameter
-- [x] Fixed ErrorView parameter naming (message → error)
-- [x] Fixed AppLogger method (warn → warning)
-- [x] Fixed routes.dart import paths
-- [x] Successfully compiled Flutter app for web (Chrome)
-- [x] App running on http://localhost:8080
-
-**Testing**
-- [x] Backend tests: 89/89 passing
-- [x] Review system tests: 22/22 passing
-- [x] All integration tests passing
-- [x] Flutter compilation successful
-
-**DevOps**
-- [x] Both servers running simultaneously
-- [x] Backend: http://localhost:3000 ✅
-- [x] Frontend: http://localhost:8080 ✅
-- [x] API Documentation: http://localhost:3000/api-docs/ ✅
-- [x] Git repository updated with all changes
-
----
-
-### 🎯 Next Action Items (Priority Order)
-
-#### Immediate (This Week)
-- [ ] **Fix Education Screen Compilation Errors**
-  - [ ] Install missing packages: share_plus, video_player, chewie
-  - [ ] Fix type mismatches in education_screen_new.dart
-  - [ ] Add missing methods to EducationalContentService
-  - [ ] Add missing properties to EducationalContent model
-
-- [ ] **Shopping Cart Implementation**
-  - [ ] Create cart model and database table
-  - [ ] Implement add/remove/update cart APIs
-  - [ ] Create cart screen UI in Flutter
-  - [ ] Add cart badge to navigation bar
-  - [ ] Implement cart persistence
-
-- [ ] **Order Management System**
-  - [ ] Create orders database schema
-  - [ ] Implement order placement API
-  - [ ] Create checkout screen UI
-  - [ ] Add order tracking functionality
-  - [ ] Create order history screen
-
-- [ ] **Payment Integration**
-  - [ ] Integrate Razorpay/Stripe payment gateway
-  - [ ] Create payment processing API
-  - [ ] Implement payment confirmation flow
-  - [ ] Add payment history tracking
-  - [ ] Set up webhook handlers
-
-#### Short-term (Next 2 Weeks)
-- [ ] **Email Verification System**
-  - [ ] Set up email service (SendGrid/AWS SES)
-  - [ ] Create email templates
-  - [ ] Implement verification token system
-  - [ ] Add email verification UI flows
-
-- [ ] **SMS OTP Authentication**
-  - [ ] Integrate SMS service (Twilio/MSG91)
-  - [ ] Implement OTP generation and validation
-  - [ ] Create OTP verification screens
-  - [ ] Add resend OTP functionality
-
-- [ ] **Real ML Model Integration**
-  - [ ] Train TensorFlow model on crop disease dataset
-  - [ ] Convert model to TFLite for mobile
-  - [ ] Update FastAPI service with real model
-  - [ ] Test accuracy across 20+ crop types
-  - [ ] Add confidence scores and multiple predictions
-
-- [ ] **Expert Consultation Feature**
-  - [ ] Create expert registration flow
-  - [ ] Design consultation booking system
-  - [ ] Implement consultation scheduling
-  - [ ] Add expert profile pages
-
-#### Medium-term (Next Month)
-- [ ] **Social Features**
-  - [ ] Implement community forum
-  - [ ] Add Q&A functionality
-  - [ ] Create farmer success stories section
-  - [ ] Add social sharing capabilities
-
-- [ ] **Advanced Analytics**
-  - [ ] Create farmer dashboard with insights
-  - [ ] Implement crop yield tracking
-  - [ ] Add expense vs. income analytics
-  - [ ] Build market price trend charts
-
-- [ ] **Localization**
-  - [ ] Add Hindi language support
-  - [ ] Translate all UI strings
-  - [ ] Implement language switcher
-  - [ ] Add 5 regional languages
-
-- [ ] **Testing & Quality**
-  - [ ] Increase backend test coverage to 90%
-  - [ ] Add Flutter widget tests
-  - [ ] Implement E2E testing suite
-  - [ ] Set up continuous integration (CI)
-
-#### Long-term (Next Quarter)
-- [ ] **Mobile App Release**
-  - [ ] Complete Google Play Store listing
-  - [ ] Complete Apple App Store listing
-  - [ ] Beta testing program (100+ users)
-  - [ ] Public release on both platforms
-
-- [ ] **Scaling Infrastructure**
-  - [ ] Set up production Kubernetes cluster
-  - [ ] Implement auto-scaling
-  - [ ] Add monitoring and alerting (Prometheus/Grafana)
-  - [ ] Set up disaster recovery
-
-- [ ] **Advanced Features**
-  - [ ] IoT sensor integration
-  - [ ] Drone imagery analysis
-  - [ ] Blockchain for supply chain tracking
-  - [ ] AI-powered crop planning
-
----
-
-### 📈 Development Velocity
-
-| Metric | Current | Target | Status |
-|--------|---------|--------|--------|
-| **Backend APIs** | 25 endpoints | 50 endpoints | 🟢 On Track |
-| **Test Coverage** | 85% | 90% | 🟡 Good |
-| **UI Screens** | 15 screens | 30 screens | 🟢 On Track |
-| **User Stories Completed** | 45 | 100 | 🟢 On Track |
-| **Bugs Fixed** | 120 | - | 🟢 Continuous |
-| **Documentation** | 90% | 100% | 🟢 Nearly Complete |
-
----
-
-### 🏆 Milestones Achieved
-
-| Milestone | Date Achieved | Description |
-|-----------|---------------|-------------|
-| **Project Kickoff** | Jan 2025 | Initial repository setup and planning |
-| **Backend MVP** | Feb 2025 | Core backend APIs functional |
-| **Database Setup** | Feb 2025 | PostgreSQL schema and migrations |
-| **Auth System** | Mar 2025 | User registration and login working |
-| **ML Integration** | Mar 2025 | Disease detection API integrated |
-| **Reviews System** | Oct 2025 | Complete reviews and ratings feature |
-| **Frontend Compilation** | Oct 22, 2025 | Flutter app successfully compiling and running |
-| **Database Seed** | Oct 22, 2025 | Test data seeded successfully |
-| **Servers Running** | Oct 22, 2025 | Both backend and frontend operational |
-
----
-
-### 🎯 Sprint Planning (Current Sprint)
-
-**Sprint Goal**: Complete marketplace checkout flow and integrate payment gateway
-
-**Sprint Duration**: Oct 22 - Nov 5, 2025 (2 weeks)
-
-**Sprint Backlog**:
-1. [ ] Shopping cart implementation (8 story points)
-2. [ ] Order placement and tracking (13 story points)
-3. [ ] Payment gateway integration (13 story points)
-4. [ ] Email notifications for orders (5 story points)
-5. [ ] Fix education screen compilation (3 story points)
-6. [ ] Bug fixes and UI polish (8 story points)
-
-**Total Capacity**: 50 story points
-
----
-
-### 🌟 Acknowledgments
-
-- 🙏 **Contributors**: Thanks to all our amazing contributors
-- 🎓 **Institutions**: Agricultural universities and research centers
-- 👨‍🌾 **Farmers**: Our end users who provide valuable feedback
-- 🏢 **Sponsors**: Organizations supporting agricultural technology
-
----
-
-*Built with ❤️ for Indian farmers by the Kheti Sahayak team*
-
-**🌾 "Empowering Agriculture, One App at a Time" 🌾**
