@@ -16,6 +16,16 @@ class MockRedisClient {
     return 'OK';
   }
 
+  async setex(key, seconds, value) {
+    this.store.set(key, value);
+    // In a real implementation, you'd set a timeout to delete after 'seconds'
+    // For mock purposes, we'll just store it
+    setTimeout(() => {
+      this.store.delete(key);
+    }, seconds * 1000);
+    return 'OK';
+  }
+
   async del(key) {
     this.store.delete(key);
     return 1;

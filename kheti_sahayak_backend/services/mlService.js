@@ -49,10 +49,12 @@ class MLService {
   async analyzeImage(imageBuffer, cropType, issueDescription) {
     try {
       const formData = new FormData();
-      formData.append('file', imageBuffer, {
+      formData.append('image', imageBuffer, {
         filename: 'image.jpg',
         contentType: 'image/jpeg',
       });
+      formData.append('crop_type', cropType);
+      formData.append('issue_description', issueDescription);
 
       const response = await axios.post(`${this.apiUrl}/predict`, formData, {
         headers: {
@@ -61,15 +63,16 @@ class MLService {
       });
 
       const result = response.data;
-      
-      // Map the ML model response to the format expected by the application
+
+      // The ML service already returns the complete response format
+      // {disease, confidence, severity, symptoms, treatment_steps, recommendations}
       return {
-        disease: result.class_name,
+        disease: result.disease,
         confidence: result.confidence,
-        recommendations: this.getRecommendations(result.class_name, cropType),
-        severity: this.calculateSeverity(result.confidence),
-        symptoms: this.getSymptoms(result.class_name, cropType),
-        treatment_steps: this.getTreatmentSteps(result.class_name, cropType)
+        recommendations: result.recommendations,
+        severity: result.severity,
+        symptoms: result.symptoms,
+        treatment_steps: result.treatment_steps
       };
     } catch (error) {
       console.error('Error analyzing image with ML service:', error.message);
