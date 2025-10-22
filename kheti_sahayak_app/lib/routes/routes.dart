@@ -4,13 +4,13 @@ import 'package:kheti_sahayak_app/screens/auth/register_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/forgot_password_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/change_password_screen.dart';
 import 'package:kheti_sahayak_app/screens/dashboard/dashboard_screen.dart';
-import 'package:kheti_sahayak_app/screens/marketplace/marketplace_screen.dart';
+import 'package:kheti_sahayak_app/screens/main_sections/marketplace_screen.dart';
 import 'package:kheti_sahayak_app/screens/marketplace/product_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/cart/cart_screen.dart';
 import 'package:kheti_sahayak_app/screens/checkout/checkout_screen.dart';
 import 'package:kheti_sahayak_app/screens/checkout/order_confirmation_screen.dart';
 import 'package:kheti_sahayak_app/screens/diagnostics/diagnostics_screen.dart';
-import 'package:kheti_sahayak_app/screens/education/education_screen.dart';
+// import 'package:kheti_sahayak_app/screens/education/education_screen_new.dart' as education;
 import 'package:kheti_sahayak_app/screens/profile/profile_screen.dart';
 import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 
@@ -61,7 +61,10 @@ class AppRoutes {
       );
     },
     diagnostics: (context) => const DiagnosticsScreen(),
-    education: (context) => const EducationScreen(),
+    education: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Education')),
+      body: const Center(child: Text('Education Content Coming Soon')),
+    ),
     profile: (context) => const ProfileScreen(),
     changePassword: (context) => const ChangePasswordScreen(),
   };

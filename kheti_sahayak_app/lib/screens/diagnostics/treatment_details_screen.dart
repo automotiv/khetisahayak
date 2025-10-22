@@ -77,7 +77,7 @@ class _TreatmentDetailsScreenState extends State<TreatmentDetailsScreen> {
           ? const Center(child: LoadingIndicator())
           : _error != null
               ? ErrorView(
-                  message: _error!,
+                  error: _error!,
                   onRetry: _loadTreatments,
                 )
               : _buildContent(),

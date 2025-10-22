@@ -62,14 +62,14 @@ class UploadQueue {
 
     for (final e in entries) {
       if (e.attempts >= maxAttempts) {
-        AppLogger.warn('Dropping upload after max attempts: ${e.filePath}');
+        AppLogger.warning('Dropping upload after max attempts: ${e.filePath}');
         // skip and remove
         continue;
       }
       try {
         final file = File(e.filePath);
         if (!await file.exists()) {
-          AppLogger.warn('Queued file missing, removing: ${e.filePath}');
+          AppLogger.warning('Queued file missing, removing: ${e.filePath}');
           continue;
         }
 

@@ -23,12 +23,8 @@ class ProductService {
         params['search'] = search;
       }
 
-      final token = await AuthService.getToken();
-      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
-
       final response = await ApiService.get(
         '/marketplace/products?${_buildQueryString(params)}',
-        headers: headers,
       );
 
       if (response['products'] != null) {
@@ -45,12 +41,8 @@ class ProductService {
 
   static Future<Product> getProduct(String productId) async {
     try {
-      final token = await AuthService.getToken();
-      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
-
       final response = await ApiService.get(
         '/marketplace/products/$productId',
-        headers: headers,
       );
 
       return Product.fromJson(response['product']);
@@ -61,13 +53,9 @@ class ProductService {
 
   static Future<Product> createProduct(Map<String, dynamic> productData) async {
     try {
-      final token = await AuthService.getToken();
-      if (token == null) throw Exception('Authentication required');
-
       final response = await ApiService.post(
         '/marketplace/products',
-        body: productData,
-        headers: {'Authorization': 'Bearer $token'},
+        productData,
       );
 
       return Product.fromJson(response['product']);
@@ -78,13 +66,9 @@ class ProductService {
 
   static Future<Product> updateProduct(String productId, Map<String, dynamic> productData) async {
     try {
-      final token = await AuthService.getToken();
-      if (token == null) throw Exception('Authentication required');
-
       final response = await ApiService.put(
         '/marketplace/products/$productId',
-        body: productData,
-        headers: {'Authorization': 'Bearer $token'},
+        productData,
       );
 
       return Product.fromJson(response['product']);
@@ -95,12 +79,8 @@ class ProductService {
 
   static Future<void> deleteProduct(String productId) async {
     try {
-      final token = await AuthService.getToken();
-      if (token == null) throw Exception('Authentication required');
-
       await ApiService.delete(
         '/marketplace/products/$productId',
-        headers: {'Authorization': 'Bearer $token'},
       );
     } catch (e) {
       throw Exception('Failed to delete product: $e');

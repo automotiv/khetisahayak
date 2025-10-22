@@ -5,6 +5,10 @@ import 'package:kheti_sahayak_app/routes/routes.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
+import 'package:kheti_sahayak_app/widgets/gradient_card.dart';
+import 'package:kheti_sahayak_app/widgets/modern_stats_card.dart';
+import 'package:kheti_sahayak_app/widgets/feature_card.dart';
+import 'package:kheti_sahayak_app/widgets/info_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -159,82 +163,129 @@ class _HomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome card
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome, ${user?.fullName ?? 'Farmer'}! 👋',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+          // Welcome card with gradient
+          GradientCard(
+            gradient: AppTheme.primaryGradient,
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome Back! 👋',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        user?.fullName ?? 'Farmer',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'What would you like to do today?',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'What would you like to do today?',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.hintColor,
-                    ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
+                  child: const Icon(
+                    Icons.waving_hand,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          
+          const SizedBox(height: 32),
+
           // Quick actions
           Text(
             'Quick Actions',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
-          
-          // Action buttons grid
+
+          // Action buttons grid with animations
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.0,
             children: [
-              _buildActionButton(
-                context,
+              AnimatedFeatureCard(
                 icon: Icons.search,
-                label: 'Crop Search',
+                title: 'Crop Search',
+                subtitle: 'Find best crops',
+                color: AppTheme.skyBlue,
+                useGradient: true,
+                delay: 0,
                 onTap: () {
                   // Navigate to crop search
                 },
               ),
-              _buildActionButton(
-                context,
+              AnimatedFeatureCard(
                 icon: Icons.camera_alt,
-                label: 'Scan Plant',
+                title: 'Scan Plant',
+                subtitle: 'Detect diseases',
+                color: AppTheme.primaryGreen,
+                useGradient: true,
+                delay: 100,
                 onTap: () {
                   // Navigate to plant scanning
                 },
               ),
-              _buildActionButton(
-                context,
+              AnimatedFeatureCard(
                 icon: Icons.shopping_basket,
-                label: 'Marketplace',
+                title: 'Marketplace',
+                subtitle: 'Buy & sell',
+                color: AppTheme.accentGold,
+                useGradient: true,
+                delay: 200,
                 onTap: () {
-                  // Navigate to marketplace
                   Navigator.pushNamed(context, AppRoutes.marketplace);
                 },
               ),
-              _buildActionButton(
-                context,
-                icon: Icons.help_outline,
-                label: 'Ask Expert',
+              AnimatedFeatureCard(
+                icon: Icons.support_agent,
+                title: 'Ask Expert',
+                subtitle: 'Get advice',
+                color: AppTheme.earthBrown,
+                useGradient: true,
+                delay: 300,
                 onTap: () {
                   // Navigate to ask expert
                 },
@@ -247,26 +298,32 @@ class _HomeTab extends StatelessWidget {
           // Today's Insights
           Text(
             "Today's Insights",
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
-          
-          _buildInsightCard(
-            context,
-            'Best Time to Plant',
-            'Tomatoes and peppers can be planted now',
-            Icons.calendar_today,
-            Colors.green,
+
+          AnimatedInfoCard(
+            title: 'Best Time to Plant',
+            description: 'Tomatoes and peppers can be planted now',
+            icon: Icons.calendar_today,
+            color: AppTheme.primaryGreen,
+            delay: 0,
+            onTap: () {
+              // Navigate to planting guide
+            },
           ),
-          const SizedBox(height: 12),
-          _buildInsightCard(
-            context,
-            'Weather Alert',
-            'Light rain expected in the next 2 days',
-            Icons.cloud,
-            Colors.blue,
+          AnimatedInfoCard(
+            title: 'Weather Alert',
+            description: 'Light rain expected in the next 2 days',
+            icon: Icons.cloud,
+            color: AppTheme.skyBlue,
+            delay: 100,
+            onTap: () {
+              // Navigate to weather details
+            },
           ),
           
           const SizedBox(height: 24),
@@ -327,41 +384,51 @@ class _HomeTab extends StatelessWidget {
           // Quick Stats
           Text(
             'This Week',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  '3',
-                  'Diagnostics',
-                  Icons.medical_services,
-                  Colors.blue,
+                child: AnimatedStatsCard(
+                  value: '3',
+                  label: 'Diagnostics',
+                  icon: Icons.medical_services,
+                  color: AppTheme.skyBlue,
+                  animationDuration: const Duration(milliseconds: 1200),
+                  onTap: () {
+                    // Navigate to diagnostics
+                  },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  '2',
-                  'Courses',
-                  Icons.school,
-                  Colors.green,
+                child: AnimatedStatsCard(
+                  value: '2',
+                  label: 'Courses',
+                  icon: Icons.school,
+                  color: AppTheme.primaryGreen,
+                  animationDuration: const Duration(milliseconds: 1400),
+                  onTap: () {
+                    // Navigate to courses
+                  },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  '1',
-                  'Orders',
-                  Icons.shopping_cart,
-                  Colors.orange,
+                child: AnimatedStatsCard(
+                  value: '5',
+                  label: 'Orders',
+                  icon: Icons.shopping_cart,
+                  color: AppTheme.accentGold,
+                  animationDuration: const Duration(milliseconds: 1600),
+                  onTap: () {
+                    // Navigate to orders
+                  },
                 ),
               ),
             ],
@@ -687,28 +754,56 @@ class _MarketplaceTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Text(
-            'Agricultural Marketplace',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
+          // Header with gradient background
+          GradientCard(
+            gradient: AppTheme.accentGradient,
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.only(bottom: 24),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Agricultural Marketplace',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Find seeds, tools, and farming supplies',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.shopping_cart,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Find seeds, tools, and farming supplies',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.hintColor,
-            ),
-          ),
-          const SizedBox(height: 24),
           
           // Featured Categories
           Text(
             'Featured Categories',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -757,8 +852,9 @@ class _MarketplaceTab extends StatelessWidget {
           // Popular Products
           Text(
             'Popular Products',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -956,28 +1052,60 @@ class _DiagnosticsTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Text(
-            'Crop Diagnostics',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
+          // Header with gradient background
+          GradientCard(
+            gradient: LinearGradient(
+              colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.only(bottom: 24),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Crop Diagnostics',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Identify plant diseases and get expert advice',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.medical_services,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Identify plant diseases and get expert advice',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.hintColor,
-            ),
-          ),
-          const SizedBox(height: 24),
           
           // Quick Actions
           Text(
             'Quick Actions',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -1706,8 +1834,9 @@ class _ProfileTab extends StatelessWidget {
           // Quick Actions
           Text(
             'Quick Actions',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),

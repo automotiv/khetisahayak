@@ -57,56 +57,120 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: _isLoading
           ? const Center(child: LoadingIndicator())
-          : SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height,
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colorScheme.primary.withOpacity(0.05),
+                    colorScheme.surface,
+                  ],
                 ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+              ),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                    ),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Logo and welcome text
                           const SizedBox(height: 40),
-                          Icon(
-                            Icons.agriculture,
-                            size: 80,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Welcome Back',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
+
+                          // Animated logo
+                          Hero(
+                            tag: 'app_logo',
+                            child: TweenAnimationBuilder(
+                              duration: const Duration(milliseconds: 800),
+                              tween: Tween<double>(begin: 0, end: 1),
+                              builder: (context, double value, child) {
+                                return Transform.scale(
+                                  scale: value,
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      gradient: AppTheme.primaryGradient,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: colorScheme.primary.withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 10),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.agriculture,
+                                      size: 50,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Sign in to continue to Kheti Sahayak',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.hintColor,
+
+                          const SizedBox(height: 32),
+
+                          // Welcome text with animation
+                          TweenAnimationBuilder(
+                            duration: const Duration(milliseconds: 600),
+                            tween: Tween<double>(begin: 0, end: 1),
+                            builder: (context, double value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Welcome Back',
+                                  style: theme.textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Sign in to continue to Kheti Sahayak',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 40),
+
+                          const SizedBox(height: 48),
 
                           // Email field
                           Text(
                             'Email',
-                            style: theme.textTheme.labelLarge,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           CustomTextField(
@@ -125,12 +189,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
                           // Password field
                           Text(
                             'Password',
-                            style: theme.textTheme.labelLarge,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           CustomTextField(
@@ -141,13 +208,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: theme.hintColor,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscurePassword = !_obscurePassword;
+                                  _obscurePassword = !_obscurePassword,
                                 });
                               },
                             ),
@@ -169,41 +236,81 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: TextButton(
                               onPressed: () {
                                 Navigator.pushNamed(
-                                  context, 
+                                  context,
                                   AppRoutes.forgotPassword
                                 );
                               },
-                              child: const Text('Forgot Password?'),
+                              child: Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 8),
 
-                          // Login button
-                          PrimaryButton(
-                            onPressed: _login,
-                            text: 'Sign In',
-                            isLoading: _isLoading,
+                          // Login button with gradient
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: AppTheme.primaryGradient,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _login,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Sign In',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
 
                           // Divider with "or" text
                           Row(
                             children: [
-                              Expanded(child: Divider(color: theme.dividerColor)),
+                              Expanded(
+                                child: Divider(color: colorScheme.outline.withOpacity(0.5)),
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                 child: Text(
                                   'OR',
-                                  style: theme.textTheme.bodySmall,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                              Expanded(child: Divider(color: theme.dividerColor)),
+                              Expanded(
+                                child: Divider(color: colorScheme.outline.withOpacity(0.5)),
+                              ),
                             ],
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
 
                           // Sign up link
                           Row(
@@ -211,17 +318,24 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Text(
                                 'Don\'t have an account?',
-                                style: theme.textTheme.bodyMedium,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
-                              const SizedBox(width: 4),
                               TextButton(
                                 onPressed: () {
                                   Navigator.pushReplacementNamed(
-                                    context, 
+                                    context,
                                     AppRoutes.register
                                   );
                                 },
-                                child: const Text('Sign Up'),
+                                child: Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -231,9 +345,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Terms and privacy policy
                           Text(
                             'By signing in, you agree to our Terms of Service and Privacy Policy',
-                            style: theme.textTheme.bodySmall,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                             textAlign: TextAlign.center,
                           ),
+
+                          const SizedBox(height: 40),
                         ],
                       ),
                     ),
@@ -241,29 +359,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-    );
-  }
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: Text(
-                  'Don\'t have an account? Register here.',
-                  style: TextStyle(color: Colors.green[700]),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
