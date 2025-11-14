@@ -107,3 +107,31 @@ aws:
     max-attempts: ${OTP_MAX_ATTEMPTS:3}
   sms:
     enabled: ${SMS_ENABLED:false}
+    provider: ${SMS_PROVIDER:console}  # Options: console, twilio, aws-sns, custom
+    api-key: ${SMS_API_KEY:}
+    sender-id: ${SMS_SENDER_ID:KHETI}
+  email:
+    enabled: ${EMAIL_ENABLED:false}
+    from-address: ${EMAIL_FROM:no-reply@khetisahayak.com}
+    verification-expiry-hours: ${EMAIL_VERIFICATION_EXPIRY_HOURS:24}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: h2
+  datasource:
+    url: jdbc:h2:mem:kheti_sahayak;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+server:
+  port: ${PORT:8080}

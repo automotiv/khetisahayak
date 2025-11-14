@@ -111,6 +111,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAvailableExperts();
 
     /**
+     * Find verified and active users by type
+     */
+    List<User> findByUserTypeAndIsVerifiedTrueAndIsActiveTrue(User.UserType userType);
+
+    /**
      * Search farmers by name (for admin/expert lookup)
      */
     @Query("SELECT u FROM User u WHERE u.userType = 'FARMER' " +

@@ -1,12 +1,12 @@
 package com.khetisahayak.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * OTP Service for Kheti Sahayak Agricultural Platform
@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class OtpService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final SmsService smsService;
     private final SecureRandom secureRandom;
 
     @Value("${app.otp.length:6}")
@@ -28,8 +29,10 @@ public class OtpService {
     @Value("${app.otp.max-attempts:3}")
     private int maxAttempts;
 
-    public OtpService(RedisTemplate<String, String> redisTemplate) {
+    @Autowired
+    public OtpService(RedisTemplate<String, String> redisTemplate, SmsService smsService) {
         this.redisTemplate = redisTemplate;
+        this.smsService = smsService;
         this.secureRandom = new SecureRandom();
     }
 
@@ -58,8 +61,14 @@ public class OtpService {
         redisTemplate.opsForValue().increment(attemptKey);
         redisTemplate.expire(attemptKey, Duration.ofHours(1));
         
-        // TODO: Send OTP via SMS service (implement SMS integration)
-        // For development, log OTP to console
+        // Send OTP via SMS service (implements SMS integration)
+        boolean smsSent = smsService.sendOtp(mobileNumber, otp);
+        if (!smsSent && smsService.isEnabled()) {
+            // Log warning if SMS service is enabled but failed to send
+            System.err.println("Warning: Failed to send OTP SMS to " + mobileNumber);
+        }
+        
+        // For development/debugging, also log OTP to console
         System.out.println("OTP for " + mobileNumber + ": " + otp);
         
         return otp;

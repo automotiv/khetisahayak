@@ -25,6 +25,9 @@ public class InfoController {
         endpoints.put("diagnostics", "/api/diagnostics");
         endpoints.put("marketplace", "/api/marketplace");
         endpoints.put("educationalContent", "/api/educational-content");
+        endpoints.put("experts", "/api/experts");
+        endpoints.put("community", "/api/community");
+        endpoints.put("schemes", "/api/schemes");
         endpoints.put("orders", "/api/orders");
         endpoints.put("notifications", "/api/notifications");
         resp.put("endpoints", endpoints);

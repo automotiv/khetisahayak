@@ -54,7 +54,9 @@ public class SecurityConfig {
                     "script-src 'self'; " +
                     "style-src 'self' 'unsafe-inline'"
                 ))
-                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                .referrerPolicy(referrer -> referrer
+                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                )
             )
             
             // Role-based authorization for agricultural platform

@@ -32,14 +32,18 @@ public class UserService implements UserDetailsService {
     @Autowired
     private OtpService otpService;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
 
     /**
      * Register a new farmer with agricultural profile
      * Implements CodeRabbit validation for Indian agricultural context
      */
-    public Map<String, Object> registerFarmer(String mobileNumber, String fullName, 
-                                             String primaryCrop, String state, 
-                                             String district, Double farmSize) {
+    public Map<String, Object> registerFarmer(String mobileNumber, String fullName,
+                                             String primaryCrop, String state,
+                                             String district, Double farmSize,
+                                             String email) {
         
         // Validate mobile number format (Indian format)
         if (!mobileNumber.matches("^[6-9]\\d{9}$")) {
@@ -69,7 +73,8 @@ public class UserService implements UserDetailsService {
      */
     public Map<String, Object> verifyOtpAndCreateUser(String mobileNumber, String otp,
                                                     String fullName, String primaryCrop,
-                                                    String state, String district, Double farmSize) {
+                                                    String state, String district, Double farmSize,
+                                                    String email) {
         
         // Verify OTP
         if (!otpService.verifyOtp(mobileNumber, otp)) {
@@ -84,6 +89,8 @@ public class UserService implements UserDetailsService {
         farmer.setState(state);
         farmer.setDistrict(district);
         farmer.setFarmSize(farmSize);
+        farmer.setEmail(email);
+        farmer.setIsEmailVerified(false);
         farmer.setUserType(User.UserType.FARMER);
         farmer.setIsVerified(true);
         farmer.setIsActive(true);
@@ -112,6 +119,11 @@ public class UserService implements UserDetailsService {
         response.put("token", jwtToken);
         response.put("tokenType", "Bearer");
         response.put("expiresIn", jwtService.getExpirationTime());
+
+        // Trigger email verification if email provided
+        if (email != null && !email.isBlank()) {
+            response.put("emailVerification", emailVerificationService.sendVerificationEmail(savedFarmer, email));
+        }
 
         return response;
     }
@@ -261,6 +273,7 @@ public class UserService implements UserDetailsService {
         userResponse.put("email", user.getEmail());
         userResponse.put("userType", user.getUserType().name());
         userResponse.put("isVerified", user.getIsVerified());
+        userResponse.put("isEmailVerified", user.getIsEmailVerified());
         userResponse.put("isActive", user.getIsActive());
         userResponse.put("primaryCrop", user.getPrimaryCrop());
         userResponse.put("state", user.getState());
@@ -274,5 +287,13 @@ public class UserService implements UserDetailsService {
         userResponse.put("lastLoginAt", user.getLastLoginAt());
         
         return userResponse;
+    }
+
+    /**
+     * Get user entity by mobile number
+     */
+    public User getUserEntityByMobile(String mobileNumber) {
+        return userRepository.findByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 }

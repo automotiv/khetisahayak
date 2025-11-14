@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -50,7 +51,12 @@ public class MLService {
 
         try {
             String healthUrl = mlServiceUrl + "/health";
-            ResponseEntity<Map> response = restTemplate.getForEntity(healthUrl, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                healthUrl, 
+                HttpMethod.GET, 
+                null, 
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
             return response.getStatusCode() == HttpStatus.OK;
         } catch (Exception e) {
             System.err.println("ML Service health check failed: " + e.getMessage());
@@ -68,7 +74,12 @@ public class MLService {
 
         try {
             String modelInfoUrl = mlServiceUrl + "/model-info";
-            ResponseEntity<Map> response = restTemplate.getForEntity(modelInfoUrl, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                modelInfoUrl, 
+                HttpMethod.GET, 
+                null, 
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
             return response.getBody();
         } catch (Exception e) {
             System.err.println("Failed to get model info: " + e.getMessage());

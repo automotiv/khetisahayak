@@ -62,10 +62,16 @@ public class User {
     private UserType userType = UserType.FARMER;
 
     /**
-     * Account verification status
+     * Account verification status (mobile/OTP)
      */
     @Column(nullable = false)
     private Boolean isVerified = false;
+
+    /**
+     * Email verification status
+     */
+    @Column(name = "email_verified", nullable = false)
+    private Boolean isEmailVerified = false;
 
     /**
      * Account active status

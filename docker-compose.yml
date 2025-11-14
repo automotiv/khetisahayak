@@ -1,58 +1,58 @@
+version: '3.8'
+
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:14-alpine
-    container_name: kheti-postgres
+    container_name: kheti_sahayak_postgres
     environment:
       POSTGRES_DB: kheti_sahayak
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: kheti_sahayak_app
+      POSTGRES_PASSWORD: secure_password123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./kheti_sahayak_spring_boot/src/main/resources/db/migration:/docker-entrypoint-initdb.d
     networks:
-      - kheti-network
+      - kheti_sahayak_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U kheti_sahayak_app -d kheti_sahayak"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: kheti-redis
+    container_name: kheti_sahayak_redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - kheti-network
+      - kheti_sahayak_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Spring Boot Backend
-  backend:
+  # Kheti Sahayak Spring Boot Application
+  kheti_sahayak_app:
     build:
       context: ./kheti_sahayak_spring_boot
       dockerfile: Dockerfile
-    container_name: kheti-backend
+    container_name: kheti_sahayak_app
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: kheti_sahayak
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: khetisahayak-agricultural-platform-jwt-secret-key-for-farmer-authentication
-      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kheti_sahayak
+      SPRING_DATASOURCE_USERNAME: kheti_sahayak_app
+      SPRING_DATASOURCE_PASSWORD: secure_password123
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      ML_SERVICE_ENABLED: "true"
+      ML_SERVICE_URL: http://ml-service:5000
     ports:
       - "8080:8080"
     depends_on:
@@ -61,56 +61,41 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - kheti-network
+      - kheti_sahayak_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # React Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: kheti-frontend
+  # ML Service (Python FastAPI)
+  ml-service:
+    image: python:3.9-slim
+    container_name: kheti_sahayak_ml
+    working_dir: /app
     environment:
-      VITE_API_BASE_URL: http://localhost:8080
+      - PYTHONUNBUFFERED=1
     ports:
-      - "3000:80"
-    depends_on:
-      - backend
+      - "5000:5000"
+    volumes:
+      - ./ml_service:/app
+    command: >
+      bash -c "
+        pip install fastapi uvicorn python-multipart pillow tensorflow &&
+        uvicorn main:app --host 0.0.0.0 --port 5000
+      "
     networks:
-      - kheti-network
-
-  # Adminer (Database Admin Tool)
-  adminer:
-    image: adminer:latest
-    container_name: kheti-adminer
-    ports:
-      - "8081:8080"
-    depends_on:
-      - postgres
-    networks:
-      - kheti-network
-
-  # Redis Commander (Redis Admin Tool)
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: kheti-redis-commander
-    environment:
-      REDIS_HOSTS: local:redis:6379
-    ports:
-      - "8082:8081"
-    depends_on:
-      - redis
-    networks:
-      - kheti-network
+      - kheti_sahayak_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  kheti-network:
+  kheti_sahayak_network:
     driver: bridge

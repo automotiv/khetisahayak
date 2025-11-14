@@ -2,6 +2,7 @@ package com.khetisahayak.controller;
 
 import com.khetisahayak.service.UserService;
 import com.khetisahayak.service.JwtService;
+import com.khetisahayak.service.EmailVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +35,9 @@ public class AuthController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     /**
      * Register a new farmer user with OTP verification
@@ -70,11 +74,16 @@ public class AuthController {
             @RequestParam(required = false)
             @DecimalMin(value = "0.1", message = "Farm size must be at least 0.1 acres")
             @DecimalMax(value = "10000.0", message = "Farm size must be less than 10000 acres")
-            Double farmSize) {
+            Double farmSize,
+
+            @Parameter(description = "Farmer's email address for verification")
+            @RequestParam(required = false)
+            @Email(message = "Email must be valid")
+            String email) {
         
         try {
             Map<String, Object> response = userService.registerFarmer(
-                mobileNumber, fullName, primaryCrop, state, district, farmSize
+                mobileNumber, fullName, primaryCrop, state, district, farmSize, email
             );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -112,11 +121,15 @@ public class AuthController {
             @RequestParam @NotBlank String district,
             
             @Parameter(description = "Farm size in acres")
-            @RequestParam(required = false) Double farmSize) {
+            @RequestParam(required = false) Double farmSize,
+
+            @Parameter(description = "Farmer's email address")
+            @RequestParam(required = false)
+            @Email(message = "Email must be valid") String email) {
         
         try {
             Map<String, Object> response = userService.verifyOtpAndCreateUser(
-                mobileNumber, otp, fullName, primaryCrop, state, district, farmSize
+                mobileNumber, otp, fullName, primaryCrop, state, district, farmSize, email
             );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -234,6 +247,36 @@ public class AuthController {
         response.put("token", "new_jwt_token_placeholder");
         response.put("expiresIn", "24h");
         
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Send or resend email verification link
+     */
+    @Operation(summary = "Send email verification", description = "Send email verification link to authenticated user")
+    @PostMapping("/send-email-verification")
+    @PreAuthorize("hasRole('FARMER') or hasRole('EXPERT') or hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> sendEmailVerification(
+            @Parameter(description = "Email address to verify")
+            @RequestParam(required = false) @Email(message = "Email must be valid") String email) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String mobileNumber = auth.getName();
+        var user = userService.getUserEntityByMobile(mobileNumber);
+        Map<String, Object> response = emailVerificationService.sendVerificationEmail(user, email);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Verify email using token
+     */
+    @Operation(summary = "Verify email token", description = "Verify email using token received on email")
+    @PostMapping("/verify-email")
+    public ResponseEntity<Map<String, Object>> verifyEmailToken(
+            @Parameter(description = "Email verification token")
+            @RequestParam @NotBlank String token) {
+
+        Map<String, Object> response = emailVerificationService.verifyToken(token);
         return ResponseEntity.ok(response);
     }
 
