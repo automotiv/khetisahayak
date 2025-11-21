@@ -12,6 +12,8 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   int _selectedCategoryIndex = 0;
+  bool _isLoading = true;
+  bool _isRefreshing = false;
   
   // Sample product data
   final List<Map<String, dynamic>> _products = [
@@ -65,6 +67,30 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    // Simulate network delay for initial load
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshProducts() async {
+    setState(() {
+      _isRefreshing = true;
+    });
+    // Simulate network delay for refresh
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) {
+      setState(() {
+        _isRefreshing = false;
+      });
+    }
   }
   
   List<Map<String, dynamic>> get _filteredProducts {
@@ -92,9 +118,14 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Products Tab
-          SingleChildScrollView(
+          // Products Tab with Pull-to-Refresh
+          RefreshIndicator(
+            onRefresh: _refreshProducts,
+            child: _isLoading
+                ? _buildLoadingSkeleton()
+                : SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -208,7 +239,8 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
               ],
             ),
           ),
-          
+          ),
+
           // Sell Tab
           Center(
             child: _buildEmptyState(
@@ -418,6 +450,120 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
     );
   }
   
+  /// Loading skeleton for product list
+  Widget _buildLoadingSkeleton() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search bar skeleton
+          _buildSkeletonBox(height: 48, borderRadius: 12),
+          const SizedBox(height: 16),
+
+          // Categories skeleton
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _buildSkeletonBox(width: 80, height: 40, borderRadius: 20),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Product grid skeleton
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: 6,
+            itemBuilder: (context, index) {
+              return _buildProductSkeleton();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductSkeleton() {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image skeleton
+          _buildSkeletonBox(
+            height: 120,
+            borderRadius: 12,
+            topLeftRadius: 12,
+            topRightRadius: 12,
+            bottomLeftRadius: 0,
+            bottomRightRadius: 0,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSkeletonBox(height: 14, width: double.infinity),
+                const SizedBox(height: 4),
+                _buildSkeletonBox(height: 14, width: 80),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildSkeletonBox(height: 16, width: 60),
+                    _buildSkeletonBox(height: 28, width: 28, borderRadius: 8),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonBox({
+    double? width,
+    double height = 16,
+    double borderRadius = 4,
+    double? topLeftRadius,
+    double? topRightRadius,
+    double? bottomLeftRadius,
+    double? bottomRightRadius,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(topLeftRadius ?? borderRadius),
+          topRight: Radius.circular(topRightRadius ?? borderRadius),
+          bottomLeft: Radius.circular(bottomLeftRadius ?? borderRadius),
+          bottomRight: Radius.circular(bottomRightRadius ?? borderRadius),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
