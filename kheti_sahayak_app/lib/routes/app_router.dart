@@ -11,8 +11,9 @@ import '../screens/main_sections/educational_content_screen.dart';
 import '../screens/main_sections/profile_screen.dart';
 import '../screens/marketplace/product_detail_screen.dart';
 import '../screens/cart/cart_screen.dart';
-import '../screens/checkout/checkout_screen.dart';
+import '../screens/checkout/checkout_screen_new.dart';
 import '../screens/checkout/order_confirmation_screen.dart';
+import '../screens/orders/order_detail_screen.dart';
 import 'routes.dart';
 
 class AppRouter {
@@ -49,6 +50,11 @@ class AppRouter {
         final orderId = settings.arguments as String;
         return MaterialPageRoute(
           builder: (_) => OrderConfirmationScreen(orderId: orderId),
+        );
+      case '/order-details':
+        final orderId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => OrderDetailScreen(orderId: orderId),
         );
       default:
         return MaterialPageRoute(

@@ -4,6 +4,7 @@ import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/widgets/primary_button.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
+import 'package:kheti_sahayak_app/screens/checkout/checkout_screen_new.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -160,9 +161,9 @@ class _CartScreenState extends State<CartScreen> {
   void _proceedToCheckout() {
     if (_cart == null || _cart!.isEmpty) return;
 
-    // TODO: Navigate to checkout screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Checkout feature coming soon!')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CheckoutScreen()),
     );
   }
 

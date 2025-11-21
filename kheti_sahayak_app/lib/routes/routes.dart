@@ -7,8 +7,9 @@ import 'package:kheti_sahayak_app/screens/dashboard/dashboard_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/marketplace_screen.dart';
 import 'package:kheti_sahayak_app/screens/marketplace/product_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/cart/cart_screen.dart';
-import 'package:kheti_sahayak_app/screens/checkout/checkout_screen.dart';
+import 'package:kheti_sahayak_app/screens/checkout/checkout_screen_new.dart';
 import 'package:kheti_sahayak_app/screens/checkout/order_confirmation_screen.dart';
+import 'package:kheti_sahayak_app/screens/orders/order_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/diagnostics/diagnostics_screen.dart';
 // import 'package:kheti_sahayak_app/screens/education/education_screen_new.dart' as education;
 import 'package:kheti_sahayak_app/screens/profile/profile_screen.dart';
@@ -53,12 +54,8 @@ class AppRoutes {
       );
     },
     orderDetails: (context) {
-      // TODO: Implement OrderDetailsScreen
       final orderId = ModalRoute.of(context)!.settings.arguments as String?;
-      return Scaffold(
-        appBar: AppBar(title: const Text('Order Details')),
-        body: Center(child: Text('Order #${orderId ?? 'N/A'}')),
-      );
+      return OrderDetailScreen(orderId: orderId ?? '');
     },
     diagnostics: (context) => const DiagnosticsScreen(),
     education: (context) => Scaffold(
