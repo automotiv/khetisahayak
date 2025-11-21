@@ -5,6 +5,7 @@ import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/services/educational_content_service.dart';
 import 'package:kheti_sahayak_app/models/educational_content.dart';
+import 'package:kheti_sahayak_app/widgets/weather_icons.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -97,31 +98,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 20),
 
           // Weather Information Section
-          _buildSectionCard(
-            context,
-            title: 'Current Weather',
-            child: _weatherError.isNotEmpty
-                ? Text(_weatherError, style: const TextStyle(color: Colors.red))
-                : _weatherData == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildWeatherDetail(
-                              'Temperature', '${_weatherData!['temperature']}°C',
-                              Icons.thermostat),
-                          _buildWeatherDetail(
-                              'Condition', '${_weatherData!['condition']}',
-                              Icons.cloud),
-                          _buildWeatherDetail(
-                              'Humidity', '${_weatherData!['humidity']}%',
-                              Icons.water_drop),
-                          _buildWeatherDetail(
-                              'Wind Speed', '${_weatherData!['wind_speed']} m/s',
-                              Icons.wind_power),
-                        ],
-                      ),
-          ),
+          _weatherError.isNotEmpty
+              ? _buildSectionCard(
+                  context,
+                  title: 'Current Weather',
+                  child: Text(_weatherError, style: const TextStyle(color: Colors.red)),
+                )
+              : _weatherData == null
+                  ? _buildSectionCard(
+                      context,
+                      title: 'Current Weather',
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : WeatherCard(
+                      condition: _weatherData!['condition'] as String?,
+                      iconCode: _weatherData!['icon'] as String?,
+                      temperature: '${_weatherData!['temperature']}°C',
+                      location: _weatherData!['location'] as String?,
+                      humidity: '${_weatherData!['humidity']}%',
+                      windSpeed: '${_weatherData!['wind_speed']} m/s',
+                    ),
           const SizedBox(height: 20),
 
           // Recent Diagnostics Section
