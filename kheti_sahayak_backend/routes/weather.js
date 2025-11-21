@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const redisClient = require('../redisClient');
+const { getRecommendations, getForecast: getEnhancedForecast } = require('../controllers/weatherController');
 
 const router = express.Router();
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -259,6 +260,97 @@ router.get('/forecast', async (req, res) => {
     }
   }
 });
+
+/**
+ * @swagger
+ * /api/weather/recommendations:
+ *   get:
+ *     summary: Get weather-based farming activity recommendations
+ *     description: Returns personalized farming activity recommendations based on current weather conditions
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: Activity recommendations based on weather
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     current_weather:
+ *                       type: object
+ *                     activity_recommendations:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           activity:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           name_hi:
+ *                             type: string
+ *                           severity:
+ *                             type: string
+ *                             enum: [ideal, caution, avoid]
+ *                           suitability_score:
+ *                             type: integer
+ *                           message:
+ *                             type: string
+ *                           issues:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                     daily_tips:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/recommendations', getRecommendations);
+
+/**
+ * @swagger
+ * /api/weather/forecast-enhanced:
+ *   get:
+ *     summary: Get 5-day forecast with activity recommendations
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: 5-day forecast with daily activity recommendations
+ */
+router.get('/forecast-enhanced', getEnhancedForecast);
 
 /**
  * @swagger
