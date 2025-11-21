@@ -1,0 +1,15 @@
+healthy
+bacterial_blight
+fungal_rust
+leaf_spot
+powdery_mildew
+early_blight
+late_blight
+mosaic_virus
+septoria_leaf_spot
+target_spot
+yellow_curl_virus
+anthracnose
+downy_mildew
+cercospora_leaf_spot
+alternaria_leaf_spot
