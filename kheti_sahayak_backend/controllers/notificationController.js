@@ -1,5 +1,6 @@
 const db = require('../db');
 const asyncHandler = require('express-async-handler');
+const pushNotificationService = require('../services/pushNotificationService');
 
 // @desc    Get user's notifications
 // @route   GET /api/notifications
@@ -214,6 +215,214 @@ const createBulkNotifications = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Register device for push notifications
+// @route   POST /api/notifications/register-device
+// @access  Private
+const registerDevice = asyncHandler(async (req, res) => {
+  const { token, platform, device_name, app_version } = req.body;
+
+  if (!token || !platform) {
+    res.status(400);
+    throw new Error('Token and platform are required');
+  }
+
+  if (!['android', 'ios', 'web'].includes(platform)) {
+    res.status(400);
+    throw new Error('Platform must be android, ios, or web');
+  }
+
+  // Upsert device token
+  const result = await db.query(
+    `INSERT INTO device_tokens (user_id, token, platform, device_name, app_version, is_active, last_used_at)
+     VALUES ($1, $2, $3, $4, $5, true, CURRENT_TIMESTAMP)
+     ON CONFLICT (user_id, token)
+     DO UPDATE SET
+       platform = EXCLUDED.platform,
+       device_name = EXCLUDED.device_name,
+       app_version = EXCLUDED.app_version,
+       is_active = true,
+       last_used_at = CURRENT_TIMESTAMP,
+       updated_at = CURRENT_TIMESTAMP
+     RETURNING id`,
+    [req.user.id, token, platform, device_name, app_version]
+  );
+
+  res.json({
+    success: true,
+    message: 'Device registered successfully',
+    device_id: result.rows[0].id
+  });
+});
+
+// @desc    Unregister device from push notifications
+// @route   DELETE /api/notifications/unregister-device
+// @access  Private
+const unregisterDevice = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    res.status(400);
+    throw new Error('Token is required');
+  }
+
+  await db.query(
+    'UPDATE device_tokens SET is_active = false WHERE user_id = $1 AND token = $2',
+    [req.user.id, token]
+  );
+
+  res.json({
+    success: true,
+    message: 'Device unregistered successfully'
+  });
+});
+
+// @desc    Subscribe to notification topic
+// @route   POST /api/notifications/subscribe
+// @access  Private
+const subscribeToTopic = asyncHandler(async (req, res) => {
+  const { token, topic } = req.body;
+
+  if (!token || !topic) {
+    res.status(400);
+    throw new Error('Token and topic are required');
+  }
+
+  // Subscribe via FCM
+  const fcmResult = await pushNotificationService.subscribeToTopic(token, topic);
+
+  if (!fcmResult.success && !fcmResult.mock) {
+    res.status(500);
+    throw new Error('Failed to subscribe to topic');
+  }
+
+  // Store subscription in database
+  await db.query(
+    `INSERT INTO notification_topics (user_id, topic)
+     VALUES ($1, $2)
+     ON CONFLICT (user_id, topic) DO NOTHING`,
+    [req.user.id, topic]
+  );
+
+  res.json({
+    success: true,
+    message: `Subscribed to topic: ${topic}`
+  });
+});
+
+// @desc    Unsubscribe from notification topic
+// @route   DELETE /api/notifications/unsubscribe
+// @access  Private
+const unsubscribeFromTopic = asyncHandler(async (req, res) => {
+  const { token, topic } = req.body;
+
+  if (!token || !topic) {
+    res.status(400);
+    throw new Error('Token and topic are required');
+  }
+
+  // Unsubscribe via FCM
+  await pushNotificationService.unsubscribeFromTopic(token, topic);
+
+  // Remove subscription from database
+  await db.query(
+    'DELETE FROM notification_topics WHERE user_id = $1 AND topic = $2',
+    [req.user.id, topic]
+  );
+
+  res.json({
+    success: true,
+    message: `Unsubscribed from topic: ${topic}`
+  });
+});
+
+// @desc    Get user's topic subscriptions
+// @route   GET /api/notifications/subscriptions
+// @access  Private
+const getSubscriptions = asyncHandler(async (req, res) => {
+  const result = await db.query(
+    'SELECT topic, subscribed_at FROM notification_topics WHERE user_id = $1 ORDER BY subscribed_at DESC',
+    [req.user.id]
+  );
+
+  res.json({
+    success: true,
+    subscriptions: result.rows
+  });
+});
+
+// @desc    Send test push notification
+// @route   POST /api/notifications/send-test
+// @access  Private
+const sendTestNotification = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    res.status(400);
+    throw new Error('Token is required');
+  }
+
+  const result = await pushNotificationService.sendToDevice(
+    token,
+    'Test Notification',
+    'This is a test notification from Kheti Sahayak!',
+    { type: 'test', timestamp: new Date().toISOString() }
+  );
+
+  res.json({
+    success: result.success,
+    message: result.success ? 'Test notification sent' : 'Failed to send notification',
+    messageId: result.messageId,
+    mock: result.mock || false
+  });
+});
+
+// @desc    Send push notification to user (Admin only)
+// @route   POST /api/notifications/send-push
+// @access  Private/Admin
+const sendPushNotification = asyncHandler(async (req, res) => {
+  const { user_id, title, body, data } = req.body;
+
+  if (!user_id || !title || !body) {
+    res.status(400);
+    throw new Error('User ID, title, and body are required');
+  }
+
+  const result = await pushNotificationService.sendToUser(user_id, title, body, data || {});
+
+  // Also store in notification history
+  await db.query(
+    `INSERT INTO notification_history (user_id, title, body, notification_type, data)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [user_id, title, body, data?.type || 'general', JSON.stringify(data || {})]
+  );
+
+  res.json({
+    success: result.success,
+    message: result.message || (result.success ? 'Notification sent' : 'Failed to send'),
+    details: result
+  });
+});
+
+// @desc    Send push notification to topic (Admin only)
+// @route   POST /api/notifications/send-to-topic
+// @access  Private/Admin
+const sendToTopic = asyncHandler(async (req, res) => {
+  const { topic, title, body, data } = req.body;
+
+  if (!topic || !title || !body) {
+    res.status(400);
+    throw new Error('Topic, title, and body are required');
+  }
+
+  const result = await pushNotificationService.sendToTopic(topic, title, body, data || {});
+
+  res.json({
+    success: result.success,
+    message: result.success ? `Notification sent to topic: ${topic}` : 'Failed to send',
+    messageId: result.messageId
+  });
+});
+
 module.exports = {
   getUserNotifications,
   markNotificationAsRead,
@@ -222,4 +431,13 @@ module.exports = {
   getNotificationStats,
   createNotification,
   createBulkNotifications,
+  // FCM endpoints
+  registerDevice,
+  unregisterDevice,
+  subscribeToTopic,
+  unsubscribeFromTopic,
+  getSubscriptions,
+  sendTestNotification,
+  sendPushNotification,
+  sendToTopic
 }; 
