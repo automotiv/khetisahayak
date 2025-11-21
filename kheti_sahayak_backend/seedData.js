@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const db = require('./db');
 const { Pool } = require('pg');
+const { seedEquipmentData } = require('./seeds/equipmentSeed');
+const { seedTechnologyData } = require('./seeds/technologySeed');
 
 console.log('Connecting to database:', process.env.DB_NAME);
 
@@ -518,6 +520,21 @@ const seedData = async () => {
           product.is_organic, JSON.stringify(product.specifications), userResult.rows[0]?.id || null
         ]
       );
+    }
+
+    // Seed equipment and technology data
+    try {
+      console.log('\n🚜 Seeding equipment data...');
+      await seedEquipmentData();
+    } catch (err) {
+      console.log('Equipment seed skipped (tables may not exist):', err.message);
+    }
+
+    try {
+      console.log('\n🔬 Seeding technology data...');
+      await seedTechnologyData();
+    } catch (err) {
+      console.log('Technology seed skipped (tables may not exist):', err.message);
     }
 
     console.log('✅ Database seeding completed successfully!');

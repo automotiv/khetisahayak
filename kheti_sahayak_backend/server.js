@@ -23,6 +23,8 @@ const ingestionRoutes = require('./routes/ingestion');
 const reviewsRoutes = require('./routes/reviews');
 const cartRoutes = require('./routes/cart');
 const paymentRoutes = require('./routes/payments');
+const equipmentRoutes = require('./routes/equipment');
+const technologyRoutes = require('./routes/technology');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -56,6 +58,8 @@ app.use('/api/ingestion', ingestionRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/equipment', equipmentRoutes);
+app.use('/api/technology', technologyRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -74,7 +78,9 @@ app.get('/', (req, res) => {
       notifications: '/api/notifications',
       reviews: '/api/reviews',
       cart: '/api/cart',
-      payments: '/api/payments'
+      payments: '/api/payments',
+      equipment: '/api/equipment',
+      technology: '/api/technology'
     }
   });
 });
