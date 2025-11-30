@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:kheti_sahayak_app/models/menu_item.dart';
+import 'package:kheti_sahayak_app/services/app_config_service.dart';
+import 'package:kheti_sahayak_app/screens/common/coming_soon_screen.dart';
+import 'package:kheti_sahayak_app/screens/weather/weather_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/dashboard_screen.dart';
 import 'package:kheti_sahayak_app/screens/marketplace/marketplace_screen_new.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/diagnostics_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/educational_content_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/profile_screen.dart';
+import 'package:kheti_sahayak_app/screens/social/expert_connect_screen.dart';
+import 'package:kheti_sahayak_app/screens/social/community_screen.dart';
+import 'package:kheti_sahayak_app/screens/info/government_schemes_screen.dart';
+import 'package:kheti_sahayak_app/screens/info/recommendations_screen.dart';
+import 'package:kheti_sahayak_app/screens/utility/digital_logbook_screen.dart';
+import 'package:kheti_sahayak_app/screens/utility/equipment_screen.dart';
+import 'package:kheti_sahayak_app/screens/system/notifications_screen.dart';
 import 'package:kheti_sahayak_app/screens/cart/cart_screen.dart';
 import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:kheti_sahayak_app/models/cart.dart';
@@ -16,13 +27,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  String _selectedRouteId = 'dashboard';
   CartSummary _cartSummary = CartSummary(subtotal: 0, totalItems: 0, itemCount: 0);
+  List<MenuItem> _menuItems = [];
+  bool _isLoadingMenu = true;
 
   @override
   void initState() {
     super.initState();
     _loadCartSummary();
+    _loadMenu();
+  }
+
+  Future<void> _loadMenu() async {
+    final items = await AppConfigService.getMenuItems();
+    if (mounted) {
+      setState(() {
+        _menuItems = items;
+        _isLoadingMenu = false;
+        // Ensure selected route exists in menu, else default to first or dashboard
+        if (items.isNotEmpty && !items.any((i) => i.routeId == _selectedRouteId)) {
+          _selectedRouteId = items.first.routeId;
+        }
+      });
+    }
   }
 
   Future<void> _loadCartSummary() async {
@@ -34,22 +62,15 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      // Silently fail - cart badge will show 0
+      // Silently fail
     }
   }
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    DashboardScreen(),
-    MarketplaceScreenNew(),
-    DiagnosticsScreen(),
-    EducationalContentScreen(),
-    ProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
+  void _onItemTapped(String routeId) {
     setState(() {
-      _selectedIndex = index;
+      _selectedRouteId = routeId;
     });
+    Navigator.pop(context); // Close drawer
   }
 
   void _navigateToCart() async {
@@ -57,15 +78,103 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const CartScreen()),
     );
-    // Reload cart summary when returning from cart screen
     _loadCartSummary();
+  }
+
+  Widget _getWidgetForRoute(String routeId) {
+    switch (routeId) {
+      case 'dashboard':
+        return const DashboardScreen();
+      case 'weather':
+        return const WeatherScreen(); // Assumes WeatherScreen exists
+      case 'diagnostics':
+        return const DiagnosticsScreen();
+      case 'marketplace':
+        return const MarketplaceScreenNew();
+      case 'education':
+        return const EducationalContentScreen();
+      case 'expert_connect':
+        return const ExpertConnectScreen();
+      case 'community':
+        return const CommunityScreen();
+      case 'book':
+        return const GovernmentSchemesScreen();
+      case 'lightbulb':
+        return const RecommendationsScreen();
+      case 'edit_note':
+        return const DigitalLogbookScreen();
+      case 'agriculture':
+        return const EquipmentScreen();
+      case 'notifications':
+        return const NotificationsScreen();
+      case 'profile':
+        return const ProfileScreen();
+      default:
+        // Find label for title
+        final item = _menuItems.firstWhere(
+          (i) => i.routeId == routeId,
+          orElse: () => MenuItem(id: 0, label: 'Feature', iconName: '', routeId: '', displayOrder: 0),
+        );
+        return ComingSoonScreen(title: item.label);
+    }
+  }
+
+  Widget _getIconWidget(String iconName, bool isSelected) {
+    String? assetName;
+    switch (iconName) {
+      case 'dashboard': assetName = 'dashboard.png'; break;
+      case 'wb_sunny': assetName = 'wb_sunny.png'; break;
+      case 'medical_services': assetName = 'medical_services.png'; break;
+      case 'store': assetName = 'store.png'; break;
+      case 'school': assetName = 'school.png'; break;
+      case 'people': assetName = 'people.png'; break;
+      case 'forum': assetName = 'forum.png'; break;
+      // Add other mappings as generated
+    }
+
+    if (assetName != null) {
+      return Image.asset(
+        'assets/icons/$assetName',
+        width: 24,
+        height: 24,
+        color: isSelected ? Colors.green[800] : Colors.grey[700],
+      );
+    }
+
+    // Fallback to IconData
+    IconData iconData;
+    switch (iconName) {
+      case 'dashboard': iconData = Icons.dashboard; break;
+      case 'wb_sunny': iconData = Icons.wb_sunny; break;
+      case 'medical_services': iconData = Icons.medical_services; break;
+      case 'store': iconData = Icons.store; break;
+      case 'school': iconData = Icons.school; break;
+      case 'people': iconData = Icons.people; break;
+      case 'forum': iconData = Icons.forum; break;
+      case 'book': iconData = Icons.book; break;
+      case 'account_balance': iconData = Icons.account_balance; break;
+      case 'lightbulb': iconData = Icons.lightbulb; break;
+      case 'handyman': iconData = Icons.handyman; break;
+      case 'notifications': iconData = Icons.notifications; break;
+      case 'person': iconData = Icons.person; break;
+      default: iconData = Icons.circle; break;
+    }
+    return Icon(iconData, color: isSelected ? Colors.green[800] : Colors.grey[700]);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Find current title
+    String currentTitle = 'Kheti Sahayak';
+    if (_menuItems.isNotEmpty) {
+      try {
+        currentTitle = _menuItems.firstWhere((i) => i.routeId == _selectedRouteId).label;
+      } catch (e) {}
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kheti Sahayak'),
+        title: Text(currentTitle),
         actions: [
           Stack(
             children: [
@@ -80,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                   top: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
@@ -104,36 +213,60 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'Marketplace',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services),
-            label: 'Diagnostics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'Education',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green[800],
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed, // Ensures all labels are visible
+      drawer: Drawer(
+        child: _isLoadingMenu
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Colors.green[700],
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Kheti Sahayak',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Empowering Farmers',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ..._menuItems.map((item) {
+                    return ListTile(
+                      leading: _getIconWidget(item.iconName, _selectedRouteId == item.routeId),
+                      title: Text(
+                        item.label,
+                        style: TextStyle(
+                          color: _selectedRouteId == item.routeId ? Colors.green[800] : Colors.black87,
+                          fontWeight: _selectedRouteId == item.routeId ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      selected: _selectedRouteId == item.routeId,
+                      selectedTileColor: Colors.green[50],
+                      onTap: () => _onItemTapped(item.routeId),
+                    );
+                  }).toList(),
+                ],
+              ),
       ),
+      body: _isLoadingMenu
+          ? const Center(child: CircularProgressIndicator())
+          : _getWidgetForRoute(_selectedRouteId),
     );
   }
 }

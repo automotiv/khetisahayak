@@ -133,36 +133,103 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Legacy instance methods for backward compatibility
+  // Real API calls for crops and market data
   Future<List<dynamic>> getCrops() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return [
-      {'name': 'Wheat', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Wheat'},
-      {'name': 'Rice', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Rice'},
-      {'name': 'Sugarcane', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Sugarcane'},
-      {'name': 'Cotton', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Cotton'},
-      {'name': 'Maize', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Maize'},
-    ];
+    try {
+      final result = await get('educational-content', queryParams: {'category': 'crops'});
+      final List<dynamic> content = result['content'] ?? result ?? [];
+      return content.map((item) => {
+        'id': item['id'],
+        'name': item['title'] ?? item['name'] ?? 'Unknown Crop',
+        'imageUrl': item['image_url'] ?? 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=${item['title'] ?? 'Crop'}',
+        'description': item['summary'] ?? item['description'] ?? '',
+        'category': item['category'] ?? 'crops',
+      }).toList();
+    } catch (e) {
+      // Fallback to default crops if API fails
+      return [
+        {'name': 'Wheat', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Wheat'},
+        {'name': 'Rice', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Rice'},
+        {'name': 'Sugarcane', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Sugarcane'},
+        {'name': 'Cotton', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Cotton'},
+        {'name': 'Maize', 'imageUrl': 'https://via.placeholder.com/400x200.png/a2dca7/000000?text=Maize'},
+      ];
+    }
   }
 
   Future<List<dynamic>> getMarketPrices() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return [
-      {'name': 'Onions', 'price': '₹2,500 / quintal'},
-      {'name': 'Tomatoes', 'price': '₹1,800 / quintal'},
-      {'name': 'Potatoes', 'price': '₹2,000 / quintal'},
-      {'name': 'Soybeans', 'price': '₹4,500 / quintal'},
-      {'name': 'Cotton', 'price': '₹7,000 / quintal'},
-    ];
+    try {
+      final result = await get('marketplace');
+      final List<dynamic> products = result['products'] ?? result ?? [];
+      return products.map((item) => {
+        'id': item['id'],
+        'name': item['name'] ?? 'Unknown Product',
+        'price': '₹${_formatPrice(item['price'])} / ${item['unit'] ?? 'unit'}',
+        'rawPrice': item['price'],
+        'category': item['category'] ?? '',
+        'description': item['description'] ?? '',
+        'imageUrl': item['image_url'] ?? item['images']?[0] ?? '',
+        'isOrganic': item['is_organic'] ?? false,
+        'sellerName': item['seller_name'] ?? '',
+      }).toList();
+    } catch (e) {
+      // Fallback to default prices if API fails
+      return [
+        {'name': 'Onions', 'price': '₹2,500 / quintal'},
+        {'name': 'Tomatoes', 'price': '₹1,800 / quintal'},
+        {'name': 'Potatoes', 'price': '₹2,000 / quintal'},
+        {'name': 'Soybeans', 'price': '₹4,500 / quintal'},
+        {'name': 'Cotton', 'price': '₹7,000 / quintal'},
+      ];
+    }
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price == null) return '0';
+    final numPrice = price is num ? price : num.tryParse(price.toString()) ?? 0;
+    return numPrice.toStringAsFixed(numPrice.truncateToDouble() == numPrice ? 0 : 2);
   }
 
   Future<Map<String, String>> getCropDetails(String cropName) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return {
-      'sowingInfo': 'Ideal sowing time is from May to June. Use a seed rate of 15 kg/hectare.',
-      'wateringSchedule': 'Requires irrigation every 10-15 days during the growing season.',
-      'fertilizerReq': 'Apply a basal dose of NPK at 40:60:40 kg/ha.',
-      'pestsAndDiseases': 'Watch out for aphids and stem borer. Powdery mildew can be an issue in humid conditions.',
-    };
+    try {
+      // Search for crop in educational content
+      final result = await get('educational-content', queryParams: {'search': cropName, 'category': 'crops'});
+      final List<dynamic> content = result['content'] ?? result ?? [];
+
+      if (content.isNotEmpty) {
+        final crop = content.first;
+        return {
+          'id': crop['id']?.toString() ?? '',
+          'title': crop['title'] ?? cropName,
+          'sowingInfo': crop['sowing_info'] ?? _extractSection(crop['content'], 'sowing') ?? 'Sowing information not available.',
+          'wateringSchedule': crop['watering_schedule'] ?? _extractSection(crop['content'], 'water') ?? 'Watering schedule not available.',
+          'fertilizerReq': crop['fertilizer_req'] ?? _extractSection(crop['content'], 'fertilizer') ?? 'Fertilizer requirements not available.',
+          'pestsAndDiseases': crop['pests_diseases'] ?? _extractSection(crop['content'], 'pest') ?? 'Pest and disease information not available.',
+          'content': crop['content'] ?? '',
+          'summary': crop['summary'] ?? '',
+        };
+      }
+      throw Exception('Crop not found');
+    } catch (e) {
+      // Fallback to default info if API fails
+      return {
+        'sowingInfo': 'Ideal sowing time varies by region. Consult local agricultural experts.',
+        'wateringSchedule': 'Requires regular irrigation based on soil moisture levels.',
+        'fertilizerReq': 'Apply balanced NPK fertilizer as per soil test recommendations.',
+        'pestsAndDiseases': 'Monitor regularly for common pests. Use integrated pest management practices.',
+      };
+    }
+  }
+
+  String? _extractSection(String? content, String keyword) {
+    if (content == null || content.isEmpty) return null;
+    final lines = content.split('\n');
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].toLowerCase().contains(keyword)) {
+        // Return this line and next few lines as the relevant section
+        return lines.skip(i).take(3).join(' ').trim();
+      }
+    }
+    return null;
   }
 }
