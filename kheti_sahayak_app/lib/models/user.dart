@@ -30,23 +30,32 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    // Handle full_name from either full_name field or first_name + last_name
+    String? fullName = json['full_name'];
+    if (fullName == null && (json['first_name'] != null || json['last_name'] != null)) {
+      final firstName = json['first_name'] ?? '';
+      final lastName = json['last_name'] ?? '';
+      fullName = '$firstName $lastName'.trim();
+      if (fullName.isEmpty) fullName = null;
+    }
+
     return User(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       username: json['username'] ?? '',
       email: json['email'] ?? '',
-      phoneNumber: json['phone_number'],
-      fullName: json['full_name'],
+      phoneNumber: json['phone_number'] ?? json['phone'],
+      fullName: fullName,
       address: json['address'],
       profileImageUrl: json['profile_image_url'],
       bio: json['bio'],
       role: json['role'] ?? 'user',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at']) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : DateTime.now(),
-      updatedAt: json['updated_at'] != null 
+      updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'])
           : null,
-      isEmailVerified: json['is_email_verified'] ?? false,
+      isEmailVerified: json['is_email_verified'] ?? json['is_verified'] ?? false,
       isPhoneVerified: json['is_phone_verified'] ?? false,
     );
   }

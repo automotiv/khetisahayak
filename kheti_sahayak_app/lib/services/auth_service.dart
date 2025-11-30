@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kheti_sahayak_app/services/api_service.dart';
 import 'package:kheti_sahayak_app/models/user.dart';
@@ -31,9 +32,11 @@ class AuthService {
     
     if (userData != null && _authToken != null) {
       try {
-        _currentUser = User.fromJson(Map<String, dynamic>.from(userData as Map));
+        final userMap = json.decode(userData) as Map<String, dynamic>;
+        _currentUser = User.fromJson(userMap);
         _userController.add(_currentUser);
       } catch (e) {
+        // Clear invalid data
         await _clearAuthData();
       }
     } else {
@@ -69,15 +72,20 @@ class AuthService {
 
   Future<User> login(String email, String password) async {
     try {
+      print('AuthService: Attempting login for $email');
       final response = await ApiService.post('auth/login', {
         'email': email,
         'password': password,
       });
-      
+      print('AuthService: Login response received: ${response.keys}');
+
       final user = User.fromJson(response['user']);
+      print('AuthService: User parsed: ${user.email}');
       await _saveAuthData(response['token'], user);
+      print('AuthService: Auth data saved');
       return user;
     } catch (e) {
+      print('AuthService: Login error: $e');
       rethrow;
     }
   }
@@ -85,12 +93,12 @@ class AuthService {
   Future<void> _saveAuthData(String token, User user) async {
     _authToken = token;
     _currentUser = user;
-    
+
     await Future.wait([
       _storage.write(key: _tokenKey, value: token),
-      _storage.write(key: _userKey, value: user.toJson().toString()),
+      _storage.write(key: _userKey, value: json.encode(user.toJson())),
     ]);
-    
+
     _userController.add(user);
   }
   
@@ -111,11 +119,18 @@ class AuthService {
   
   Future<User?> getCurrentUser() async {
     if (_currentUser != null) return _currentUser;
-    
+
     final userData = await _storage.read(key: _userKey);
     if (userData != null) {
-      _currentUser = User.fromJson(Map<String, dynamic>.from(userData as Map));
-      return _currentUser;
+      try {
+        final userMap = json.decode(userData) as Map<String, dynamic>;
+        _currentUser = User.fromJson(userMap);
+        return _currentUser;
+      } catch (e) {
+        print('Error parsing user data: $e');
+        await _clearAuthData();
+        return null;
+      }
     }
     return null;
   }
@@ -151,7 +166,7 @@ class AuthService {
       
       final updatedUser = User.fromJson(response);
       _currentUser = updatedUser;
-      await _storage.write(key: _userKey, value: updatedUser.toJson().toString());
+      await _storage.write(key: _userKey, value: json.encode(updatedUser.toJson()));
       _userController.add(updatedUser);
       
       return updatedUser;

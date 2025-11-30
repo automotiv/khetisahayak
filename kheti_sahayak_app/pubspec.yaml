@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # UI Components
   cupertino_icons:
@@ -37,6 +39,7 @@ dependencies:
   cached_network_image:
   image_picker:
   intl:
+  fl_chart: ^0.68.0 # New chart dependency
   
   # State Management
   provider:
@@ -48,7 +51,7 @@ dependencies:
   shared_preferences:
   sqflite:
   path_provider:
-  connectivity_plus:
+  connectivity_plus: ^6.1.0
 
   # Form Validation
   form_validator:
@@ -64,8 +67,8 @@ dependencies:
   carousel_slider:
   readmore:
 
-  # Maps & Location (temporarily disabled)
-  # geolocator: ^12.0.0
+  # Maps & Location
+  geolocator: ^12.0.0
 
   # Image Processing
   image:

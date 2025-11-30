@@ -97,7 +97,7 @@ class CropRecommendation {
   double? get maxPrice => marketPriceRange?['max']?.toDouble();
   String get priceRangeDisplay {
     if (minPrice != null && maxPrice != null) {
-      return '\$${minPrice!.toStringAsFixed(2)} - \$${maxPrice!.toStringAsFixed(2)}';
+      return '₹${minPrice!.toStringAsFixed(0)} - ₹${maxPrice!.toStringAsFixed(0)}/quintal';
     }
     return 'Price not available';
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:kheti_sahayak_app/models/educational_content.dart';
 import 'package:kheti_sahayak_app/services/educational_content_service.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
@@ -349,18 +348,11 @@ class _EducationalContentScreenState extends State<EducationalContentScreen> wit
                       ),
                       Row(
                         children: [
-                          IconButton(
-                            icon: Icon(
-                              content.isBookmarked ?? false 
-                                  ? Icons.bookmark 
-                                  : Icons.bookmark_border,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            onPressed: () => _toggleBookmark(content),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.share),
-                            onPressed: () => _shareContent(content),
+                          Icon(Icons.visibility, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${content.viewCount}',
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
@@ -370,14 +362,17 @@ class _EducationalContentScreenState extends State<EducationalContentScreen> wit
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Category: ${content.category}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontStyle: FontStyle.italic,
+                      Flexible(
+                        child: Text(
+                          content.category,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontStyle: FontStyle.italic,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
-                        'Date: ${content.createdAt.toLocal().toString().split(' ')[0]}',
+                        content.createdAt.toLocal().toString().split(' ')[0],
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -401,70 +396,6 @@ class _EducationalContentScreenState extends State<EducationalContentScreen> wit
         return Colors.red[100]!;
       default:
         return Colors.grey[200]!;
-    }
-  }
-  
-  Future<void> _toggleBookmark(EducationalContent content) async {
-    try {
-      // Toggle the bookmark status locally first for immediate feedback
-      final updatedContent = content.copyWith(
-        isBookmarked: !(content.isBookmarked ?? false),
-      );
-      
-      // Update the UI immediately
-      _updateContentInLists(updatedContent);
-      
-      // Then try to update on the server
-      final response = await EducationalContentService.toggleBookmark(content.id);
-      
-      // Update with the server response
-      if (mounted) {
-        final serverUpdatedContent = content.copyWith(
-          isBookmarked: response['is_bookmarked'] as bool,
-        );
-        _updateContentInLists(serverUpdatedContent);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update bookmark')),
-        );
-        
-        // Revert the local change if the server update fails
-        _updateContentInLists(content);
-      }
-    }
-  }
-  
-  void _updateContentInLists(EducationalContent updatedContent) {
-    setState(() {
-      // Update in all relevant lists
-      _updateInList(_articles, updatedContent);
-      _updateInList(_videos, updatedContent);
-      _updateInList(_guides, updatedContent);
-      _updateInList(_popularContent, updatedContent);
-    });
-  }
-  
-  void _updateInList(List<EducationalContent> list, EducationalContent updated) {
-    final index = list.indexWhere((c) => c.id == updated.id);
-    if (index != -1) {
-      list[index] = updated;
-    }
-  }
-  
-  Future<void> _shareContent(EducationalContent content) async {
-    try {
-      await Share.share(
-        'Check out this ${content.category}: ${content.title}\n\n${content.summary ?? ''}',
-        subject: '${content.category} from Kheti Sahayak',
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to share content')),
-        );
-      }
     }
   }
   
