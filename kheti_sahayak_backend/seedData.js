@@ -457,6 +457,43 @@ const seedAppMenu = async () => {
   console.log('App menu items seeded successfully');
 };
 
+const seedExperts = async () => {
+  const experts = [
+    { name: 'Dr. Ramesh Gupta', specialization: 'Soil Scientist', qualification: 'PhD in Agriculture', experience_years: 15, is_online: true, rating: 4.8 },
+    { name: 'Ms. Priya Sharma', specialization: 'Plant Pathologist', qualification: 'MSc in Plant Pathology', experience_years: 8, is_online: true, rating: 4.9 },
+    { name: 'Mr. Suresh Patel', specialization: 'Agronomist', qualification: 'BSc Agriculture', experience_years: 10, is_online: false, rating: 4.5 },
+    { name: 'Dr. Anita Desai', specialization: 'Entomologist', qualification: 'PhD Entomology', experience_years: 12, is_online: false, rating: 4.7 },
+  ];
+
+  for (const expert of experts) {
+    await db.query(
+      `INSERT INTO experts (name, specialization, qualification, experience_years, is_online, rating)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT DO NOTHING`,
+      [expert.name, expert.specialization, expert.qualification, expert.experience_years, expert.is_online, expert.rating]
+    );
+  }
+  console.log('Experts seeded successfully');
+};
+
+const seedCommunityPosts = async () => {
+  const posts = [
+    { user_name: 'Rajesh Kumar', content: 'My wheat crop is showing yellow spots. Any advice?', likes: 12, comments_count: 5 },
+    { user_name: 'Sunita Devi', content: 'Just harvested my organic tomatoes! Great yield this year.', likes: 45, comments_count: 10 },
+    { user_name: 'Amit Singh', content: 'Looking for best fertilizer for cotton in sandy soil.', likes: 8, comments_count: 3 },
+  ];
+
+  for (const post of posts) {
+    await db.query(
+      `INSERT INTO community_posts (user_name, content, likes, comments_count)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT DO NOTHING`,
+      [post.user_name, post.content, post.likes, post.comments_count]
+    );
+  }
+  console.log('Community posts seeded successfully');
+};
+
 const seedData = async () => {
   try {
     console.log('🌱 Starting database seeding...');
@@ -509,6 +546,10 @@ const seedData = async () => {
 
     // Seed app menu
     await seedAppMenu();
+
+    // Seed social features
+    await seedExperts();
+    await seedCommunityPosts();
 
     // Seed sample products
     const sampleProducts = [

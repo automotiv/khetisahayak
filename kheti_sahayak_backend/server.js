@@ -26,6 +26,8 @@ const paymentRoutes = require('./routes/payments');
 const equipmentRoutes = require('./routes/equipment');
 const technologyRoutes = require('./routes/technology');
 const appConfigRoutes = require('./routes/app_config');
+const expertRoutes = require('./routes/experts');
+const communityRoutes = require('./routes/community');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -62,6 +64,8 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/equipment', equipmentRoutes);
 app.use('/api/technology', technologyRoutes);
 app.use('/api/app-config', appConfigRoutes);
+app.use('/api/experts', expertRoutes);
+app.use('/api/community', communityRoutes);
 
 app.get('/', (req, res) => {
   res.json({
