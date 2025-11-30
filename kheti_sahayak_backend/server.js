@@ -29,6 +29,7 @@ const appConfigRoutes = require('./routes/app_config');
 const expertRoutes = require('./routes/experts');
 const communityRoutes = require('./routes/community');
 const schemeRoutes = require('./routes/schemes');
+const logbookRoutes = require('./routes/logbook');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -68,6 +69,7 @@ app.use('/api/app-config', appConfigRoutes);
 app.use('/api/experts', expertRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/schemes', schemeRoutes);
+app.use('/api/logbook', logbookRoutes);
 
 app.get('/', (req, res) => {
   res.json({
