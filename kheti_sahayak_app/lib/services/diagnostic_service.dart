@@ -22,24 +22,34 @@ class DiagnosticService {
       if (cropType != null && cropType != 'All') queryParams['crop_type'] = cropType.toLowerCase();
 
       final response = await ApiService.get('diagnostics', queryParams: queryParams);
-      
-      // Handle both response formats for backward compatibility
-      if (response.containsKey('data') && response['data'] is List) {
+
+      // Handle various response formats
+      if (response is List) {
+        // Direct array response
         return {
-          'diagnostics': (response['data'] as List)
-              .map((diagnosticJson) => Diagnostic.fromJson(diagnosticJson))
-              .toList(),
-          'pagination': response['pagination'] ?? {'total': response['data'].length, 'page': page, 'limit': limit},
-        };
-      } else {
-        // Fallback to direct array response
-        return {
-          'diagnostics': (response as List)
+          'diagnostics': response
               .map((diagnosticJson) => Diagnostic.fromJson(diagnosticJson))
               .toList(),
           'pagination': {'total': response.length, 'page': 1, 'limit': response.length},
         };
+      } else if (response is Map) {
+        // Map response with 'data' or 'diagnostics' key
+        final diagnosticsList = response['data'] ?? response['diagnostics'] ?? [];
+        if (diagnosticsList is List) {
+          return {
+            'diagnostics': diagnosticsList
+                .map((diagnosticJson) => Diagnostic.fromJson(diagnosticJson))
+                .toList(),
+            'pagination': response['pagination'] ?? {'total': diagnosticsList.length, 'page': page, 'limit': limit},
+          };
+        }
       }
+
+      // Fallback - return empty list
+      return {
+        'diagnostics': <Diagnostic>[],
+        'pagination': {'total': 0, 'page': 1, 'limit': limit},
+      };
     } catch (e) {
       print('Error in getUserDiagnostics: $e');
       rethrow;

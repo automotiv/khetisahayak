@@ -20,11 +20,19 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Handle price as either string or num
+    double parsePrice(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return Product(
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      price: (json['price'] as num).toDouble(),
+      price: parsePrice(json['price']),
       category: json['category'],
       imageUrl: json['image_url'],
       createdAt: DateTime.parse(json['created_at']),

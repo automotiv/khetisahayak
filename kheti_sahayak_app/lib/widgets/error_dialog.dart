@@ -43,7 +43,7 @@ class ErrorDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: onPressed ?? () => Navigator.of(context).pop(),
-          child: Text(buttonText!),
+          child: Text(buttonText ?? 'OK'),
         ),
         if (showRetry || onRetry != null)
           TextButton(
@@ -51,7 +51,7 @@ class ErrorDialog extends StatelessWidget {
               Navigator.of(context).pop();
               if (onRetry != null) onRetry!();
             },
-            child: Text(retryButtonText!),
+            child: Text(retryButtonText ?? 'Retry'),
           ),
       ],
     );

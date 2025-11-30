@@ -1,115 +1,64 @@
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:kheti_sahayak_app/models/weather_model.dart';
 import 'package:geolocator/geolocator.dart';
-import 'api_service.dart';
-import 'auth_service.dart';
+import 'package:kheti_sahayak_app/services/geocoding_service.dart';
 
 class WeatherService {
-  static Future<Map<String, dynamic>> getCurrentWeather({double? lat, double? lon}) async {
+  static const String _apiKey = '0f18d2edebf650586232b0cf54925db4';
+  static const String _baseUrl = 'https://api.openweathermap.org/data/2.5/forecast';
+
+  Future<Map<String, dynamic>> getWeatherData() async {
+    Position position = await _determinePosition();
+    WeatherForecast weatherForecast = await getWeatherForecast(lat: position.latitude, lon: position.longitude);
+    String locationName = await GeocodingService().getLocationName(position.latitude, position.longitude);
+
+    return {
+      'forecast': weatherForecast,
+      'locationName': locationName,
+    };
+  }
+
+  Future<WeatherForecast> getWeatherForecast({required double lat, required double lon}) async {
+    final Uri uri = Uri.parse('$_baseUrl?lat=$lat&lon=$lon&appid=$_apiKey&units=metric');
+
     try {
-      Map<String, dynamic> params = {};
+      final response = await http.get(uri);
 
-      if (lat != null && lon != null) {
-        params['lat'] = lat.toString();
-        params['lon'] = lon.toString();
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        return WeatherForecast.fromJson(jsonResponse);
       } else {
-        final position = await _getCurrentLocation();
-        params['lat'] = position.latitude.toString();
-        params['lon'] = position.longitude.toString();
+        throw Exception('Failed to load weather forecast: ${response.statusCode}');
       }
-
-      final token = await AuthService.getToken();
-      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
-
-      final response = await ApiService.get(
-        '/weather/current?${_buildQueryString(params)}',
-        headers: headers,
-      );
-
-      return response;
     } catch (e) {
-      throw Exception('Failed to fetch current weather: $e');
+      throw Exception('Failed to load weather forecast: $e');
     }
   }
 
-  static Future<Map<String, dynamic>> getWeatherForecast({double? lat, double? lon, int days = 7}) async {
-    try {
-      Map<String, dynamic> params = {'days': days.toString()};
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-      if (lat != null && lon != null) {
-        params['lat'] = lat.toString();
-        params['lon'] = lon.toString();
-      } else {
-        final position = await _getCurrentLocation();
-        params['lat'] = position.latitude.toString();
-        params['lon'] = position.longitude.toString();
-      }
-
-      final token = await AuthService.getToken();
-      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
-
-      final response = await ApiService.get(
-        '/weather/forecast?${_buildQueryString(params)}',
-        headers: headers,
-      );
-
-      return response;
-    } catch (e) {
-      throw Exception('Failed to fetch weather forecast: $e');
-    }
-  }
-
-  static Future<Map<String, dynamic>> getWeatherAlerts({double? lat, double? lon}) async {
-    try {
-      Map<String, dynamic> params = {};
-
-      if (lat != null && lon != null) {
-        params['lat'] = lat.toString();
-        params['lon'] = lon.toString();
-      } else {
-        final position = await _getCurrentLocation();
-        params['lat'] = position.latitude.toString();
-        params['lon'] = position.longitude.toString();
-      }
-
-      final token = await AuthService.getToken();
-      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
-
-      final response = await ApiService.get(
-        '/weather/alerts?${_buildQueryString(params)}',
-        headers: headers,
-      );
-
-      return response;
-    } catch (e) {
-      throw Exception('Failed to fetch weather alerts: $e');
-    }
-  }
-
-  static Future<Position> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Location services are disabled');
+      return Future.error('Location services are disabled.');
     }
 
-    LocationPermission permission = await Geolocator.checkPermission();
+    permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Location permissions are denied');
+        return Future.error('Location permissions are denied');
       }
     }
-
+    
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permissions are permanently denied');
+      return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-  }
-
-  static String _buildQueryString(Map<String, dynamic> params) {
-    return params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-        .join('&');
+    return await Geolocator.getCurrentPosition();
   }
 }

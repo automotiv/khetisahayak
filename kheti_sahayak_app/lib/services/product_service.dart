@@ -10,42 +10,48 @@ class ProductService {
     int limit = 20,
   }) async {
     try {
-      Map<String, dynamic> params = {
+      Map<String, dynamic> queryParams = {
         'page': page.toString(),
         'limit': limit.toString(),
       };
 
       if (category != null && category.isNotEmpty) {
-        params['category'] = category;
+        queryParams['category'] = category;
       }
 
       if (search != null && search.isNotEmpty) {
-        params['search'] = search;
+        queryParams['search'] = search;
       }
 
       final response = await ApiService.get(
-        '/marketplace/products?${_buildQueryString(params)}',
+        'marketplace',
+        queryParams: queryParams,
       );
 
-      if (response['products'] != null) {
+      // Handle both array response and object with products key
+      if (response is List) {
+        return response.map((json) => Product.fromJson(json)).toList();
+      } else if (response['products'] != null) {
         return (response['products'] as List)
+            .map((json) => Product.fromJson(json))
+            .toList();
+      } else if (response['data'] != null) {
+        return (response['data'] as List)
             .map((json) => Product.fromJson(json))
             .toList();
       }
 
       return [];
     } catch (e) {
+      print('Error in getProducts: $e');
       throw Exception('Failed to fetch products: $e');
     }
   }
 
   static Future<Product> getProduct(String productId) async {
     try {
-      final response = await ApiService.get(
-        '/marketplace/products/$productId',
-      );
-
-      return Product.fromJson(response['product']);
+      final response = await ApiService.get('marketplace/$productId');
+      return Product.fromJson(response['product'] ?? response);
     } catch (e) {
       throw Exception('Failed to fetch product: $e');
     }
@@ -53,12 +59,8 @@ class ProductService {
 
   static Future<Product> createProduct(Map<String, dynamic> productData) async {
     try {
-      final response = await ApiService.post(
-        '/marketplace/products',
-        productData,
-      );
-
-      return Product.fromJson(response['product']);
+      final response = await ApiService.post('marketplace', productData);
+      return Product.fromJson(response['product'] ?? response);
     } catch (e) {
       throw Exception('Failed to create product: $e');
     }
@@ -66,12 +68,8 @@ class ProductService {
 
   static Future<Product> updateProduct(String productId, Map<String, dynamic> productData) async {
     try {
-      final response = await ApiService.put(
-        '/marketplace/products/$productId',
-        productData,
-      );
-
-      return Product.fromJson(response['product']);
+      final response = await ApiService.put('marketplace/$productId', productData);
+      return Product.fromJson(response['product'] ?? response);
     } catch (e) {
       throw Exception('Failed to update product: $e');
     }
@@ -79,9 +77,7 @@ class ProductService {
 
   static Future<void> deleteProduct(String productId) async {
     try {
-      await ApiService.delete(
-        '/marketplace/products/$productId',
-      );
+      await ApiService.delete('marketplace/$productId');
     } catch (e) {
       throw Exception('Failed to delete product: $e');
     }
@@ -89,21 +85,17 @@ class ProductService {
 
   static Future<List<String>> getCategories() async {
     try {
-      final response = await ApiService.get('/marketplace/categories');
+      final response = await ApiService.get('marketplace/categories');
 
       if (response['categories'] != null) {
         return List<String>.from(response['categories']);
+      } else if (response is List) {
+        return List<String>.from(response);
       }
 
       return [];
     } catch (e) {
       throw Exception('Failed to fetch categories: $e');
     }
-  }
-
-  static String _buildQueryString(Map<String, dynamic> params) {
-    return params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-        .join('&');
   }
 }
