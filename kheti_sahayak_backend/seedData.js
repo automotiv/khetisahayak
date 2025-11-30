@@ -494,6 +494,53 @@ const seedCommunityPosts = async () => {
   console.log('Community posts seeded successfully');
 };
 
+const seedSchemes = async () => {
+  const schemes = [
+    {
+      name: 'Pradhan Mantri Fasal Bima Yojana (PMFBY)',
+      description: 'Crop insurance scheme to provide financial support to farmers suffering crop loss/damage arising out of unforeseen events.',
+      benefits: 'Financial support for crop loss, stabilization of income, encouragement of innovative practices.',
+      eligibility: 'All farmers growing notified crops in notified areas including sharecroppers and tenant farmers.',
+      category: 'Insurance',
+      link: 'https://pmfby.gov.in/'
+    },
+    {
+      name: 'Pradhan Mantri Krishi Sinchai Yojana (PMKSY)',
+      description: 'Scheme to improve farm productivity and ensure better utilization of the resources in the country.',
+      benefits: 'Access to irrigation, expansion of cultivable area under assured irrigation, improvement in water use efficiency.',
+      eligibility: 'Farmers with cultivable land.',
+      category: 'Irrigation',
+      link: 'https://pmksy.gov.in/'
+    },
+    {
+      name: 'Soil Health Card Scheme',
+      description: 'Scheme to issue soil health cards to farmers which will carry crop-wise recommendations of nutrients and fertilizers.',
+      benefits: 'Information on soil nutrient status, recommendations on dosage of nutrients.',
+      eligibility: 'All farmers.',
+      category: 'Soil Health',
+      link: 'https://soilhealth.dac.gov.in/'
+    },
+    {
+      name: 'Kisan Credit Card (KCC)',
+      description: 'Scheme to provide adequate and timely credit support from the banking system under a single window.',
+      benefits: 'Credit for cultivation, post-harvest expenses, consumption requirements.',
+      eligibility: 'All farmers, tenant farmers, oral lessees, share croppers.',
+      category: 'Credit',
+      link: 'https://www.nabard.org/'
+    }
+  ];
+
+  for (const scheme of schemes) {
+    await db.query(
+      `INSERT INTO schemes (name, description, benefits, eligibility, category, link)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT DO NOTHING`,
+      [scheme.name, scheme.description, scheme.benefits, scheme.eligibility, scheme.category, scheme.link]
+    );
+  }
+  console.log('Schemes seeded successfully');
+};
+
 const seedData = async () => {
   try {
     console.log('🌱 Starting database seeding...');
@@ -550,6 +597,7 @@ const seedData = async () => {
     // Seed social features
     await seedExperts();
     await seedCommunityPosts();
+    await seedSchemes();
 
     // Seed sample products
     const sampleProducts = [
