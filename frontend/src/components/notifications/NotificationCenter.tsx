@@ -23,7 +23,6 @@ import {
   ShoppingCart,
   People,
   Forum,
-  Schedule,
   MarkEmailRead,
   Delete,
   Settings
@@ -137,8 +136,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications }
       )}
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
-        <Tab 
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <span>All</span>
@@ -146,7 +145,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications }
             </Box>
           }
         />
-        <Tab 
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <span>Unread</span>
@@ -173,14 +172,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications }
                 {getNotificationIcon(notification.type)}
               </Avatar>
             </ListItemAvatar>
-            
+
             <ListItemText
               primary={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                   <Typography variant="subtitle1">
                     {notification.title}
                   </Typography>
-                  <Chip 
+                  <Chip
                     label={notification.priority}
                     size="small"
                     color={getPriorityColor(notification.priority) as any}
@@ -198,7 +197,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications }
                 </Box>
               }
             />
-            
+
             <ListItemSecondaryAction>
               <Stack direction="row" spacing={1}>
                 {!readNotifications.has(notification.id) && (
@@ -226,8 +225,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications }
       {filteredNotifications.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
-            {tabValue === 1 ? 'No unread notifications' : 
-             tabValue === 2 ? 'No read notifications' : 'No notifications'}
+            {tabValue === 1 ? 'No unread notifications' :
+              tabValue === 2 ? 'No read notifications' : 'No notifications'}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {tabValue === 0 ? 'You\'ll see notifications here when they arrive' : ''}

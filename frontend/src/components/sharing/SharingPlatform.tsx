@@ -60,17 +60,17 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
 
   const filteredEquipment = equipment.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.owner.toLowerCase().includes(searchTerm.toLowerCase());
+      item.owner.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedEquipmentType === 'all' || item.type === selectedEquipmentType;
-    
+
     return matchesSearch && matchesType;
   });
 
   const filteredLabor = labor.filter(worker => {
     const matchesSearch = worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         worker.description.toLowerCase().includes(searchTerm.toLowerCase());
+      worker.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSkill = selectedSkill === 'all' || worker.skills.includes(selectedSkill);
-    
+
     return matchesSearch && matchesSkill;
   });
 
@@ -99,8 +99,8 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
       </Box>
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
-        <Tab 
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Build />
@@ -108,7 +108,7 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
             </Box>
           }
         />
-        <Tab 
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <People />
@@ -133,7 +133,7 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
             ),
           }}
         />
-        
+
         {tabValue === 0 ? (
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Equipment Type</InputLabel>
@@ -175,10 +175,10 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
       </Stack>
 
       {/* Content Grid */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: 2 
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        gap: 2
       }}>
         {tabValue === 0 ? (
           filteredEquipment.map((item) => (
@@ -223,17 +223,17 @@ const SharingPlatform: React.FC<SharingPlatformProps> = ({ equipment, labor }) =
       </Box>
 
       {/* Empty State */}
-      {((tabValue === 0 && filteredEquipment.length === 0) || 
+      {((tabValue === 0 && filteredEquipment.length === 0) ||
         (tabValue === 1 && filteredLabor.length === 0)) && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h6" color="text.secondary">
-            {tabValue === 0 ? 'No equipment found' : 'No workers found'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try adjusting your search or filters
-          </Typography>
-        </Box>
-      )}
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" color="text.secondary">
+              {tabValue === 0 ? 'No equipment found' : 'No workers found'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Try adjusting your search or filters
+            </Typography>
+          </Box>
+        )}
 
       {/* Add Listing FAB */}
       <Fab

@@ -48,7 +48,14 @@ let redisClient;
 
 try {
   // Try to connect to Redis if host and port are provided
-  if (process.env.REDIS_HOST && process.env.REDIS_PORT) {
+  // Try to connect to Redis if URL or host/port are provided
+  if (process.env.REDIS_URL) {
+    redisClient = new Redis(process.env.REDIS_URL, {
+      lazyConnect: true,
+      connectTimeout: 2000,
+      maxRetriesPerRequest: 1,
+    });
+  } else if (process.env.REDIS_HOST && process.env.REDIS_PORT) {
     redisClient = new Redis({
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
@@ -56,7 +63,7 @@ try {
       connectTimeout: 2000, // 2 seconds timeout
       maxRetriesPerRequest: 1,
     });
-    
+
     redisClient.on('connect', () => console.log('Connected to Redis!'));
     redisClient.on('error', (err) => {
       console.error('Redis Client Error', err);

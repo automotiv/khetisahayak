@@ -1,0 +1,29 @@
+{
+    "name": "render-mcp-server",
+    "version": "1.0.0",
+    "description": "MCP server for Render API",
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node src/index.ts"
+    },
+    "keywords": [
+        "mcp",
+        "render",
+        "api"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^0.6.0",
+        "axios": "^1.6.0",
+        "dotenv": "^16.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "ts-node": "^10.9.0",
+        "typescript": "^5.0.0"
+    }
+}

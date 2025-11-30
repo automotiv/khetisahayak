@@ -10,14 +10,14 @@ import {
   Alert,
   IconButton
 } from '@mui/material';
-import { 
-  ThumbUp, 
-  ThumbDown, 
-  CheckCircle, 
+import {
+  ThumbUp,
+  ThumbDown,
+  CheckCircle,
   Schedule,
-  Priority,
+  PriorityHigh,
   WaterDrop,
-  Eco,
+  Nature,
   BugReport,
   Agriculture,
   TrendingUp,
@@ -60,7 +60,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       case RecommendationType.IRRIGATION:
         return <WaterDrop sx={{ color: 'info.main' }} />;
       case RecommendationType.FERTILIZATION:
-        return <Eco sx={{ color: 'success.main' }} />;
+        return <Nature sx={{ color: 'success.main' }} />;
       case RecommendationType.PEST_MANAGEMENT:
         return <BugReport sx={{ color: 'error.main' }} />;
       case RecommendationType.CROP_SELECTION:
@@ -70,7 +70,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       case RecommendationType.STORAGE:
         return <Storage sx={{ color: 'warning.main' }} />;
       default:
-        return <Priority sx={{ color: 'grey.600' }} />;
+        return <PriorityHigh sx={{ color: 'grey.600' }} />;
     }
   };
 
@@ -99,7 +99,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const isDue = new Date(dueDate) <= new Date();
 
   return (
-    <Card sx={{ 
+    <Card sx={{
       border: actionRequired && isDue ? 2 : 0,
       borderColor: actionRequired && isDue ? 'error.main' : 'transparent'
     }}>
@@ -112,7 +112,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 {title}
               </Typography>
             </Box>
-            <Chip 
+            <Chip
               label={formatRecommendationPriority(priority)}
               size="small"
               color={getPriorityColor(priority) as any}
@@ -157,15 +157,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 Was this recommendation helpful?
               </Typography>
               <Stack direction="row" spacing={1}>
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={() => handleFeedback(true)}
                   sx={{ color: 'success.main' }}
                 >
                   <ThumbUp />
                 </IconButton>
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={() => handleFeedback(false)}
                   sx={{ color: 'error.main' }}
                 >

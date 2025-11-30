@@ -11,14 +11,13 @@ import {
   Collapse,
   Alert
 } from '@mui/material';
-import { 
-  Bookmark, 
-  BookmarkBorder, 
-  ExpandMore, 
-  ExpandLess, 
+import {
+  Bookmark,
+  BookmarkBorder,
+  ExpandMore,
+  ExpandLess,
   Launch,
-  AccessTime,
-  CheckCircle
+  AccessTime
 } from '@mui/icons-material';
 import { SchemeType, SchemeLevel } from '../../types/enums';
 import { formatSchemeType, formatDate } from '../../utils/formatters';
@@ -101,12 +100,12 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
                 {name}
               </Typography>
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                <Chip 
+                <Chip
                   label={formatSchemeType(type)}
                   size="small"
                   color={getSchemeTypeColor(type) as any}
                 />
-                <Chip 
+                <Chip
                   label={level.toUpperCase()}
                   size="small"
                   variant="outlined"
@@ -144,7 +143,7 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
             >
               {expanded ? 'Hide Details' : 'View Details'}
             </Button>
-            
+
             <Collapse in={expanded}>
               <Stack spacing={2} sx={{ mt: 2 }}>
                 <Box>
@@ -155,7 +154,7 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
                     {eligibility}
                   </Typography>
                 </Box>
-                
+
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>
                     Benefits:
@@ -164,7 +163,7 @@ const SchemeCard: React.FC<SchemeCardProps> = ({
                     {benefits}
                   </Typography>
                 </Box>
-                
+
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>
                     Application Deadline:

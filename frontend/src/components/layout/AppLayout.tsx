@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  IconButton, 
-  Badge, 
-  BottomNavigation, 
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Badge,
+  BottomNavigation,
   BottomNavigationAction,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider
 } from '@mui/material';
-import { 
-  Notifications, 
-  Menu, 
+import {
+  Notifications,
+  Menu,
   AccountCircle,
   Dashboard,
   WbSunny,
@@ -29,8 +30,7 @@ import {
   Book,
   AccountBalance,
   Lightbulb,
-  Share,
-  Settings
+  Share
 } from '@mui/icons-material';
 
 interface AppLayoutProps {
@@ -38,15 +38,13 @@ interface AppLayoutProps {
   currentTab: number;
   onTabChange: (newValue: number) => void;
   notificationCount?: number;
-  showExtendedNavigation?: boolean;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ 
-  children, 
-  currentTab, 
-  onTabChange, 
-  notificationCount = 0,
-  showExtendedNavigation = false
+const AppLayout: React.FC<AppLayoutProps> = ({
+  children,
+  currentTab,
+  onTabChange,
+  notificationCount = 0
 }) => {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
@@ -69,17 +67,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           >
             <Menu />
           </IconButton>
-          
+
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Kheti Sahayak
           </Typography>
-          
+
           <IconButton color="inherit">
             <Badge badgeContent={notificationCount} color="error">
               <Notifications />
             </Badge>
           </IconButton>
-          
+
           <IconButton color="inherit">
             <AccountCircle />
           </IconButton>
@@ -87,13 +85,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       </AppBar>
 
       {/* Main Content */}
-      <Box 
-        component="main" 
-        sx={{ 
-          flexGrow: 1, 
-          mt: 8, 
-          mb: 8, 
-          px: 2, 
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          mt: 8,
+          mb: 8,
+          px: 2,
           py: 1,
           backgroundColor: 'background.default'
         }}
@@ -109,64 +107,90 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       >
         <Box sx={{ width: 280, pt: 8 }}>
           <List>
-            <ListItem button onClick={() => handleSideMenuItemClick(0)}>
-              <ListItemIcon><Dashboard /></ListItemIcon>
-              <ListItemText primary="Dashboard" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(0)}>
+                <ListItemIcon><Dashboard /></ListItemIcon>
+                <ListItemText primary="Dashboard" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(1)}>
-              <ListItemIcon><WbSunny /></ListItemIcon>
-              <ListItemText primary="Weather" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(1)}>
+                <ListItemIcon><WbSunny /></ListItemIcon>
+                <ListItemText primary="Weather" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(2)}>
-              <ListItemIcon><LocalHospital /></ListItemIcon>
-              <ListItemText primary="Crop Diagnostics" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(2)}>
+                <ListItemIcon><LocalHospital /></ListItemIcon>
+                <ListItemText primary="Crop Diagnostics" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(3)}>
-              <ListItemIcon><Storefront /></ListItemIcon>
-              <ListItemText primary="Marketplace" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(3)}>
+                <ListItemIcon><Storefront /></ListItemIcon>
+                <ListItemText primary="Marketplace" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(4)}>
-              <ListItemIcon><School /></ListItemIcon>
-              <ListItemText primary="Education" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(4)}>
+                <ListItemIcon><School /></ListItemIcon>
+                <ListItemText primary="Education" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(5)}>
-              <ListItemIcon><People /></ListItemIcon>
-              <ListItemText primary="Expert Connect" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(5)}>
+                <ListItemIcon><People /></ListItemIcon>
+                <ListItemText primary="Expert Connect" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(6)}>
-              <ListItemIcon><ChatBubbleOutline /></ListItemIcon>
-              <ListItemText primary="Community" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(6)}>
+                <ListItemIcon><ChatBubbleOutline /></ListItemIcon>
+                <ListItemText primary="Community" />
+              </ListItemButton>
             </ListItem>
-            
+
             <Divider sx={{ my: 1 }} />
-            
-            <ListItem button onClick={() => handleSideMenuItemClick(7)}>
-              <ListItemIcon><Book /></ListItemIcon>
-              <ListItemText primary="Digital Logbook" />
+
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(7)}>
+                <ListItemIcon><Book /></ListItemIcon>
+                <ListItemText primary="Digital Logbook" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(8)}>
-              <ListItemIcon><AccountBalance /></ListItemIcon>
-              <ListItemText primary="Government Schemes" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(8)}>
+                <ListItemIcon><AccountBalance /></ListItemIcon>
+                <ListItemText primary="Government Schemes" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(9)}>
-              <ListItemIcon><Lightbulb /></ListItemIcon>
-              <ListItemText primary="Recommendations" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(9)}>
+                <ListItemIcon><Lightbulb /></ListItemIcon>
+                <ListItemText primary="Recommendations" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(10)}>
-              <ListItemIcon><Share /></ListItemIcon>
-              <ListItemText primary="Equipment & Labor" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(10)}>
+                <ListItemIcon><Share /></ListItemIcon>
+                <ListItemText primary="Equipment & Labor" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(11)}>
-              <ListItemIcon>
-                <Badge badgeContent={notificationCount} color="error">
-                  <Notifications />
-                </Badge>
-              </ListItemIcon>
-              <ListItemText primary="Notifications" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(11)}>
+                <ListItemIcon>
+                  <Badge badgeContent={notificationCount} color="error">
+                    <Notifications />
+                  </Badge>
+                </ListItemIcon>
+                <ListItemText primary="Notifications" />
+              </ListItemButton>
             </ListItem>
-            <ListItem button onClick={() => handleSideMenuItemClick(12)}>
-              <ListItemIcon><AccountCircle /></ListItemIcon>
-              <ListItemText primary="Profile" />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(12)}>
+                <ListItemIcon><AccountCircle /></ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
             </ListItem>
           </List>
         </Box>
@@ -175,7 +199,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       {/* Bottom Navigation */}
       <BottomNavigation
         value={currentTab > 6 ? -1 : currentTab}
-        onChange={(event, newValue) => onTabChange(newValue)}
+        onChange={(_, newValue) => onTabChange(newValue)}
         sx={{
           position: 'fixed',
           bottom: 0,
@@ -186,28 +210,28 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           borderColor: 'divider'
         }}
       >
-        <BottomNavigationAction 
-          label="Dashboard" 
-          icon={<Dashboard />} 
+        <BottomNavigationAction
+          label="Dashboard"
+          icon={<Dashboard />}
         />
-        <BottomNavigationAction 
-          label="Weather" 
-          icon={<WbSunny />} 
+        <BottomNavigationAction
+          label="Weather"
+          icon={<WbSunny />}
         />
-        <BottomNavigationAction 
-          label="Diagnostics" 
-          icon={<LocalHospital />} 
+        <BottomNavigationAction
+          label="Diagnostics"
+          icon={<LocalHospital />}
         />
-        <BottomNavigationAction 
-          label="Marketplace" 
-          icon={<Storefront />} 
+        <BottomNavigationAction
+          label="Marketplace"
+          icon={<Storefront />}
         />
-        <BottomNavigationAction 
-          label="Education" 
-          icon={<School />} 
+        <BottomNavigationAction
+          label="Education"
+          icon={<School />}
         />
-        <BottomNavigationAction 
-          label="More" 
+        <BottomNavigationAction
+          label="More"
           icon={<Menu />}
           onClick={() => setSideMenuOpen(true)}
         />

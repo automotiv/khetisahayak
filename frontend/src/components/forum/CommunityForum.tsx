@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
+import {
+  Box,
+  Typography,
+  TextField,
   InputAdornment,
   FormControl,
   Select,
@@ -30,9 +30,9 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ posts }) => {
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.author.toLowerCase().includes(searchTerm.toLowerCase());
+      post.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -80,19 +80,19 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ posts }) => {
       </Typography>
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
-        <Tab 
-          label="Latest" 
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+        <Tab
+          label="Latest"
           icon={<Schedule />}
           iconPosition="start"
         />
-        <Tab 
-          label="Trending" 
+        <Tab
+          label="Trending"
           icon={<TrendingUp />}
           iconPosition="start"
         />
-        <Tab 
-          label="Expert Replies" 
+        <Tab
+          label="Expert Replies"
           icon={<Star />}
           iconPosition="start"
         />
@@ -113,7 +113,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ posts }) => {
             ),
           }}
         />
-        
+
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>Category</InputLabel>
           <Select

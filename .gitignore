@@ -60,3 +60,7 @@ flutter_*.zip
 
 # Externalized wiki
 khetisahayak.wiki/
+
+# Secrets
+kheti_sahayak_backend/render_db_details.txt
+render_mcp/.env

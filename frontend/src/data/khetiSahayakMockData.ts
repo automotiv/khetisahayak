@@ -1,6 +1,6 @@
 // Mock data for Kheti Sahayak application
 
-import { UserRole, CropType, WeatherCondition, ProductCategory, OrderStatus, DiagnosisStatus, ContentType, ForumCategory, NotificationType } from '../types/enums';
+import { UserRole, CropType, WeatherCondition, ProductCategory, DiagnosisStatus, ContentType, ForumCategory, NotificationType } from '../types/enums';
 
 // Data for global state store
 export const mockStore = {

@@ -1,6 +1,6 @@
 // String formatting functions for Kheti Sahayak
 
-import { WeatherCondition, CropType, OrderStatus, DiagnosisStatus, ContentType, ForumCategory, NotificationType, ActivityType, EquipmentType, BookingStatus, LaborSkill, SchemeType, RecommendationPriority } from '../types/enums';
+import { WeatherCondition, OrderStatus, DiagnosisStatus, ActivityType, EquipmentType, BookingStatus, LaborSkill, SchemeType, RecommendationPriority } from '../types/enums';
 
 export const formatTemperature = (temp: number, unit: 'C' | 'F' = 'C'): string => {
   return `${Math.round(temp)}°${unit}`;

@@ -1,6 +1,6 @@
 // Enhanced mock data for additional Kheti Sahayak features
 
-import { UserRole, CropType, WeatherCondition, ProductCategory, OrderStatus, DiagnosisStatus, ContentType, ForumCategory, NotificationType, ActivityType, EquipmentType, EquipmentStatus, BookingStatus, LaborSkill, SchemeType, SchemeLevel, RecommendationType, RecommendationPriority } from '../types/enums';
+import { UserRole, CropType, WeatherCondition, ProductCategory, DiagnosisStatus, ContentType, ForumCategory, NotificationType, ActivityType, EquipmentType, EquipmentStatus, LaborSkill, SchemeType, SchemeLevel, RecommendationType, RecommendationPriority } from '../types/enums';
 
 // Data for global state store
 export const mockStore = {
@@ -146,7 +146,7 @@ export const mockQuery = {
 // Additional API query data for new features
 export const enhancedMockQuery = {
   ...mockQuery,
-  
+
   logbookEntries: [
     {
       id: "entry1" as const,
@@ -171,7 +171,7 @@ export const enhancedMockQuery = {
       photos: []
     }
   ],
-  
+
   governmentSchemes: [
     {
       id: "scheme1" as const,
@@ -198,7 +198,7 @@ export const enhancedMockQuery = {
       isBookmarked: true
     }
   ],
-  
+
   recommendations: [
     {
       id: "rec1" as const,
@@ -223,7 +223,7 @@ export const enhancedMockQuery = {
       isFollowed: false
     }
   ],
-  
+
   equipmentListings: [
     {
       id: "equip1" as const,
@@ -240,7 +240,7 @@ export const enhancedMockQuery = {
       description: "Well-maintained tractor suitable for all farming operations" as const
     }
   ],
-  
+
   laborProfiles: [
     {
       id: "labor1" as const,
@@ -256,7 +256,7 @@ export const enhancedMockQuery = {
       description: "Experienced farm worker specializing in vegetable crops" as const
     }
   ],
-  
+
   notifications: [
     {
       id: "notif1" as const,
@@ -295,7 +295,7 @@ export const enhancedMockStore = {
     language: "hindi" as const,
     isVerified: true
   },
-  
+
   farmProfile: {
     farmSize: 2.5,
     soilType: "loamy" as const,
@@ -307,7 +307,7 @@ export const enhancedMockStore = {
     phLevel: 6.8,
     organicMatter: 2.3
   },
-  
+
   userPreferences: {
     notificationSettings: {
       weatherAlerts: true,

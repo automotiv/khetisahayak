@@ -45,11 +45,11 @@ const GovernmentSchemes: React.FC<GovernmentSchemesProps> = ({ schemes }) => {
 
   const filteredSchemes = schemes.filter(scheme => {
     const matchesSearch = scheme.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         scheme.description.toLowerCase().includes(searchTerm.toLowerCase());
+      scheme.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || scheme.type === selectedType;
     const matchesLevel = selectedLevel === 'all' || scheme.level === selectedLevel;
     const matchesTab = tabValue === 0 || (tabValue === 1 && bookmarkedSchemes.has(scheme.id));
-    
+
     return matchesSearch && matchesType && matchesLevel && matchesTab;
   });
 
@@ -78,9 +78,9 @@ const GovernmentSchemes: React.FC<GovernmentSchemesProps> = ({ schemes }) => {
       </Typography>
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
         <Tab label="All Schemes" />
-        <Tab 
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Bookmark />
@@ -108,7 +108,7 @@ const GovernmentSchemes: React.FC<GovernmentSchemesProps> = ({ schemes }) => {
             ),
           }}
         />
-        
+
         <Stack direction="row" spacing={2}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Type</InputLabel>
@@ -127,7 +127,7 @@ const GovernmentSchemes: React.FC<GovernmentSchemesProps> = ({ schemes }) => {
               <MenuItem value={SchemeType.WATER_MANAGEMENT}>Water Management</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Level</InputLabel>
             <Select

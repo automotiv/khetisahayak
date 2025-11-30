@@ -10,6 +10,7 @@ import {
   Divider,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   ListItemSecondaryAction,
@@ -19,20 +20,24 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  Chip
 } from '@mui/material';
 import {
   Edit,
-  Settings,
-  Notifications,
   Language,
   Security,
   Help,
   Info,
   ExitToApp,
-  Person,
   Agriculture,
-  LocationOn
+  LocationOn,
+  WbSunny,
+  AccountBalance,
+  ShoppingCart,
+  People,
+  Forum,
+  Schedule
 } from '@mui/icons-material';
 
 interface UserProfileProps {
@@ -170,7 +175,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
                 />
               </ListItemSecondaryAction>
             </ListItem>
-            
+
             <ListItem>
               <ListItemIcon>
                 <AccountBalance />
@@ -183,7 +188,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
                 />
               </ListItemSecondaryAction>
             </ListItem>
-            
+
             <ListItem>
               <ListItemIcon>
                 <ShoppingCart />
@@ -196,7 +201,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
                 />
               </ListItemSecondaryAction>
             </ListItem>
-            
+
             <ListItem>
               <ListItemIcon>
                 <People />
@@ -209,7 +214,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
                 />
               </ListItemSecondaryAction>
             </ListItem>
-            
+
             <ListItem>
               <ListItemIcon>
                 <Forum />
@@ -222,7 +227,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
                 />
               </ListItemSecondaryAction>
             </ListItem>
-            
+
             <ListItem>
               <ListItemIcon>
                 <Schedule />
@@ -246,47 +251,57 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, farmProfile, preference
             App Settings
           </Typography>
           <List>
-            <ListItem button>
-              <ListItemIcon>
-                <Language />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Language" 
-                secondary={preferences.language}
-              />
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <Language />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Language"
+                  secondary={preferences.language}
+                />
+              </ListItemButton>
             </ListItem>
-            
-            <ListItem button>
-              <ListItemIcon>
-                <Security />
-              </ListItemIcon>
-              <ListItemText primary="Privacy & Security" />
+
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <Security />
+                </ListItemIcon>
+                <ListItemText primary="Privacy & Security" />
+              </ListItemButton>
             </ListItem>
-            
-            <ListItem button>
-              <ListItemIcon>
-                <Help />
-              </ListItemIcon>
-              <ListItemText primary="Help & Support" />
+
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <Help />
+                </ListItemIcon>
+                <ListItemText primary="Help & Support" />
+              </ListItemButton>
             </ListItem>
-            
-            <ListItem button>
-              <ListItemIcon>
-                <Info />
-              </ListItemIcon>
-              <ListItemText primary="About Kheti Sahayak" />
+
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <Info />
+                </ListItemIcon>
+                <ListItemText primary="About Kheti Sahayak" />
+              </ListItemButton>
             </ListItem>
-            
+
             <Divider sx={{ my: 1 }} />
-            
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon>
-                <ExitToApp sx={{ color: 'error.main' }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Logout" 
-                sx={{ color: 'error.main' }}
-              />
+
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <ExitToApp sx={{ color: 'error.main' }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Logout"
+                  sx={{ color: 'error.main' }}
+                />
+              </ListItemButton>
             </ListItem>
           </List>
         </CardContent>

@@ -12,7 +12,7 @@ import {
   Stack,
   Avatar
 } from '@mui/material';
-import { CalendarToday, LocationOn, Security } from '@mui/icons-material';
+import { CalendarToday, LocationOn } from '@mui/icons-material';
 import { EquipmentType, EquipmentStatus } from '../../types/enums';
 import { formatEquipmentType, formatCurrency } from '../../utils/formatters';
 
@@ -85,14 +85,14 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({
         image={images[0] || '/placeholder-equipment.jpg'}
         alt={name}
       />
-      
+
       <CardContent sx={{ flexGrow: 1 }}>
         <Stack spacing={2}>
           <Box>
             <Typography variant="h6" component="div" gutterBottom>
               {name}
             </Typography>
-            <Chip 
+            <Chip
               label={formatEquipmentType(type)}
               size="small"
               color="primary"
@@ -153,14 +153,14 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({
             </Box>
           </Stack>
 
-          <Chip 
+          <Chip
             label={getStatusText(status)}
             size="small"
             color={getStatusColor(status) as any}
           />
         </Stack>
       </CardContent>
-      
+
       <CardActions>
         <Stack spacing={1} sx={{ width: '100%' }}>
           <Button
