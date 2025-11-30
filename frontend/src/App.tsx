@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, CircularProgress, Box } from '@mui/material';
 import AppLayout from './components/layout/AppLayout';
 import Dashboard from './components/dashboard/Dashboard';
 import WeatherForecast from './components/weather/WeatherForecast';
@@ -19,10 +19,53 @@ import LoginForm from './components/auth/LoginForm';
 import theme from './theme/theme';
 import { mockQuery } from './data/khetiSahayakMockData';
 import { enhancedMockQuery, enhancedMockStore } from './data/enhancedKhetiSahayakMockData';
+import { khetiApi } from './services/api';
 
 const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Set to false to show login
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  // Data State
+  // Data State
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(mockQuery.marketplaceProducts);
+  const [weather] = useState(enhancedMockQuery.weatherData);
+  const [content, setContent] = useState(mockQuery.educationalContent);
+  const [diagnostics] = useState(mockQuery.diagnosisHistory);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch data in parallel
+        const [productsData, contentData] = await Promise.all([
+          khetiApi.getProducts().catch(e => {
+            console.error("Failed to fetch products", e);
+            return mockQuery.marketplaceProducts; // Fallback
+          }),
+          khetiApi.getEducationalContent().catch(e => {
+            console.error("Failed to fetch content", e);
+            return mockQuery.educationalContent; // Fallback
+          })
+          // Add other fetches here as backend endpoints become available
+        ]);
+
+        if (productsData && productsData.data) {
+          setProducts(productsData.data);
+        }
+        if (contentData && contentData.data) {
+          setContent(contentData.data);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleLogin = (phone: string) => {
     console.log('Login successful:', phone);
@@ -30,37 +73,45 @@ const App: React.FC = () => {
   };
 
   const renderCurrentTab = () => {
+    if (loading) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+
     switch (currentTab) {
       case 0:
         return (
           <Dashboard
-            weatherData={enhancedMockQuery.weatherData}
-            diagnosisHistory={mockQuery.diagnosisHistory}
+            weatherData={weather}
+            diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
           />
         );
       case 1:
         return (
           <WeatherForecast
-            weatherData={enhancedMockQuery.weatherData}
+            weatherData={weather}
           />
         );
       case 2:
         return (
           <CropDiagnostics
-            diagnosisHistory={mockQuery.diagnosisHistory}
+            diagnosisHistory={diagnostics}
           />
         );
       case 3:
         return (
           <Marketplace
-            products={mockQuery.marketplaceProducts}
+            products={products}
           />
         );
       case 4:
         return (
           <EducationalContent
-            content={mockQuery.educationalContent}
+            content={content}
           />
         );
       case 5:
@@ -117,8 +168,8 @@ const App: React.FC = () => {
       default:
         return (
           <Dashboard
-            weatherData={enhancedMockQuery.weatherData}
-            diagnosisHistory={mockQuery.diagnosisHistory}
+            weatherData={weather}
+            diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
           />
         );
