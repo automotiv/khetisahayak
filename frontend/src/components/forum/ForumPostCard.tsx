@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
+import {
+  Card,
+  CardContent,
+  Typography,
   IconButton,
   Chip,
   Box,
@@ -11,13 +11,12 @@ import {
   Menu,
   MenuItem
 } from '@mui/material';
-import { 
-  ThumbUp, 
-  ThumbUpOutlined, 
-  Reply, 
+import {
+  ThumbUp,
+  ThumbUpOutlined,
+  Reply,
   MoreVert,
-  Verified,
-  ChatBubbleOutline
+  Verified
 } from '@mui/icons-material';
 import { ForumCategory } from '../../types/enums';
 import { formatDateTime } from '../../utils/formatters';
@@ -94,8 +93,8 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
   };
 
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         cursor: 'pointer',
         '&:hover': {
           transform: 'translateY(-1px)',
@@ -108,7 +107,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="div" sx={{ 
+              <Typography variant="h6" component="div" sx={{
                 fontSize: '1.1rem',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -124,14 +123,14 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
           </Box>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Chip 
+            <Chip
               label={category.replace('_', ' ')}
               size="small"
               color={getCategoryColor(category) as any}
               variant="outlined"
             />
             {hasExpertReply && (
-              <Chip 
+              <Chip
                 label="Expert Reply"
                 size="small"
                 color="info"
@@ -162,7 +161,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
                   {currentUpvotes}
                 </Typography>
               </Box>
-              
+
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <IconButton size="small" onClick={handleReply}>
                   <Reply />

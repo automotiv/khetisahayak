@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
+import {
+  Box,
+  Typography,
+  TextField,
   InputAdornment,
   FormControl,
   Select,
   MenuItem,
   InputLabel,
   Stack,
-  Chip,
   IconButton,
   Badge
 } from '@mui/material';
-import { Search, FilterList, ShoppingCart } from '@mui/icons-material';
+import { Search, ShoppingCart } from '@mui/icons-material';
 import ProductCard from './ProductCard';
 import { QueryTypes } from '../../types/schema';
 import { ProductCategory } from '../../types/enums';
@@ -48,6 +47,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ products }) => {
   });
 
   const handleAddToCart = (productId: string) => {
+    console.log('Adding to cart:', productId);
     setCartCount(prev => prev + 1);
   };
 
@@ -79,7 +79,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ products }) => {
             ),
           }}
         />
-        
+
         <Stack direction="row" spacing={2}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Category</InputLabel>
@@ -97,7 +97,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ products }) => {
               <MenuItem value={ProductCategory.SERVICES}>Services</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Sort by</InputLabel>
             <Select
@@ -114,10 +114,10 @@ const Marketplace: React.FC<MarketplaceProps> = ({ products }) => {
       </Stack>
 
       {/* Products Grid */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-        gap: 2 
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: 2
       }}>
         {sortedProducts.map((product) => (
           <ProductCard

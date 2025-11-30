@@ -11,7 +11,7 @@ import {
   Stack,
   Avatar
 } from '@mui/material';
-import { Work, LocationOn, Schedule } from '@mui/icons-material';
+import { Work, LocationOn } from '@mui/icons-material';
 import { LaborSkill } from '../../types/enums';
 import { formatLaborSkill, formatCurrency } from '../../utils/formatters';
 
@@ -66,8 +66,8 @@ const LaborCard: React.FC<LaborCardProps> = ({
       <CardContent sx={{ flexGrow: 1 }}>
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar 
-              src={profileImage} 
+            <Avatar
+              src={profileImage}
               alt={name}
               sx={{ width: 50, height: 50 }}
             />
@@ -79,7 +79,7 @@ const LaborCard: React.FC<LaborCardProps> = ({
                 {experience} years experience
               </Typography>
             </Box>
-            <Chip 
+            <Chip
               label={isAvailable ? "Available" : "Busy"}
               size="small"
               color={isAvailable ? "success" : "default"}
@@ -101,7 +101,7 @@ const LaborCard: React.FC<LaborCardProps> = ({
             </Typography>
             <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
               {skills.map((skill) => (
-                <Chip 
+                <Chip
                   key={skill}
                   label={formatLaborSkill(skill)}
                   size="small"
@@ -142,7 +142,7 @@ const LaborCard: React.FC<LaborCardProps> = ({
           </Stack>
         </Stack>
       </CardContent>
-      
+
       <CardActions>
         <Stack spacing={1} sx={{ width: '100%' }}>
           <Button

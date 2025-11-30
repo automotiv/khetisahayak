@@ -38,7 +38,8 @@ Key Principles of Organic Farming:
       category: 'Farming Methods',
       subcategory: 'Organic Farming',
       difficulty_level: 'beginner',
-      tags: ['organic', 'sustainable', 'farming', 'beginner']
+      tags: ['organic', 'sustainable', 'farming', 'beginner'],
+      imageUrl: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400'
     },
     {
       title: 'Crop Rotation Strategies',
@@ -64,7 +65,8 @@ Planning Your Rotation:
       category: 'Farming Methods',
       subcategory: 'Crop Management',
       difficulty_level: 'intermediate',
-      tags: ['crop rotation', 'soil health', 'pest management', 'intermediate']
+      tags: ['crop rotation', 'soil health', 'pest management', 'intermediate'],
+      imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400'
     },
     {
       title: 'Integrated Pest Management (IPM)',
@@ -100,7 +102,8 @@ Chemical Control (as last resort):
       category: 'Pest Management',
       subcategory: 'IPM',
       difficulty_level: 'intermediate',
-      tags: ['pest management', 'IPM', 'biological control', 'intermediate']
+      tags: ['pest management', 'IPM', 'biological control', 'intermediate'],
+      imageUrl: 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=400'
     },
     {
       title: 'Soil Testing and Analysis',
@@ -141,7 +144,8 @@ Making Recommendations:
       category: 'Soil Management',
       subcategory: 'Soil Testing',
       difficulty_level: 'beginner',
-      tags: ['soil testing', 'nutrients', 'pH', 'beginner']
+      tags: ['soil testing', 'nutrients', 'pH', 'beginner'],
+      imageUrl: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400'
     },
     {
       title: 'Drip Irrigation Systems',
@@ -188,7 +192,8 @@ Maintenance:
       category: 'Irrigation',
       subcategory: 'Drip Systems',
       difficulty_level: 'advanced',
-      tags: ['irrigation', 'drip', 'water efficiency', 'advanced']
+      tags: ['irrigation', 'drip', 'water efficiency', 'advanced'],
+      imageUrl: 'https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?w=400'
     },
     {
       title: 'Greenhouse Management',
@@ -254,15 +259,27 @@ Economic Considerations:
       category: 'Protected Agriculture',
       subcategory: 'Greenhouse',
       difficulty_level: 'advanced',
-      tags: ['greenhouse', 'environmental control', 'year-round production', 'advanced']
+      tags: ['greenhouse', 'environmental control', 'year-round production', 'advanced'],
+      imageUrl: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400'
+    },
+    {
+      title: 'Modern Tractor Operations',
+      content: 'Comprehensive guide on operating modern tractors safely and efficiently, covering maintenance, safety protocols, and field operations.',
+      summary: 'Video tutorial on modern tractor operations and safety.',
+      category: 'Farm Machinery',
+      subcategory: 'Tractors',
+      difficulty_level: 'intermediate',
+      tags: ['tractor', 'machinery', 'safety', 'video'],
+      imageUrl: 'https://images.unsplash.com/photo-1519331379826-f95209603306?w=400',
+      videoUrl: 'https://www.youtube.com/watch?v=dummy_video_id'
     }
   ];
 
   for (const content of contentData) {
     await db.query(
       `INSERT INTO educational_content (
-        title, content, summary, category, subcategory, difficulty_level, tags, is_published
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        title, content, summary, category, subcategory, difficulty_level, tags, is_published, image_url, video_url
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
         content.title,
         content.content,
@@ -271,7 +288,9 @@ Economic Considerations:
         content.subcategory,
         content.difficulty_level,
         content.tags,
-        true
+        true,
+        content.imageUrl,
+        content.videoUrl
       ]
     );
   }

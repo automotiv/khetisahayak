@@ -42,7 +42,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
   const filteredRecommendations = recommendations.filter(rec => {
     const matchesType = selectedType === 'all' || rec.type === selectedType;
     const matchesPriority = selectedPriority === 'all' || rec.priority === selectedPriority;
-    
+
     let matchesTab = true;
     switch (tabValue) {
       case 0: // All
@@ -55,7 +55,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
         matchesTab = followedRecommendations.has(rec.id);
         break;
     }
-    
+
     return matchesType && matchesPriority && matchesTab;
   });
 
@@ -64,11 +64,11 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
     const priorityOrder = { high: 3, medium: 2, low: 1 };
     const aPriority = priorityOrder[a.priority];
     const bPriority = priorityOrder[b.priority];
-    
+
     if (aPriority !== bPriority) {
       return bPriority - aPriority;
     }
-    
+
     return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
 
@@ -84,9 +84,9 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
     console.log('Feedback for recommendation:', recommendationId, 'Helpful:', helpful);
   };
 
-  const urgentCount = recommendations.filter(r => 
-    r.actionRequired && 
-    r.priority === RecommendationPriority.HIGH && 
+  const urgentCount = recommendations.filter(r =>
+    r.actionRequired &&
+    r.priority === RecommendationPriority.HIGH &&
     !followedRecommendations.has(r.id)
   ).length;
 
@@ -98,8 +98,8 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
 
       {/* Urgent Alert */}
       {urgentCount > 0 && (
-        <Alert 
-          severity="warning" 
+        <Alert
+          severity="warning"
           icon={<PriorityHigh />}
           sx={{ mb: 2 }}
         >
@@ -108,9 +108,9 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
       )}
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
         <Tab label="All" />
-        <Tab 
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Schedule />
@@ -118,7 +118,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
             </Box>
           }
         />
-        <Tab 
+        <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CheckCircle />
@@ -146,7 +146,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) =>
             <MenuItem value={RecommendationType.STORAGE}>Storage</MenuItem>
           </Select>
         </FormControl>
-        
+
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Priority</InputLabel>
           <Select

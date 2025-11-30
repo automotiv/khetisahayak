@@ -14,9 +14,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Card,
+  CardContent
 } from '@mui/material';
-import { Add, Search, GetApp, FilterList } from '@mui/icons-material';
+import { Add, Search, GetApp } from '@mui/icons-material';
 import LogbookEntry from './LogbookEntry';
 import { ActivityType } from '../../types/enums';
 
@@ -48,9 +50,9 @@ const DigitalLogbook: React.FC<DigitalLogbookProps> = ({ entries }) => {
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = entry.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.cropType.toLowerCase().includes(searchTerm.toLowerCase());
+      entry.cropType.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesActivity = selectedActivity === 'all' || entry.activityType === selectedActivity;
-    
+
     return matchesSearch && matchesActivity;
   });
 
@@ -127,7 +129,7 @@ const DigitalLogbook: React.FC<DigitalLogbookProps> = ({ entries }) => {
             ),
           }}
         />
-        
+
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>Activity Type</InputLabel>
           <Select

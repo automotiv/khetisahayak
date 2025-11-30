@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Button, 
-  Stack, 
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Stack,
   LinearProgress,
   Chip,
   Alert,
   CardMedia
 } from '@mui/material';
 import { CameraAlt, PhotoLibrary, Send } from '@mui/icons-material';
-import { DiagnosisStatus } from '../../types/enums';
 import { formatConfidenceScore, formatDateTime } from '../../utils/formatters';
 import { QueryTypes } from '../../types/schema';
 
@@ -34,10 +33,10 @@ const CropDiagnostics: React.FC<CropDiagnosticsProps> = ({ diagnosisHistory }) =
 
   const handleAnalyze = () => {
     if (!selectedImage) return;
-    
+
     setIsAnalyzing(true);
     setUploadProgress(0);
-    
+
     // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
@@ -63,18 +62,18 @@ const CropDiagnostics: React.FC<CropDiagnosticsProps> = ({ diagnosisHistory }) =
           <Typography variant="h6" gutterBottom>
             Upload Crop Image
           </Typography>
-          
+
           {selectedImage ? (
             <Box sx={{ mb: 2 }}>
-              <img 
-                src={URL.createObjectURL(selectedImage)} 
+              <img
+                src={URL.createObjectURL(selectedImage)}
                 alt="Selected crop"
                 style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8 }}
               />
             </Box>
           ) : (
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 border: '2px dashed',
                 borderColor: 'grey.300',
                 borderRadius: 2,
@@ -105,7 +104,7 @@ const CropDiagnostics: React.FC<CropDiagnosticsProps> = ({ diagnosisHistory }) =
                 onChange={handleImageUpload}
               />
             </Button>
-            
+
             <Button
               variant="outlined"
               startIcon={<PhotoLibrary />}
@@ -147,7 +146,7 @@ const CropDiagnostics: React.FC<CropDiagnosticsProps> = ({ diagnosisHistory }) =
       <Typography variant="h6" gutterBottom>
         Recent Diagnoses
       </Typography>
-      
+
       <Stack spacing={2}>
         {diagnosisHistory.map((diagnosis) => (
           <Card key={diagnosis.id}>
@@ -163,17 +162,17 @@ const CropDiagnostics: React.FC<CropDiagnosticsProps> = ({ diagnosisHistory }) =
                   <Typography variant="h6">
                     {diagnosis.diagnosis}
                   </Typography>
-                  <Chip 
+                  <Chip
                     label={formatConfidenceScore(diagnosis.confidence)}
                     color="success"
                     size="small"
                   />
                 </Box>
-                
+
                 <Typography variant="body2" color="text.secondary">
                   {diagnosis.cropType} • {formatDateTime(new Date(diagnosis.uploadDate))}
                 </Typography>
-                
+
                 <Alert severity="info" sx={{ mt: 1 }}>
                   Apply sulfur-based fungicide and ensure proper ventilation around plants.
                 </Alert>

@@ -17,14 +17,14 @@ import NotificationCenter from './components/notifications/NotificationCenter';
 import UserProfile from './components/profile/UserProfile';
 import LoginForm from './components/auth/LoginForm';
 import theme from './theme/theme';
-import { mockQuery, mockStore } from './data/khetiSahayakMockData';
+import { mockQuery } from './data/khetiSahayakMockData';
 import { enhancedMockQuery, enhancedMockStore } from './data/enhancedKhetiSahayakMockData';
 
 const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(true); // Set to false to show login
 
-  const handleLogin = (phone: string, otp: string) => {
+  const handleLogin = (phone: string) => {
     console.log('Login successful:', phone);
     setIsAuthenticated(true);
   };
@@ -41,74 +41,74 @@ const App: React.FC = () => {
         );
       case 1:
         return (
-          <WeatherForecast 
+          <WeatherForecast
             weatherData={enhancedMockQuery.weatherData}
           />
         );
       case 2:
         return (
-          <CropDiagnostics 
+          <CropDiagnostics
             diagnosisHistory={mockQuery.diagnosisHistory}
           />
         );
       case 3:
         return (
-          <Marketplace 
+          <Marketplace
             products={mockQuery.marketplaceProducts}
           />
         );
       case 4:
         return (
-          <EducationalContent 
+          <EducationalContent
             content={mockQuery.educationalContent}
           />
         );
       case 5:
         return (
-          <ExpertConnect 
+          <ExpertConnect
             experts={mockQuery.experts}
           />
         );
       case 6:
         return (
-          <CommunityForum 
+          <CommunityForum
             posts={mockQuery.forumPosts}
           />
         );
       case 7:
         return (
-          <DigitalLogbook 
+          <DigitalLogbook
             entries={enhancedMockQuery.logbookEntries}
           />
         );
       case 8:
         return (
-          <GovernmentSchemes 
+          <GovernmentSchemes
             schemes={enhancedMockQuery.governmentSchemes}
           />
         );
       case 9:
         return (
-          <Recommendations 
+          <Recommendations
             recommendations={enhancedMockQuery.recommendations}
           />
         );
       case 10:
         return (
-          <SharingPlatform 
+          <SharingPlatform
             equipment={enhancedMockQuery.equipmentListings}
             labor={enhancedMockQuery.laborProfiles}
           />
         );
       case 11:
         return (
-          <NotificationCenter 
+          <NotificationCenter
             notifications={enhancedMockQuery.notifications}
           />
         );
       case 12:
         return (
-          <UserProfile 
+          <UserProfile
             user={enhancedMockStore.user}
             farmProfile={enhancedMockStore.farmProfile}
             preferences={enhancedMockStore.userPreferences}
@@ -141,7 +141,6 @@ const App: React.FC = () => {
         currentTab={currentTab}
         onTabChange={setCurrentTab}
         notificationCount={enhancedMockQuery.notifications.filter(n => !n.isRead).length}
-        showExtendedNavigation={true}
       >
         {renderCurrentTab()}
       </AppLayout>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
+import {
+  Box,
+  Typography,
+  TextField,
   InputAdornment,
   FormControl,
   Select,
@@ -30,11 +30,11 @@ const EducationalContent: React.FC<EducationalContentProps> = ({ content }) => {
 
   const filteredContent = content.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.author.toLowerCase().includes(searchTerm.toLowerCase());
+      item.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || item.type === selectedType;
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesTab = tabValue === 0 || (tabValue === 1 && bookmarkedContent.has(item.id));
-    
+
     return matchesSearch && matchesType && matchesCategory && matchesTab;
   });
 
@@ -61,10 +61,10 @@ const EducationalContent: React.FC<EducationalContentProps> = ({ content }) => {
       </Typography>
 
       {/* Tabs */}
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
         <Tab label="All Content" />
-        <Tab 
-          label="Bookmarks" 
+        <Tab
+          label="Bookmarks"
           icon={<Bookmark />}
           iconPosition="start"
         />
@@ -85,7 +85,7 @@ const EducationalContent: React.FC<EducationalContentProps> = ({ content }) => {
             ),
           }}
         />
-        
+
         <Stack direction="row" spacing={2}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Type</InputLabel>
@@ -101,7 +101,7 @@ const EducationalContent: React.FC<EducationalContentProps> = ({ content }) => {
               <MenuItem value={ContentType.AUDIO}>Audio</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Category</InputLabel>
             <Select
@@ -121,10 +121,10 @@ const EducationalContent: React.FC<EducationalContentProps> = ({ content }) => {
       </Stack>
 
       {/* Content Grid */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-        gap: 2 
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: 2
       }}>
         {filteredContent.map((item) => (
           <ContentCard

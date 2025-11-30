@@ -1,6 +1,6 @@
 // Type definitions for Kheti Sahayak application
 
-import { UserRole, CropType, WeatherCondition, ProductCategory, OrderStatus, DiagnosisStatus, ContentType, ForumCategory, NotificationType } from './enums';
+import { UserRole, CropType, WeatherCondition, ProductCategory, DiagnosisStatus, ContentType, ForumCategory, NotificationType } from './enums';
 
 // Props types (data passed to components)
 export interface PropTypes {
