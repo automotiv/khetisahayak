@@ -24,7 +24,11 @@ router.get('/', async (req, res) => {
       message: 'Server is running but DB connection failed',
       timestamp: new Date().toISOString(),
       db_status: 'disconnected',
-      error: error.message
+      error: error.message,
+      debug: {
+        env_db_url_exists: !!process.env.DATABASE_URL,
+        is_external: process.env.DATABASE_URL ? process.env.DATABASE_URL.includes('render.com') : 'N/A'
+      }
     });
   }
 });
