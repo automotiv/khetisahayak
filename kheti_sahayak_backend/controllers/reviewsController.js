@@ -20,7 +20,7 @@ const createReview = asyncHandler(async (req, res) => {
 
   // Check if product exists
   const productResult = await db.query(
-    'SELECT id FROM marketplace_products WHERE id = $1',
+    'SELECT id FROM products WHERE id = $1',
     [productId]
   );
 
@@ -388,7 +388,7 @@ const getMyReviews = asyncHandler(async (req, res) => {
       p.name as product_name,
       p.image_urls as product_images
     FROM product_reviews pr
-    JOIN marketplace_products p ON pr.product_id = p.id
+    JOIN products p ON pr.product_id = p.id
     WHERE pr.user_id = $1
     AND pr.status != 'deleted'
     ORDER BY pr.created_at DESC

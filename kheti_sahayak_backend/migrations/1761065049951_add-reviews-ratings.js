@@ -22,13 +22,13 @@ exports.up = (pgm) => {
   pgm.createTable('product_reviews', {
     id: { type: 'serial', primaryKey: true },
     product_id: {
-      type: 'integer',
+      type: 'uuid',
       notNull: true,
-      references: 'marketplace_products',
+      references: 'products',
       onDelete: 'CASCADE',
     },
     user_id: {
-      type: 'integer',
+      type: 'uuid',
       notNull: true,
       references: 'users',
       onDelete: 'CASCADE',
@@ -89,7 +89,7 @@ exports.up = (pgm) => {
       onDelete: 'CASCADE',
     },
     user_id: {
-      type: 'integer',
+      type: 'uuid',
       notNull: true,
       references: 'users',
       onDelete: 'CASCADE',

@@ -202,6 +202,36 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: "create_blueprint",
+                description: "Create a new Blueprint (Infrastructure as Code) on Render",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        title: {
+                            type: "string",
+                            description: "Title of the Blueprint",
+                        },
+                        ownerId: {
+                            type: "string",
+                            description: "ID of the owner (user or team)",
+                        },
+                        repo: {
+                            type: "string",
+                            description: "Repository URL (e.g., https://github.com/user/repo)",
+                        },
+                        branch: {
+                            type: "string",
+                            description: "Branch to use (default: main)",
+                        },
+                        autoSync: {
+                            type: "boolean",
+                            description: "Whether to auto-sync changes (default: true)",
+                        },
+                    },
+                    required: ["title", "ownerId", "repo"],
+                },
+            },
+            {
                 name: "list_owners",
                 description: "List owners (users and teams) to get ownerId",
                 inputSchema: {
@@ -250,6 +280,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case "create_service": {
                 const args = request.params.arguments as any;
                 const response = await apiClient.post("/services", args);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "create_blueprint": {
+                const args = request.params.arguments as any;
+                const response = await apiClient.post("/blueprints", args);
                 return {
                     content: [
                         {

@@ -296,20 +296,18 @@ git clone https://github.com/your-username/khetisahayak.git
 cd khetisahayak
 
 # 2. Run the automated setup script
-chmod +x setup.sh
-./setup.sh
+chmod +x scripts/*.sh
+./scripts/setup_dev.sh
 
 # 3. Start the development environment
-npm run dev:all
+# See SETUP.md for detailed instructions
 ```
 
 The setup script will:
-- ✅ Verify all prerequisites
-- ✅ Install all dependencies
-- ✅ Configure environment files
-- ✅ Set up databases with Docker
-- ✅ Run migrations and seed data
-- ✅ Start all services in development mode
+- ✅ Install all dependencies for Backend, Frontend, and Mobile
+- ✅ Prepare the environment for development
+
+👉 **For detailed setup instructions, please read [SETUP.md](SETUP.md).**
 
 ### 🔧 Manual Setup
 
