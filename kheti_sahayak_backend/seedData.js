@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const db = require('./db');
 const { Pool } = require('pg');
@@ -6,16 +7,25 @@ const { seedTechnologyData } = require('./seeds/technologySeed');
 
 console.log('Connecting to database:', process.env.DB_NAME);
 
-const debugPool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const debugPool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    }
+    : {
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
+      ssl: process.env.DB_HOST === 'localhost' ? false : {
+        rejectUnauthorized: false,
+      },
+    }
+);
 
 async function debugAndSeed() {
   const columns = await debugPool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'users' ORDER BY ordinal_position`);
@@ -416,6 +426,37 @@ const seedCropRecommendations = async () => {
   console.log('Crop recommendations seeded successfully');
 };
 
+const seedAppMenu = async () => {
+  const menuItems = [
+    { label: 'Dashboard', icon_name: 'dashboard', route_id: 'dashboard', display_order: 1 },
+    { label: 'Weather', icon_name: 'wb_sunny', route_id: 'weather', display_order: 2 },
+    { label: 'Crop Diagnostics', icon_name: 'medical_services', route_id: 'diagnostics', display_order: 3 },
+    { label: 'Marketplace', icon_name: 'store', route_id: 'marketplace', display_order: 4 },
+    { label: 'Education', icon_name: 'school', route_id: 'education', display_order: 5 },
+    { label: 'Expert Connect', icon_name: 'people', route_id: 'expert_connect', display_order: 6 },
+    { label: 'Community', icon_name: 'forum', route_id: 'community', display_order: 7 },
+    { label: 'Digital Logbook', icon_name: 'book', route_id: 'logbook', display_order: 8 },
+    { label: 'Government Schemes', icon_name: 'account_balance', route_id: 'schemes', display_order: 9 },
+    { label: 'Recommendations', icon_name: 'lightbulb', route_id: 'recommendations', display_order: 10 },
+    { label: 'Equipment & Labor', icon_name: 'handyman', route_id: 'equipment', display_order: 11 },
+    { label: 'Notifications', icon_name: 'notifications', route_id: 'notifications', display_order: 12 },
+    { label: 'Profile', icon_name: 'person', route_id: 'profile', display_order: 13 },
+  ];
+
+  for (const item of menuItems) {
+    await db.query(
+      `INSERT INTO app_menu_items (label, icon_name, route_id, display_order)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (route_id) DO UPDATE SET
+       label = EXCLUDED.label,
+       icon_name = EXCLUDED.icon_name,
+       display_order = EXCLUDED.display_order`,
+      [item.label, item.icon_name, item.route_id, item.display_order]
+    );
+  }
+  console.log('App menu items seeded successfully');
+};
+
 const seedData = async () => {
   try {
     console.log('🌱 Starting database seeding...');
@@ -465,6 +506,9 @@ const seedData = async () => {
 
     // Seed educational content
     await seedEducationalContent();
+
+    // Seed app menu
+    await seedAppMenu();
 
     // Seed sample products
     const sampleProducts = [
