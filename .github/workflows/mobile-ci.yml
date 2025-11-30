@@ -9,6 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'kheti_sahayak_app/**'
+  workflow_dispatch:
 
 jobs:
   build:
