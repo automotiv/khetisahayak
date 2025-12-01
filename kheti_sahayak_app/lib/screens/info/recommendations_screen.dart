@@ -27,10 +27,10 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
     setState(() => _isLoading = true);
     try {
       // Fetch crop recommendations (using default parameters for now)
-      final cropRes = await http.get(Uri.parse('${Constants.baseUrl}/api/diagnostics/recommendations?season=Kharif'));
+      final cropRes = await http.get(Uri.parse('${AppConstants.baseUrl}/diagnostics/recommendations?season=Kharif'));
       
       // Fetch weather recommendations (using hardcoded location for demo)
-      final weatherRes = await http.get(Uri.parse('${Constants.baseUrl}/api/weather/recommendations?lat=28.61&lon=77.20'));
+      final weatherRes = await http.get(Uri.parse('${AppConstants.baseUrl}/weather/recommendations?lat=28.61&lon=77.20'));
 
       if (mounted) {
         setState(() {

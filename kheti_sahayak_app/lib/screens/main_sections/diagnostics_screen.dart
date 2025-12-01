@@ -16,15 +16,21 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
   final TextEditingController _issueDescriptionController = TextEditingController();
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
-  late Future<List<Diagnostic>> _diagnosticsFuture;
-
-  // TODO: Replace with actual user ID from authentication
-  final String _currentUserId = 'some_user_id';
+  Future<List<Diagnostic>>? _diagnosticsFuture;
 
   @override
   void initState() {
     super.initState();
-    _diagnosticsFuture = DiagnosticService.getUserDiagnostics(_currentUserId);
+    _loadDiagnostics();
+  }
+
+  void _loadDiagnostics() {
+    _diagnosticsFuture = _fetchDiagnostics();
+  }
+
+  Future<List<Diagnostic>> _fetchDiagnostics() async {
+    final result = await DiagnosticService.getUserDiagnostics();
+    return result['diagnostics'] ?? [];
   }
 
   Future<void> _pickImage() async {
@@ -65,7 +71,7 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
       _issueDescriptionController.clear();
       setState(() {
         _selectedImage = null;
-        _diagnosticsFuture = DiagnosticService.getUserDiagnostics(); // Refresh list
+        _loadDiagnostics(); // Refresh list
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

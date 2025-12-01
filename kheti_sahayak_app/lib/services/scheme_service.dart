@@ -6,7 +6,7 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 class SchemeService {
   static Future<List<Scheme>> getSchemes() async {
     try {
-      final response = await http.get(Uri.parse('${Constants.baseUrl}/api/schemes'));
+      final response = await http.get(Uri.parse('${AppConstants.baseUrl}/schemes'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

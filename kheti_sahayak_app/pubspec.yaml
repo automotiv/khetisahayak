@@ -59,6 +59,7 @@ dependencies:
   # Utils
   logger:
   uuid:
+  url_launcher:
 
   # Environment variables
   flutter_dotenv:
@@ -73,6 +74,7 @@ dependencies:
   # Image Processing
   image:
   path:
+  google_fonts: ^6.3.0
 
 dev_dependencies:
   flutter_test:
