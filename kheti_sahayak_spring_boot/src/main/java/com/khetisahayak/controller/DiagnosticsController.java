@@ -50,3 +50,4 @@ public class DiagnosticsController {
     public ResponseEntity<?> getExpertAssignedDiagnostics() {
         return new ResponseEntity<>("Not Implemented", HttpStatus.NOT_IMPLEMENTED);
     }
+}
