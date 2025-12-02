@@ -20,7 +20,7 @@ export const khetiApi = {
 
     // Marketplace
     getProducts: async () => {
-        const response = await api.get('/marketplace/products');
+        const response = await api.get('/marketplace');
         return response.data;
     },
 
@@ -41,6 +41,12 @@ export const khetiApi = {
         // Mocking this for now as backend might not have it fully ready or it's under a different route
         // If you have an experts route, replace this.
         return [];
+    },
+
+    // Equipment
+    getEquipmentListings: async () => {
+        const response = await api.get('/equipment/listings');
+        return response.data;
     },
 
     // Forum

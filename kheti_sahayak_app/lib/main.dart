@@ -12,6 +12,7 @@ import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 import 'package:kheti_sahayak_app/services/language_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'services/task/upload_queue.dart';
+import 'package:kheti_sahayak_app/services/local_notification_service.dart';
 
 Future<void> main() async {
   // Ensure Flutter binding is initialized
@@ -22,6 +23,9 @@ Future<void> main() async {
 
   // Initialize language service
   await LanguageService.instance.initialize();
+
+  // Initialize local notifications
+  await LocalNotificationService().initialize();
 
   runApp(
     MultiProvider(
@@ -56,8 +60,8 @@ class _MyAppState extends State<MyApp> {
     UploadQueue.processQueue();
 
     // Listen for connectivity changes and retry
-    Connectivity().onConnectivityChanged.listen((status) {
-      if (status != ConnectivityResult.none) {
+    Connectivity().onConnectivityChanged.listen((results) {
+      if (!results.contains(ConnectivityResult.none)) {
         UploadQueue.processQueue();
       }
     });
@@ -69,11 +73,13 @@ class _MyAppState extends State<MyApp> {
     await userProvider.initialize();
     
     // Initialize cart provider
+    if (!mounted) return;
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     await cartProvider.loadCart();
     
     // Initialize orders if user is logged in
     if (userProvider.isAuthenticated) {
+      if (!mounted) return;
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
       await orderProvider.loadOrders();
     }
@@ -103,7 +109,7 @@ class _MyAppState extends State<MyApp> {
             Locale('hi'), // Hindi
             Locale('mr'), // Marathi
           ],
-          localizationsDelegates: [
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,

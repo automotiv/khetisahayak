@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -248,9 +248,138 @@ class DatabaseHelper {
       ''');
 
       // Create indexes
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_products_category ON cached_products(category)');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_pending_actions_synced ON pending_actions(synced)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_weather_location ON cached_weather(location)');
+    }
+
+    if (oldVersion < 3) {
+      // Add pending tasks table for version 3
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS pending_tasks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          image_paths TEXT, -- JSON list of local file paths
+          created_at TEXT NOT NULL,
+          synced INTEGER DEFAULT 0,
+          sync_attempts INTEGER DEFAULT 0,
+          last_sync_attempt TEXT,
+          error_message TEXT
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_pending_tasks_synced ON pending_tasks(synced)');
+    }
+
+    if (oldVersion < 4) {
+      // Add activity records table for version 4
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS activity_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          activity_type TEXT NOT NULL,
+          timestamp TEXT NOT NULL,
+          metadata TEXT, -- JSON string
+          synced INTEGER DEFAULT 0
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_synced ON activity_records(synced)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_synced ON activity_records(synced)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_timestamp ON activity_records(timestamp DESC)');
+    }
+
+    if (oldVersion < 5) {
+      // Add timezone_offset column to activity_records for version 5
+      // Since SQLite doesn't support ALTER TABLE ADD COLUMN IF NOT EXISTS easily, we check if table exists first
+      // But here we assume it was created in v4 or we are upgrading.
+      // If upgrading from <4, the v4 block runs first creating the table without the column.
+      // So we need to handle this carefully.
+      
+      // Actually, if we are upgrading from <4, the v4 block creates the table.
+      // If we are upgrading from 4, we need to add the column.
+      
+      // To be safe and simple:
+      // If table exists, try to add column. If it fails (column exists), ignore.
+      // Or better: check if column exists.
+      
+      // Simplified approach:
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN timezone_offset TEXT DEFAULT ""');
+      } catch (e) {
+        // Column might already exist or table might not exist (unlikely if v4 ran)
+        print('Error adding timezone_offset column: $e');
+      }
+    }
+
+    if (oldVersion < 6) {
+      // Add fields table for version 6
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS fields (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          area REAL NOT NULL,
+          crop_type TEXT NOT NULL,
+          location TEXT NOT NULL
+        )
+      ''');
+
+      // Add field_id column to activity_records
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN field_id INTEGER');
+      } catch (e) {
+        print('Error adding field_id column: $e');
+      }
+    }
+
+    if (oldVersion < 7) {
+      // Add crop_rotations table for version 7
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS crop_rotations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          field_id INTEGER NOT NULL,
+          crop_name TEXT NOT NULL,
+          season TEXT NOT NULL,
+          year INTEGER NOT NULL,
+          status TEXT NOT NULL,
+          notes TEXT,
+          FOREIGN KEY (field_id) REFERENCES fields(id) ON DELETE CASCADE
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_crop_rotations_field ON crop_rotations(field_id)');
+    }
+
+    if (oldVersion < 8) {
+      // Add yield_records table for version 8
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS yield_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          field_id INTEGER NOT NULL,
+          crop_name TEXT NOT NULL,
+          harvest_date TEXT NOT NULL,
+          yield_amount REAL NOT NULL,
+          unit TEXT NOT NULL,
+          notes TEXT,
+          FOREIGN KEY (field_id) REFERENCES fields(id) ON DELETE CASCADE
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_yield_records_field ON yield_records(field_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_yield_records_date ON yield_records(harvest_date)');
+    }
+
+    if (oldVersion < 9) {
+      // Add cost to activity_records and market_price to yield_records for version 9
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN cost REAL DEFAULT 0.0');
+      } catch (e) {
+        print('Error adding cost column: $e');
+      }
+
+      try {
+        await db.execute('ALTER TABLE yield_records ADD COLUMN market_price REAL DEFAULT 0.0');
+      } catch (e) {
+        print('Error adding market_price column: $e');
+      }
     }
   }
 
@@ -339,6 +468,80 @@ class DatabaseHelper {
       'SELECT COUNT(*) as count FROM pending_diagnostics WHERE synced = 0',
     );
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // ================== PENDING TASKS OPERATIONS ==================
+
+  /// Insert a pending task
+  Future<int> insertPendingTask(Map<String, dynamic> task) async {
+    final db = await database;
+    return await db.insert('pending_tasks', {
+      'title': task['title'],
+      'description': task['description'],
+      'image_paths': task['image_paths'], // JSON string
+      'created_at': DateTime.now().toIso8601String(),
+      'synced': 0,
+    });
+  }
+
+  /// Get all pending tasks
+  Future<List<Map<String, dynamic>>> getPendingTasks() async {
+    final db = await database;
+    return await db.query(
+      'pending_tasks',
+      where: 'synced = ?',
+      whereArgs: [0],
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  /// Mark task as synced
+  Future<int> markTaskSynced(int id) async {
+    final db = await database;
+    return await db.update(
+      'pending_tasks',
+      {
+        'synced': 1,
+        'last_sync_attempt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Delete a pending task
+  Future<int> deletePendingTask(int id) async {
+    final db = await database;
+    return await db.delete(
+      'pending_tasks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Update task sync attempt
+  Future<int> updateTaskSyncAttempt(int id, {String? errorMessage}) async {
+    final db = await database;
+    final pending = await db.query(
+      'pending_tasks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (pending.isEmpty) return 0;
+
+    final attempts = (pending.first['sync_attempts'] as int?) ?? 0;
+
+    return await db.update(
+      'pending_tasks',
+      {
+        'sync_attempts': attempts + 1,
+        'last_sync_attempt': DateTime.now().toIso8601String(),
+        'error_message': errorMessage,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   // ================== CACHED DIAGNOSTICS OPERATIONS ==================
@@ -709,6 +912,7 @@ class DatabaseHelper {
     if (action.isEmpty) return 0;
 
     final retryCount = (action.first['retry_count'] as int?) ?? 0;
+
     return await db.update(
       'pending_actions',
       {
@@ -720,6 +924,60 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  // ================== ACTIVITY RECORDS OPERATIONS ==================
+
+  /// Insert an activity record
+  Future<int> insertActivityRecord(Map<String, dynamic> record) async {
+    final db = await database;
+    return await db.insert('activity_records', {
+      'field_id': record['field_id'],
+      'activity_type': record['activity_type'],
+      'timestamp': record['timestamp'],
+      'timezone_offset': record['timezone_offset'],
+      'metadata': record['metadata'], // JSON string
+      'synced': 0,
+      'cost': record['cost'] ?? 0.0,
+    });
+  }
+
+  /// Get all activity records
+  Future<List<Map<String, dynamic>>> getActivityRecords({int? limit, int? offset}) async {
+    final db = await database;
+    return await db.query(
+      'activity_records',
+      orderBy: 'timestamp DESC',
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+
+
+  /// Get unsynced activity records
+  Future<List<Map<String, dynamic>>> getUnsyncedActivityRecords() async {
+    final db = await database;
+    return await db.query(
+      'activity_records',
+      where: 'synced = ?',
+      whereArgs: [0],
+      orderBy: 'timestamp ASC',
+    );
+  }
+
+  /// Mark activity record as synced
+  Future<int> markActivityRecordSynced(int id) async {
+    final db = await database;
+    return await db.update(
+      'activity_records',
+      {'synced': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+
 
   /// Delete synced actions
   Future<int> deleteSyncedActions() async {
@@ -876,9 +1134,193 @@ class DatabaseHelper {
   }
 
   /// Close database
-  Future<void> close() async {
-    final db = await database;
     await db.close();
     _database = null;
+  }
+
+  // ================== FIELD OPERATIONS ==================
+
+  /// Insert a field
+  Future<int> insertField(Map<String, dynamic> field) async {
+    final db = await database;
+    return await db.insert('fields', {
+      'name': field['name'],
+      'area': field['area'],
+      'crop_type': field['crop_type'],
+      'location': field['location'],
+    });
+  }
+
+  /// Get all fields
+  Future<List<Map<String, dynamic>>> getFields() async {
+    final db = await database;
+    return await db.query('fields');
+  }
+
+  // ================== CROP ROTATION OPERATIONS ==================
+
+  /// Insert a crop rotation
+  Future<int> insertCropRotation(Map<String, dynamic> rotation) async {
+    final db = await database;
+    return await db.insert('crop_rotations', {
+      'field_id': rotation['field_id'],
+      'crop_name': rotation['crop_name'],
+      'season': rotation['season'],
+      'year': rotation['year'],
+      'status': rotation['status'],
+      'notes': rotation['notes'],
+    });
+  }
+
+  /// Get crop rotations for a field
+  Future<List<Map<String, dynamic>>> getCropRotations(int fieldId) async {
+    final db = await database;
+    return await db.query(
+      'crop_rotations',
+      where: 'field_id = ?',
+      whereArgs: [fieldId],
+      orderBy: 'year DESC, season DESC',
+    );
+  }
+
+  /// Update a crop rotation
+  Future<int> updateCropRotation(int id, Map<String, dynamic> rotation) async {
+    final db = await database;
+    return await db.update(
+      'crop_rotations',
+      {
+        'crop_name': rotation['crop_name'],
+        'season': rotation['season'],
+        'year': rotation['year'],
+        'status': rotation['status'],
+        'notes': rotation['notes'],
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Delete a crop rotation
+  Future<int> deleteCropRotation(int id) async {
+    final db = await database;
+    return await db.delete(
+      'crop_rotations',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // ================== YIELD RECORD OPERATIONS ==================
+
+  /// Insert a yield record
+  /// Insert a yield record
+  Future<int> insertYieldRecord(Map<String, dynamic> record) async {
+    final db = await database;
+    return await db.insert('yield_records', {
+      'field_id': record['field_id'],
+      'crop_name': record['crop_name'],
+      'harvest_date': record['harvest_date'],
+      'yield_amount': record['yield_amount'],
+      'unit': record['unit'],
+      'notes': record['notes'],
+      'market_price': record['market_price'] ?? 0.0,
+    });
+  }
+
+  /// Get yield records with optional filtering
+  Future<List<Map<String, dynamic>>> getYieldRecords({
+    int? fieldId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final db = await database;
+    String where = '';
+    List<dynamic> whereArgs = [];
+
+    if (fieldId != null) {
+      where = 'field_id = ?';
+      whereArgs.add(fieldId);
+    }
+
+    if (startDate != null) {
+      where += where.isEmpty ? '' : ' AND ';
+      where += 'harvest_date >= ?';
+      whereArgs.add(startDate.toIso8601String());
+    }
+
+    if (endDate != null) {
+      where += where.isEmpty ? '' : ' AND ';
+      where += 'harvest_date <= ?';
+      whereArgs.add(endDate.toIso8601String());
+    }
+
+    return await db.query(
+      'yield_records',
+      where: where.isEmpty ? null : where,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+      orderBy: 'harvest_date DESC',
+    );
+  }
+
+  /// Get aggregated yield data grouped by year and crop
+  Future<List<Map<String, dynamic>>> getYieldAggregates({
+    int? fieldId,
+    int years = 5,
+  }) async {
+    final db = await database;
+    final startDate = DateTime.now().subtract(Duration(days: 365 * years));
+    
+    String whereClause = 'harvest_date >= ?';
+    List<dynamic> args = [startDate.toIso8601String()];
+
+    if (fieldId != null) {
+      whereClause += ' AND field_id = ?';
+      args.add(fieldId);
+    }
+
+    // Extract year from harvest_date string (YYYY-MM-DD...)
+    // SQLite's substr(harvest_date, 1, 4) gets the year
+    return await db.rawQuery('''
+      SELECT 
+        substr(harvest_date, 1, 4) as year,
+        crop_name,
+        SUM(yield_amount) as total_yield,
+        unit
+      FROM yield_records
+      WHERE $whereClause
+      GROUP BY year, crop_name, unit
+      ORDER BY year DESC, crop_name ASC
+    ''', args);
+  }
+
+
+  /// Get ROI metrics for a field
+  Future<Map<String, double>> getROIMetrics(int fieldId) async {
+    final db = await database;
+
+    // 1. Calculate Total Investment (Sum of costs from activity_records)
+    final costResult = await db.rawQuery(
+      'SELECT SUM(cost) as total_cost FROM activity_records WHERE field_id = ?',
+      [fieldId],
+    );
+    final totalInvestment = (costResult.first['total_cost'] as num?)?.toDouble() ?? 0.0;
+
+    // 2. Calculate Total Return (Sum of yield_amount * market_price from yield_records)
+    final returnResult = await db.rawQuery(
+      'SELECT SUM(yield_amount * market_price) as total_return FROM yield_records WHERE field_id = ?',
+      [fieldId],
+    );
+    final totalReturn = (returnResult.first['total_return'] as num?)?.toDouble() ?? 0.0;
+
+    // 3. Calculate Net Profit and ROI
+    final netProfit = totalReturn - totalInvestment;
+    final roi = totalInvestment > 0 ? (netProfit / totalInvestment) * 100 : 0.0;
+
+    return {
+      'total_investment': totalInvestment,
+      'total_return': totalReturn,
+      'net_profit': netProfit,
+      'roi_percentage': roi,
+    };
   }
 }

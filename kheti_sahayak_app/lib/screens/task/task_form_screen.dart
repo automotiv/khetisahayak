@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/task/task_image.dart';
 import '../../widgets/task/task_image_selector.dart';
+import '../../services/task/task_service.dart';
 
 class TaskFormScreen extends StatefulWidget {
   const TaskFormScreen({Key? key}) : super(key: key);
@@ -29,13 +30,19 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // TODO: Implement form submission logic
-      // This is where you would typically upload the images and save the task
-      await Future.delayed(const Duration(seconds: 2)); // Simulate network request
+      final result = await TaskService.instance.createTask(
+        title: _titleController.text,
+        description: _descriptionController.text,
+        images: _taskImages,
+      );
       
       if (mounted) {
+        final message = result['offline'] == true 
+            ? 'Task saved offline. Will sync when online.' 
+            : 'Task created successfully!';
+            
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Task created successfully!')),
+          SnackBar(content: Text(message)),
         );
         Navigator.of(context).pop();
       }

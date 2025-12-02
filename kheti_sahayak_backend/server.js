@@ -1,14 +1,14 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const swaggerUi = require('swagger-ui-express');
+// const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
-const swaggerSpecs = require('./swagger');
+// const swaggerSpecs = require('./swagger');
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 5002; // process.env.PORT || 3000;
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -39,16 +39,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // HTTP request logger middleware
 app.use((req, res, next) => {
-  // Log an http message for each incoming request
-  logger.http(`${req.method} ${req.url}`);
-  next();
+    // Log an http message for each incoming request
+    logger.http(`${req.method} ${req.url}`);
+    next();
 });
 
 // Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Kheti Sahayak API Documentation'
-}));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+//   customCss: '.swagger-ui .topbar { display: none }',
+//   customSiteTitle: 'Kheti Sahayak API Documentation'
+// }));
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -72,27 +72,27 @@ app.use('/api/schemes', schemeRoutes);
 app.use('/api/logbook', logbookRoutes);
 
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Kheti Sahayak Backend API',
-    version: '1.0.0',
-    status: 'running',
-    documentation: '/api-docs',
-    endpoints: {
-      auth: '/api/auth',
-      health: '/api/health',
-      weather: '/api/weather',
-      diagnostics: '/api/diagnostics',
-      marketplace: '/api/marketplace',
-      educationalContent: '/api/educational-content',
-      orders: '/api/orders',
-      notifications: '/api/notifications',
-      reviews: '/api/reviews',
-      cart: '/api/cart',
-      payments: '/api/payments',
-      equipment: '/api/equipment',
-      technology: '/api/technology'
-    }
-  });
+    res.json({
+        message: 'Kheti Sahayak Backend API',
+        version: '1.0.0',
+        status: 'running',
+        documentation: '/api-docs',
+        endpoints: {
+            auth: '/api/auth',
+            health: '/api/health',
+            weather: '/api/weather',
+            diagnostics: '/api/diagnostics',
+            marketplace: '/api/marketplace',
+            educationalContent: '/api/educational-content',
+            orders: '/api/orders',
+            notifications: '/api/notifications',
+            reviews: '/api/reviews',
+            cart: '/api/cart',
+            payments: '/api/payments',
+            equipment: '/api/equipment',
+            technology: '/api/technology'
+        }
+    });
 });
 
 // Error Handling Middleware
@@ -100,6 +100,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(port, () => {
-  logger.info(`Server running on port ${port}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`Server running on port ${port}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

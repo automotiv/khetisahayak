@@ -155,3 +155,127 @@ class Sys {
     return Sys(pod: json['pod']);
   }
 }
+
+class UnifiedWeather {
+  final double temp;
+  final double tempMin;
+  final double tempMax;
+  final int humidity;
+  final double windSpeed;
+  final String condition;
+  final String icon;
+  final String description;
+  final double? uvi; // Only available in One Call
+  final double? rainChance; // pop
+  final bool isPrecision; // True if from One Call API
+  final List<DailyForecast> dailyForecasts;
+
+  UnifiedWeather({
+    required this.temp,
+    required this.tempMin,
+    required this.tempMax,
+    required this.humidity,
+    required this.windSpeed,
+    required this.condition,
+    required this.icon,
+    required this.description,
+    this.uvi,
+    this.rainChance,
+    this.isPrecision = false,
+    this.dailyForecasts = const [],
+  });
+
+  // Factory for Standard 5-day/3-hour Forecast API
+  factory UnifiedWeather.fromStandard(Map<String, dynamic> json) {
+    final list = json['list'] as List;
+    final current = list.first;
+    final main = current['main'];
+    final weather = current['weather'][0];
+    final wind = current['wind'];
+    
+    // Approximate daily forecasts by taking every 8th item (24 hours / 3 hours = 8)
+    List<DailyForecast> daily = [];
+    for (var i = 0; i < list.length; i += 8) {
+      daily.add(DailyForecast.fromStandard(list[i]));
+    }
+
+    return UnifiedWeather(
+      temp: (main['temp'] as num).toDouble(),
+      tempMin: (main['temp_min'] as num).toDouble(),
+      tempMax: (main['temp_max'] as num).toDouble(),
+      humidity: main['humidity'],
+      windSpeed: (wind['speed'] as num).toDouble(),
+      condition: weather['main'],
+      icon: weather['icon'],
+      description: weather['description'],
+      rainChance: (current['pop'] as num?)?.toDouble(),
+      isPrecision: false,
+      dailyForecasts: daily,
+    );
+  }
+
+  // Factory for One Call API
+  factory UnifiedWeather.fromOneCall(Map<String, dynamic> json) {
+    final current = json['current'];
+    final weather = current['weather'][0];
+    final dailyList = (json['daily'] as List).map((i) => DailyForecast.fromOneCall(i)).toList();
+
+    return UnifiedWeather(
+      temp: (current['temp'] as num).toDouble(),
+      tempMin: (dailyList.first.tempMin),
+      tempMax: (dailyList.first.tempMax),
+      humidity: current['humidity'],
+      windSpeed: (current['wind_speed'] as num).toDouble(),
+      condition: weather['main'],
+      icon: weather['icon'],
+      description: weather['description'],
+      uvi: (current['uvi'] as num?)?.toDouble(),
+      isPrecision: true,
+      dailyForecasts: dailyList,
+    );
+  }
+}
+
+class DailyForecast {
+  final DateTime date;
+  final double tempMin;
+  final double tempMax;
+  final String condition;
+  final String icon;
+  final double? rainChance;
+
+  DailyForecast({
+    required this.date,
+    required this.tempMin,
+    required this.tempMax,
+    required this.condition,
+    required this.icon,
+    this.rainChance,
+  });
+
+  factory DailyForecast.fromStandard(Map<String, dynamic> json) {
+    final main = json['main'];
+    final weather = json['weather'][0];
+    return DailyForecast(
+      date: DateTime.parse(json['dt_txt']),
+      tempMin: (main['temp_min'] as num).toDouble(),
+      tempMax: (main['temp_max'] as num).toDouble(),
+      condition: weather['main'],
+      icon: weather['icon'],
+      rainChance: (json['pop'] as num?)?.toDouble(),
+    );
+  }
+
+  factory DailyForecast.fromOneCall(Map<String, dynamic> json) {
+    final temp = json['temp'];
+    final weather = json['weather'][0];
+    return DailyForecast(
+      date: DateTime.fromMillisecondsSinceEpoch(json['dt'] * 1000),
+      tempMin: (temp['min'] as num).toDouble(),
+      tempMax: (temp['max'] as num).toDouble(),
+      condition: weather['main'],
+      icon: weather['icon'],
+      rainChance: (json['pop'] as num?)?.toDouble(),
+    );
+  }
+}

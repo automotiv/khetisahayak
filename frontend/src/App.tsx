@@ -26,40 +26,49 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Data State
-  // Data State
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState(mockQuery.marketplaceProducts);
   const [weather] = useState(enhancedMockQuery.weatherData);
   const [content, setContent] = useState(mockQuery.educationalContent);
   const [diagnostics] = useState(mockQuery.diagnosisHistory);
+  const [equipment, setEquipment] = useState(enhancedMockQuery.equipmentListings);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         // Fetch data in parallel
-        const [productsData, contentData] = await Promise.all([
+        const [productsData, contentData, equipmentData] = await Promise.all([
           khetiApi.getProducts().catch(e => {
             console.error("Failed to fetch products", e);
-            return mockQuery.marketplaceProducts; // Fallback
+            return { data: mockQuery.marketplaceProducts }; // Fallback
           }),
           khetiApi.getEducationalContent().catch(e => {
             console.error("Failed to fetch content", e);
-            return mockQuery.educationalContent; // Fallback
+            return { data: mockQuery.educationalContent }; // Fallback
+          }),
+          khetiApi.getEquipmentListings().catch(e => {
+            console.error("Failed to fetch equipment", e);
+            return { data: enhancedMockQuery.equipmentListings }; // Fallback
           })
-          // Add other fetches here as backend endpoints become available
         ]);
 
-        if (productsData && productsData.data) {
+        if (productsData && productsData.products) {
+          setProducts(productsData.products);
+        } else if (productsData && productsData.data) {
           setProducts(productsData.data);
         }
+
         if (contentData && contentData.data) {
           setContent(contentData.data);
         }
 
-        setLoading(false);
+        if (equipmentData && equipmentData.data) {
+          setEquipment(equipmentData.data);
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
         setLoading(false);
       }
     };
@@ -147,7 +156,7 @@ const App: React.FC = () => {
       case 10:
         return (
           <SharingPlatform
-            equipment={enhancedMockQuery.equipmentListings}
+            equipment={equipment}
             labor={enhancedMockQuery.laborProfiles}
           />
         );

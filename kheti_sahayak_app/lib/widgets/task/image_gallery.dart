@@ -10,6 +10,7 @@ class ImageGallery extends StatefulWidget {
   final List<TaskImage> images;
   final Function(int)? onRemove;
   final Function(int)? onReplace;
+  final Function(int)? onEdit;
   final Function()? onAddMore;
   final int maxImages;
   final bool canEdit;
@@ -22,6 +23,7 @@ class ImageGallery extends StatefulWidget {
     required this.images,
     this.onRemove,
     this.onReplace,
+    this.onEdit,
     this.onAddMore,
     this.maxImages = 5,
     this.canEdit = true,
@@ -138,13 +140,27 @@ class _ImageGalleryState extends State<ImageGallery> {
                         ),
                       ),
                     ),
+                      ),
+                    ),
+                  if (widget.onEdit != null)
+                    GestureDetector(
+                      onTap: () => widget.onEdit!(index),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.crop,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   if (widget.onReplace != null)
                     GestureDetector(
                       onTap: () => widget.onReplace!(index),
                       child: const Padding(
                         padding: EdgeInsets.all(4.0),
                         child: Icon(
-                          Icons.edit,
+                          Icons.refresh,
                           size: 14,
                           color: Colors.white,
                         ),

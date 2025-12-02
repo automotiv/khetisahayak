@@ -37,13 +37,13 @@ class AppTheme {
     ),
 
     // Card Theme
-    cardTheme: CardTheme(
-      color: const Color(0xFF2C2C2E), // Dark card color
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20), // Rounded corners
-      ),
-    ),
+    // cardTheme: CardTheme(
+    //   color: const Color(0xFF2C2C2E), // Dark card color
+    //   elevation: 0,
+    //   shape: RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.circular(20), // Rounded corners
+    //   ),
+    // ),
     
     // Bottom Navigation Bar Theme
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
