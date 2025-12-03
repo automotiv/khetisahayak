@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:kheti_sahayak_app/services/database_helper.dart';
 import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
+import 'package:kheti_sahayak_app/services/api_service.dart';
+import 'package:kheti_sahayak_app/services/scheme_service.dart';
 
 class SyncService {
   static final SyncService instance = SyncService._init();
@@ -289,52 +291,117 @@ class SyncService {
 
   /// Sync pending activity records
   Future<SyncResult> syncPendingActivityRecords() async {
-    if (_isSyncing) return SyncResult(success: false, message: 'Sync in progress', itemsSynced: 0);
+    if (_isSyncing) {
+      return SyncResult(
+        success: false,
+        message: 'Sync already in progress',
+        itemsSynced: 0,
+      );
+    }
 
     final online = await isOnline();
-    if (!online) return SyncResult(success: false, message: 'No internet', itemsSynced: 0);
+    if (!online) {
+      return SyncResult(
+        success: false,
+        message: 'No internet connection',
+        itemsSynced: 0,
+      );
+    }
 
     _isSyncing = true;
+    final syncLogId = await _dbHelper.startSyncLog('activity_records');
+
     int successCount = 0;
     int failureCount = 0;
     final List<String> errors = [];
 
     try {
       final pending = await _dbHelper.getUnsyncedActivityRecords();
+      
       if (pending.isEmpty) {
         _isSyncing = false;
-        return SyncResult(success: true, message: 'No pending activity records', itemsSynced: 0);
+        await _dbHelper.completeSyncLog(
+          id: syncLogId,
+          status: 'completed',
+          itemsSynced: 0,
+        );
+        return SyncResult(
+          success: true,
+          message: 'No pending activity records',
+          itemsSynced: 0,
+        );
       }
 
-      for (final item in pending) {
-        try {
-          final id = item['id'] as int;
-          
-          // TODO: Replace with actual API call
-          // await ApiService.uploadActivityRecord(item);
-          // For now, simulate success
-          await Future.delayed(Duration(milliseconds: 500));
+      print('Syncing ${pending.length} activity records...');
 
-          await _dbHelper.markActivityRecordSynced(id);
-          successCount++;
+      for (final record in pending) {
+        try {
+          final id = record['id'] as int;
+          
+          // Upload to server with timeout
+          final result = await ApiService.uploadActivityRecord(record).timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception('Upload timed out');
+            },
+          );
+
+          if (result['success'] == true) {
+            // Mark as synced
+            await _dbHelper.markActivityRecordSynced(id);
+            successCount++;
+            print('Successfully synced activity record #$id');
+          } else {
+            throw Exception(result['error'] ?? 'Upload failed');
+          }
         } catch (e) {
+          final id = record['id'] as int;
+          final error = e.toString().replaceAll('Exception: ', '');
+          errors.add('Record #$id: $error');
           failureCount++;
-          errors.add(e.toString());
+          print('Failed to sync activity record #$id: $error');
         }
       }
-    } catch (e) {
-      errors.add(e.toString());
-    } finally {
-      _isSyncing = false;
-    }
 
-    return SyncResult(
-      success: failureCount == 0,
-      message: 'Synced $successCount activity records',
-      itemsSynced: successCount,
-      itemsFailed: failureCount,
-      errors: errors,
-    );
+      _lastSyncTime = DateTime.now();
+
+      // Complete sync log
+      await _dbHelper.completeSyncLog(
+        id: syncLogId,
+        status: failureCount > 0 ? 'partial' : 'completed',
+        itemsSynced: successCount,
+        errorMessage: errors.isNotEmpty ? errors.join('; ') : null,
+      );
+
+      _isSyncing = false;
+
+      final message = failureCount > 0
+          ? 'Synced $successCount of ${pending.length} activity records ($failureCount failed)'
+          : 'Successfully synced $successCount activity records';
+
+      return SyncResult(
+        success: successCount > 0,
+        message: message,
+        itemsSynced: successCount,
+        itemsFailed: failureCount,
+        errors: errors,
+      );
+    } catch (e) {
+      _isSyncing = false;
+      _failedAttempts++;
+
+      await _dbHelper.completeSyncLog(
+        id: syncLogId,
+        status: 'failed',
+        errorMessage: e.toString(),
+      );
+
+      return SyncResult(
+        success: false,
+        message: 'Sync failed: ${e.toString()}',
+        itemsSynced: 0,
+      );
+    }
   }
 
   /// Auto-sync when connectivity is restored
@@ -349,6 +416,10 @@ class SyncService {
           await syncPendingDiagnostics();
           await syncPendingTasks();
           await syncPendingActivityRecords();
+          await syncSchemes();
+        } else {
+          // Even if no pending uploads, we might want to sync schemes (download)
+          await syncSchemes();
         }
       }
     });
@@ -371,6 +442,33 @@ class SyncService {
     }
 
     return await syncPendingDiagnostics(force: true);
+  }
+
+  /// Sync schemes (download latest)
+  Future<SyncResult> syncSchemes() async {
+    if (_isSyncing) return SyncResult(success: false, message: 'Sync in progress', itemsSynced: 0);
+
+    final online = await isOnline();
+    if (!online) return SyncResult(success: false, message: 'No internet', itemsSynced: 0);
+
+    _isSyncing = true;
+    try {
+      await SchemeService.getSchemes(forceRefresh: true);
+      
+      return SyncResult(
+        success: true,
+        message: 'Schemes synced successfully',
+        itemsSynced: 0, 
+      );
+    } catch (e) {
+      return SyncResult(
+        success: false,
+        message: 'Scheme sync failed: $e',
+        itemsSynced: 0,
+      );
+    } finally {
+      _isSyncing = false;
+    }
   }
 
   /// Clear all sync data (for debugging/testing)

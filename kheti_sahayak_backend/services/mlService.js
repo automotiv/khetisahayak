@@ -81,6 +81,21 @@ class MLService {
   }
 
   /**
+   * Get crop recommendations based on soil and weather data
+   * @param {Object} data - Soil and weather data
+   * @returns {Promise<Object>} Recommended crops
+   */
+  async getRecommendedCrops(data) {
+    try {
+      const response = await axios.post(`${this.apiUrl}/recommend-crops`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting crop recommendations from ML service:', error.message);
+      throw new Error('Failed to get crop recommendations from ML service');
+    }
+  }
+
+  /**
    * Calculate severity based on confidence score
    * @param {Number} confidence - Confidence score
    * @returns {String} Severity level

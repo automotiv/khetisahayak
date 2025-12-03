@@ -61,6 +61,7 @@ dependencies:
   # Utils
   logger:
   uuid:
+  timeago:
 
   # Environment variables
   flutter_dotenv:

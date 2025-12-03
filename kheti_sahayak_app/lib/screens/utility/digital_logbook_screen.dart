@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/logbook_entry.dart';
 import 'package:kheti_sahayak_app/services/logbook_service.dart';
+import 'package:kheti_sahayak_app/widgets/activity_type_dropdown.dart';
 import 'package:intl/intl.dart';
 
 class DigitalLogbookScreen extends StatefulWidget {
@@ -110,13 +111,9 @@ class _DigitalLogbookScreenState extends State<DigitalLogbookScreen> {
   }
 
   IconData _getActivityIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'sowing': return Icons.grass;
-      case 'harvesting': return Icons.agriculture;
-      case 'fertilizer': return Icons.science;
-      case 'irrigation': return Icons.water_drop;
-      default: return Icons.edit_note;
-    }
+    // Use the same icon mapping as ActivityTypeDropdown
+    final iconMap = ActivityTypeDropdown.activityTypes;
+    return iconMap[type] ?? Icons.edit_note;
   }
 }
 
@@ -129,13 +126,11 @@ class AddLogbookEntryDialog extends StatefulWidget {
 
 class _AddLogbookEntryDialogState extends State<AddLogbookEntryDialog> {
   final _formKey = GlobalKey<FormState>();
-  String _activityType = 'Sowing';
+  String _activityType = 'Planting';
   DateTime _selectedDate = DateTime.now();
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
   final _incomeController = TextEditingController();
-
-  final List<String> _activityTypes = ['Sowing', 'Harvesting', 'Fertilizer', 'Irrigation', 'Other'];
 
   @override
   Widget build(BuildContext context) {
@@ -147,13 +142,9 @@ class _AddLogbookEntryDialogState extends State<AddLogbookEntryDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DropdownButtonFormField<String>(
+              ActivityTypeDropdown(
                 value: _activityType,
-                items: _activityTypes.map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
                 onChanged: (value) => setState(() => _activityType = value!),
-                decoration: const InputDecoration(labelText: 'Activity Type'),
               ),
               const SizedBox(height: 16),
               ListTile(

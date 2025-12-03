@@ -12,171 +12,171 @@ const analyzeImageWithAI = async (imageUrl, cropType, issueDescription) => {
     // This is a simplified example - in production, you'd implement proper S3 download
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const imageBuffer = Buffer.from(imageResponse.data, 'binary');
-    
+
     // Call our ML service
     return await mlService.analyzeImage(imageBuffer, cropType, issueDescription);
   } catch (error) {
     console.error('Error in analyzeImageWithAI:', error);
-    
+
     // Fallback to mock responses if ML service is unavailable
     const mockResponses = {
-    'tomato': {
-      'yellow leaves': {
-        disease: 'Early Blight',
-        confidence: 0.85,
-        recommendations: 'Apply fungicide containing chlorothalonil. Improve air circulation and avoid overhead watering. Remove infected leaves immediately.',
-        severity: 'moderate',
-        symptoms: ['Yellow leaves with brown spots', 'Circular lesions on leaves', 'Stem cankers'],
-        treatment_steps: [
-          'Remove and destroy infected plant parts',
-          'Apply copper-based fungicide every 7-10 days',
-          'Improve plant spacing for better air circulation',
-          'Avoid overhead irrigation'
-        ]
+      'tomato': {
+        'yellow leaves': {
+          disease: 'Early Blight',
+          confidence: 0.85,
+          recommendations: 'Apply fungicide containing chlorothalonil. Improve air circulation and avoid overhead watering. Remove infected leaves immediately.',
+          severity: 'moderate',
+          symptoms: ['Yellow leaves with brown spots', 'Circular lesions on leaves', 'Stem cankers'],
+          treatment_steps: [
+            'Remove and destroy infected plant parts',
+            'Apply copper-based fungicide every 7-10 days',
+            'Improve plant spacing for better air circulation',
+            'Avoid overhead irrigation'
+          ]
+        },
+        'wilting': {
+          disease: 'Bacterial Wilt',
+          confidence: 0.92,
+          recommendations: 'Remove infected plants immediately. Disinfect tools. Plant resistant varieties next season.',
+          severity: 'high',
+          symptoms: ['Sudden wilting', 'Brown vascular tissue', 'No recovery after watering'],
+          treatment_steps: [
+            'Remove and destroy infected plants',
+            'Disinfect all gardening tools',
+            'Rotate crops next season',
+            'Plant resistant varieties'
+          ]
+        },
+        'spots on leaves': {
+          disease: 'Septoria Leaf Spot',
+          confidence: 0.78,
+          recommendations: 'Apply fungicide with active ingredients like azoxystrobin. Remove infected leaves.',
+          severity: 'low',
+          symptoms: ['Small brown spots with gray centers', 'Yellow halos around spots'],
+          treatment_steps: [
+            'Remove infected leaves',
+            'Apply fungicide every 7-10 days',
+            'Improve air circulation',
+            'Avoid overhead watering'
+          ]
+        }
       },
-      'wilting': {
-        disease: 'Bacterial Wilt',
-        confidence: 0.92,
-        recommendations: 'Remove infected plants immediately. Disinfect tools. Plant resistant varieties next season.',
-        severity: 'high',
-        symptoms: ['Sudden wilting', 'Brown vascular tissue', 'No recovery after watering'],
-        treatment_steps: [
-          'Remove and destroy infected plants',
-          'Disinfect all gardening tools',
-          'Rotate crops next season',
-          'Plant resistant varieties'
-        ]
+      'potato': {
+        'brown spots': {
+          disease: 'Late Blight',
+          confidence: 0.95,
+          recommendations: 'Remove infected plants immediately. Apply copper-based fungicide. Ensure proper drainage.',
+          severity: 'high',
+          symptoms: ['Dark brown spots on leaves', 'White fungal growth on underside', 'Rapid spread'],
+          treatment_steps: [
+            'Remove and destroy infected plants',
+            'Apply copper fungicide immediately',
+            'Improve field drainage',
+            'Plant resistant varieties next season'
+          ]
+        },
+        'yellow leaves': {
+          disease: 'Early Blight',
+          confidence: 0.88,
+          recommendations: 'Apply fungicide and improve air circulation. Remove infected leaves.',
+          severity: 'moderate',
+          symptoms: ['Target-like lesions', 'Yellowing leaves', 'Stem lesions'],
+          treatment_steps: [
+            'Remove infected leaves',
+            'Apply fungicide every 7-10 days',
+            'Improve plant spacing',
+            'Avoid overhead irrigation'
+          ]
+        }
       },
-      'spots on leaves': {
-        disease: 'Septoria Leaf Spot',
-        confidence: 0.78,
-        recommendations: 'Apply fungicide with active ingredients like azoxystrobin. Remove infected leaves.',
-        severity: 'low',
-        symptoms: ['Small brown spots with gray centers', 'Yellow halos around spots'],
-        treatment_steps: [
-          'Remove infected leaves',
-          'Apply fungicide every 7-10 days',
-          'Improve air circulation',
-          'Avoid overhead watering'
-        ]
+      'corn': {
+        'rust colored': {
+          disease: 'Common Rust',
+          confidence: 0.82,
+          recommendations: 'Apply fungicide with active ingredients like azoxystrobin. Plant resistant varieties next season.',
+          severity: 'moderate',
+          symptoms: ['Rust-colored pustules on leaves', 'Yellow halos around lesions'],
+          treatment_steps: [
+            'Apply fungicide at first sign',
+            'Plant resistant varieties next season',
+            'Remove crop debris after harvest',
+            'Monitor weather conditions'
+          ]
+        },
+        'gray spots': {
+          disease: 'Gray Leaf Spot',
+          confidence: 0.75,
+          recommendations: 'Apply fungicide and improve air circulation. Plant resistant varieties.',
+          severity: 'moderate',
+          symptoms: ['Gray to tan rectangular lesions', 'Lesions with parallel edges'],
+          treatment_steps: [
+            'Apply fungicide when lesions appear',
+            'Improve field drainage',
+            'Plant resistant varieties',
+            'Rotate crops'
+          ]
+        }
+      },
+      'wheat': {
+        'white powder': {
+          disease: 'Powdery Mildew',
+          confidence: 0.90,
+          recommendations: 'Apply sulfur-based fungicide. Increase plant spacing for better air circulation.',
+          severity: 'moderate',
+          symptoms: ['White powdery growth on leaves', 'Yellowing of leaves', 'Stunted growth'],
+          treatment_steps: [
+            'Apply sulfur fungicide',
+            'Improve air circulation',
+            'Avoid excessive nitrogen fertilization',
+            'Plant resistant varieties'
+          ]
+        },
+        'brown spots': {
+          disease: 'Septoria Leaf Blotch',
+          confidence: 0.85,
+          recommendations: 'Apply fungicide and remove infected plant debris. Improve field drainage.',
+          severity: 'moderate',
+          symptoms: ['Brown lesions with yellow halos', 'Small black dots in lesions'],
+          treatment_steps: [
+            'Apply fungicide at flag leaf stage',
+            'Remove crop debris',
+            'Improve field drainage',
+            'Plant resistant varieties'
+          ]
+        }
       }
-    },
-    'potato': {
-      'brown spots': {
-        disease: 'Late Blight',
-        confidence: 0.95,
-        recommendations: 'Remove infected plants immediately. Apply copper-based fungicide. Ensure proper drainage.',
-        severity: 'high',
-        symptoms: ['Dark brown spots on leaves', 'White fungal growth on underside', 'Rapid spread'],
-        treatment_steps: [
-          'Remove and destroy infected plants',
-          'Apply copper fungicide immediately',
-          'Improve field drainage',
-          'Plant resistant varieties next season'
-        ]
-      },
-      'yellow leaves': {
-        disease: 'Early Blight',
-        confidence: 0.88,
-        recommendations: 'Apply fungicide and improve air circulation. Remove infected leaves.',
-        severity: 'moderate',
-        symptoms: ['Target-like lesions', 'Yellowing leaves', 'Stem lesions'],
-        treatment_steps: [
-          'Remove infected leaves',
-          'Apply fungicide every 7-10 days',
-          'Improve plant spacing',
-          'Avoid overhead irrigation'
-        ]
-      }
-    },
-    'corn': {
-      'rust colored': {
-        disease: 'Common Rust',
-        confidence: 0.82,
-        recommendations: 'Apply fungicide with active ingredients like azoxystrobin. Plant resistant varieties next season.',
-        severity: 'moderate',
-        symptoms: ['Rust-colored pustules on leaves', 'Yellow halos around lesions'],
-        treatment_steps: [
-          'Apply fungicide at first sign',
-          'Plant resistant varieties next season',
-          'Remove crop debris after harvest',
-          'Monitor weather conditions'
-        ]
-      },
-      'gray spots': {
-        disease: 'Gray Leaf Spot',
-        confidence: 0.75,
-        recommendations: 'Apply fungicide and improve air circulation. Plant resistant varieties.',
-        severity: 'moderate',
-        symptoms: ['Gray to tan rectangular lesions', 'Lesions with parallel edges'],
-        treatment_steps: [
-          'Apply fungicide when lesions appear',
-          'Improve field drainage',
-          'Plant resistant varieties',
-          'Rotate crops'
-        ]
-      }
-    },
-    'wheat': {
-      'white powder': {
-        disease: 'Powdery Mildew',
-        confidence: 0.90,
-        recommendations: 'Apply sulfur-based fungicide. Increase plant spacing for better air circulation.',
-        severity: 'moderate',
-        symptoms: ['White powdery growth on leaves', 'Yellowing of leaves', 'Stunted growth'],
-        treatment_steps: [
-          'Apply sulfur fungicide',
-          'Improve air circulation',
-          'Avoid excessive nitrogen fertilization',
-          'Plant resistant varieties'
-        ]
-      },
-      'brown spots': {
-        disease: 'Septoria Leaf Blotch',
-        confidence: 0.85,
-        recommendations: 'Apply fungicide and remove infected plant debris. Improve field drainage.',
-        severity: 'moderate',
-        symptoms: ['Brown lesions with yellow halos', 'Small black dots in lesions'],
-        treatment_steps: [
-          'Apply fungicide at flag leaf stage',
-          'Remove crop debris',
-          'Improve field drainage',
-          'Plant resistant varieties'
-        ]
-      }
-    }
-  };
-
-  // Find the best matching response based on crop type and issue description
-  const cropResponses = mockResponses[cropType.toLowerCase()] || {};
-  let bestMatch = null;
-  let highestConfidence = 0;
-
-  for (const [key, response] of Object.entries(cropResponses)) {
-    if (issueDescription.toLowerCase().includes(key) && response.confidence > highestConfidence) {
-      bestMatch = response;
-      highestConfidence = response.confidence;
-    }
-  }
-
-  // If no specific match found, return a generic response
-  if (!bestMatch) {
-    bestMatch = {
-      disease: 'Unknown Disease',
-      confidence: 0.65,
-      recommendations: 'Please consult with an agricultural expert for proper diagnosis. The symptoms may indicate multiple possible issues.',
-      severity: 'unknown',
-      symptoms: ['Various symptoms observed', 'Requires expert examination'],
-      treatment_steps: [
-        'Consult with agricultural expert',
-        'Take detailed photos of symptoms',
-        'Monitor plant development',
-        'Consider soil testing'
-      ]
     };
-  }
 
-  return bestMatch;
+    // Find the best matching response based on crop type and issue description
+    const cropResponses = mockResponses[cropType.toLowerCase()] || {};
+    let bestMatch = null;
+    let highestConfidence = 0;
+
+    for (const [key, response] of Object.entries(cropResponses)) {
+      if (issueDescription.toLowerCase().includes(key) && response.confidence > highestConfidence) {
+        bestMatch = response;
+        highestConfidence = response.confidence;
+      }
+    }
+
+    // If no specific match found, return a generic response
+    if (!bestMatch) {
+      bestMatch = {
+        disease: 'Unknown Disease',
+        confidence: 0.65,
+        recommendations: 'Please consult with an agricultural expert for proper diagnosis. The symptoms may indicate multiple possible issues.',
+        severity: 'unknown',
+        symptoms: ['Various symptoms observed', 'Requires expert examination'],
+        treatment_steps: [
+          'Consult with agricultural expert',
+          'Take detailed photos of symptoms',
+          'Monitor plant development',
+          'Consider soil testing'
+        ]
+      };
+    }
+
+    return bestMatch;
   }
 };
 
@@ -211,11 +211,11 @@ const uploadForDiagnosis = asyncHandler(async (req, res) => {
         diagnosis_result, recommendations, confidence_score, status
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
-        req.user.id, 
-        crop_type, 
-        issue_description, 
-        [imageUrl], 
-        diagnosisResultText, 
+        req.user.id,
+        crop_type,
+        issue_description,
+        [imageUrl],
+        diagnosisResultText,
         aiResults.recommendations,
         aiResults.confidence,
         'analyzed'
@@ -254,7 +254,7 @@ const getDiagnosticHistory = asyncHandler(async (req, res) => {
     LEFT JOIN users u ON d.expert_review_id = u.id
     WHERE d.user_id = $1
   `;
-  
+
   const queryParams = [req.user.id];
   let paramCount = 1;
 
@@ -277,7 +277,7 @@ const getDiagnosticHistory = asyncHandler(async (req, res) => {
   paramCount++;
   query += ` LIMIT $${paramCount}`;
   queryParams.push(parseInt(limit));
-  
+
   paramCount++;
   query += ` OFFSET $${paramCount}`;
   queryParams.push(offset);
@@ -492,7 +492,7 @@ const getExpertAssignedDiagnostics = asyncHandler(async (req, res) => {
     JOIN users u ON d.user_id = u.id
     WHERE d.expert_review_id = $1
   `;
-  
+
   const queryParams = [req.user.id];
   let paramCount = 1;
 
@@ -509,7 +509,7 @@ const getExpertAssignedDiagnostics = asyncHandler(async (req, res) => {
   paramCount++;
   query += ` LIMIT $${paramCount}`;
   queryParams.push(parseInt(limit));
-  
+
   paramCount++;
   query += ` OFFSET $${paramCount}`;
   queryParams.push(offset);
@@ -546,42 +546,71 @@ const getExpertAssignedDiagnostics = asyncHandler(async (req, res) => {
 const getCropRecommendations = asyncHandler(async (req, res) => {
   const { season, soil_type, climate_zone, water_availability } = req.query;
 
-  let query = 'SELECT * FROM crop_recommendations WHERE 1=1';
-  const queryParams = [];
-  let paramCount = 0;
+  try {
+    // Construct data for ML service
+    // In a real app, we would fetch weather data and soil details from external APIs or user profile
+    const mlData = {
+      nitrogen: 50.0, // Default or fetched
+      phosphorus: 50.0,
+      potassium: 50.0,
+      ph: 6.5,
+      rainfall: water_availability === 'high' ? 200.0 : (water_availability === 'low' ? 50.0 : 100.0),
+      temperature: 25.0,
+      humidity: 70.0,
+      soil_type: soil_type || 'loam',
+      season: season || 'kharif'
+    };
 
-  if (season) {
-    paramCount++;
-    query += ` AND season = $${paramCount}`;
-    queryParams.push(season);
+    const mlResults = await mlService.getRecommendedCrops(mlData);
+
+    res.json({
+      success: true,
+      recommendations: mlResults.recommended_crops,
+      source: 'ml_model',
+      model_version: mlResults.model_version
+    });
+  } catch (error) {
+    console.error('ML Service failed, falling back to database:', error.message);
+
+    // Fallback to database query
+    let query = 'SELECT * FROM crop_recommendations WHERE 1=1';
+    const queryParams = [];
+    let paramCount = 0;
+
+    if (season) {
+      paramCount++;
+      query += ` AND season = $${paramCount}`;
+      queryParams.push(season);
+    }
+
+    if (soil_type) {
+      paramCount++;
+      query += ` AND soil_type ILIKE $${paramCount}`;
+      queryParams.push(`%${soil_type}%`);
+    }
+
+    if (climate_zone) {
+      paramCount++;
+      query += ` AND climate_zone ILIKE $${paramCount}`;
+      queryParams.push(`%${climate_zone}%`);
+    }
+
+    if (water_availability) {
+      paramCount++;
+      query += ` AND water_requirement = $${paramCount}`;
+      queryParams.push(water_availability);
+    }
+
+    query += ' ORDER BY crop_name';
+
+    const result = await db.query(query, queryParams);
+
+    res.json({
+      success: true,
+      recommendations: result.rows,
+      source: 'database_fallback'
+    });
   }
-
-  if (soil_type) {
-    paramCount++;
-    query += ` AND soil_type ILIKE $${paramCount}`;
-    queryParams.push(`%${soil_type}%`);
-  }
-
-  if (climate_zone) {
-    paramCount++;
-    query += ` AND climate_zone ILIKE $${paramCount}`;
-    queryParams.push(`%${climate_zone}%`);
-  }
-
-  if (water_availability) {
-    paramCount++;
-    query += ` AND water_requirement = $${paramCount}`;
-    queryParams.push(water_availability);
-  }
-
-  query += ' ORDER BY crop_name';
-
-  const result = await db.query(query, queryParams);
-
-  res.json({
-    success: true,
-    recommendations: result.rows
-  });
 });
 
 // @desc    Get treatment recommendations for a diagnostic

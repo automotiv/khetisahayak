@@ -13,6 +13,7 @@ import 'package:kheti_sahayak_app/services/language_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'services/task/upload_queue.dart';
 import 'package:kheti_sahayak_app/services/local_notification_service.dart';
+import 'package:kheti_sahayak_app/services/sync_service.dart';
 
 Future<void> main() async {
   // Ensure Flutter binding is initialized
@@ -56,6 +57,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _initBackgroundProcessing() {
+    // Initialize auto-sync for activity records
+    SyncService.instance.startAutoSync();
+    
     // Try processing queued uploads at startup
     UploadQueue.processQueue();
 

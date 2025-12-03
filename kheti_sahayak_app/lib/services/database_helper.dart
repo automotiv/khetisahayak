@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 11,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -171,6 +171,24 @@ class DatabaseHelper {
     await db.execute('CREATE INDEX idx_cached_products_category ON cached_products(category)');
     await db.execute('CREATE INDEX idx_pending_actions_synced ON pending_actions(synced)');
     await db.execute('CREATE INDEX idx_cached_weather_location ON cached_weather(location)');
+
+    // Cached schemes table - for offline access
+    await db.execute('''
+      CREATE TABLE cached_schemes (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        benefits TEXT,
+        eligibility TEXT,
+        category TEXT,
+        link TEXT,
+        last_accessed TEXT,
+        cached_at TEXT NOT NULL
+      )
+    ''');
+    
+    await db.execute('CREATE INDEX idx_cached_schemes_name ON cached_schemes(name)');
+    await db.execute('CREATE INDEX idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
@@ -380,6 +398,53 @@ class DatabaseHelper {
       } catch (e) {
         print('Error adding market_price column: $e');
       }
+    }
+
+    if (oldVersion < 10) {
+      // Add photo and GPS support to activity_records for version 10
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN photo_paths TEXT');
+      } catch (e) {
+        print('Error adding photo_paths column: $e');
+      }
+
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN latitude REAL');
+      } catch (e) {
+        print('Error adding latitude column: $e');
+      }
+
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN longitude REAL');
+      } catch (e) {
+        print('Error adding longitude column: $e');
+      }
+
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN location_accuracy REAL');
+      } catch (e) {
+        print('Error adding location_accuracy column: $e');
+      }
+    }
+
+    if (oldVersion < 11) {
+      // Add cached_schemes table for version 11
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_schemes (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT NOT NULL,
+          benefits TEXT,
+          eligibility TEXT,
+          category TEXT,
+          link TEXT,
+          last_accessed TEXT,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_name ON cached_schemes(name)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
     }
   }
 
@@ -775,6 +840,108 @@ class DatabaseHelper {
     final cutoffDate = DateTime.now()
         .subtract(Duration(days: daysToKeep))
         .toIso8601String();
+
+    return await db.delete(
+      'cached_products',
+      where: 'cached_at < ?',
+      whereArgs: [cutoffDate],
+    );
+  }
+
+  // ================== CACHED SCHEMES OPERATIONS ==================
+
+  /// Cache a scheme
+  Future<int> cacheScheme(Map<String, dynamic> scheme) async {
+    final db = await database;
+    return await db.insert(
+      'cached_schemes',
+      {
+        'id': scheme['id'],
+        'name': scheme['name'],
+        'description': scheme['description'],
+        'benefits': scheme['benefits'],
+        'eligibility': scheme['eligibility'],
+        'category': scheme['category'],
+        'link': scheme['link'],
+        'last_accessed': DateTime.now().toIso8601String(),
+        'cached_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Cache multiple schemes
+  Future<void> cacheSchemes(List<Map<String, dynamic>> schemes) async {
+    final db = await database;
+    final batch = db.batch();
+    for (final scheme in schemes) {
+      batch.insert(
+        'cached_schemes',
+        {
+          'id': scheme['id'],
+          'name': scheme['name'],
+          'description': scheme['description'],
+          'benefits': scheme['benefits'],
+          'eligibility': scheme['eligibility'],
+          'category': scheme['category'],
+          'link': scheme['link'],
+          'cached_at': DateTime.now().toIso8601String(),
+          // Preserve last_accessed if exists, otherwise null (will be updated on view)
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  /// Get cached schemes with optional search
+  Future<List<Map<String, dynamic>>> getCachedSchemes({
+    String? query,
+    int? limit,
+  }) async {
+    final db = await database;
+    String? where;
+    List<dynamic>? whereArgs;
+
+    if (query != null && query.isNotEmpty) {
+      where = 'name LIKE ? OR description LIKE ? OR category LIKE ?';
+      whereArgs = ['%$query%', '%$query%', '%$query%'];
+    }
+
+    return await db.query(
+      'cached_schemes',
+      where: where,
+      whereArgs: whereArgs,
+      orderBy: 'name ASC',
+      limit: limit,
+    );
+  }
+
+  /// Update last accessed time for a scheme
+  Future<int> updateSchemeLastAccessed(int id) async {
+    final db = await database;
+    return await db.update(
+      'cached_schemes',
+      {'last_accessed': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Get recently accessed schemes
+  Future<List<Map<String, dynamic>>> getRecentSchemes({int limit = 50}) async {
+    final db = await database;
+    return await db.query(
+      'cached_schemes',
+      where: 'last_accessed IS NOT NULL',
+      orderBy: 'last_accessed DESC',
+      limit: limit,
+    );
+  }
+    final db = await database;
+    final cutoffDate = DateTime.now()
+        .subtract(Duration(days: daysToKeep))
+        .toIso8601String();
     return await db.delete(
       'cached_products',
       where: 'cached_at < ?',
@@ -1134,6 +1301,8 @@ class DatabaseHelper {
   }
 
   /// Close database
+  Future<void> close() async {
+    final db = await database;
     await db.close();
     _database = null;
   }
@@ -1324,3 +1493,4 @@ class DatabaseHelper {
     };
   }
 }
+

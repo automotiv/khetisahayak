@@ -133,6 +133,47 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  /// Upload activity record to server
+  /// Converts local activity record to logbook entry format
+  static Future<Map<String, dynamic>> uploadActivityRecord(Map<String, dynamic> record) async {
+    try {
+      // Parse timestamp to get date
+      final timestamp = record['timestamp'] is String
+          ? DateTime.parse(record['timestamp'])
+          : record['timestamp'] as DateTime;
+      
+      // Format date as YYYY-MM-DD for API
+      final date = timestamp.toIso8601String().split('T')[0];
+      
+      // Extract metadata if present
+      final metadata = record['metadata'] is String
+          ? json.decode(record['metadata'])
+          : (record['metadata'] ?? {});
+      
+      // Build request body matching backend API expectations
+      final requestBody = {
+        'activity_type': record['activity_type'],
+        'date': date,
+        'description': metadata['description'] ?? metadata['notes'] ?? '',
+        'cost': (record['cost'] as num?)?.toDouble() ?? 0.0,
+        'income': 0.0, // Can be extended later if needed
+      };
+      
+      // Upload to logbook endpoint
+      final result = await post('/logbook', requestBody);
+      
+      return {
+        'success': true,
+        'data': result,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   // Real API calls for crops and market data
   Future<List<dynamic>> getCrops() async {
     try {

@@ -20,7 +20,7 @@ import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:kheti_sahayak_app/models/cart.dart';
 import 'package:kheti_sahayak_app/screens/fields/field_list_screen.dart';
 import 'package:kheti_sahayak_app/screens/analytics/analytics_screen.dart';
-import 'package:kheti_sahayak_app/screens/analytics/analytics_screen.dart';
+import 'package:kheti_sahayak_app/screens/info/input_advisor_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -68,14 +68,14 @@ class _HomePageState extends State<HomePage> {
           ));
         }
         
-        // Add "Analytics" if not present
-        if (!items.any((i) => i.routeId == 'analytics')) {
-          items.insert(2, MenuItem(
-            id: 998,
-            label: 'Analytics',
-            iconName: 'analytics',
-            routeId: 'analytics',
-            displayOrder: 3,
+        // Add "Input Advisor" if not present
+        if (!items.any((i) => i.routeId == 'input_advisor')) {
+          items.insert(3, MenuItem(
+            id: 997,
+            label: 'Input Advisor',
+            iconName: 'science',
+            routeId: 'input_advisor',
+            displayOrder: 4,
           ));
         }
 
@@ -147,6 +147,8 @@ class _HomePageState extends State<HomePage> {
         return const NotificationsScreen();
       case 'profile':
         return const ProfileScreen();
+      case 'input_advisor':
+        return const InputAdvisorScreen();
       default:
         // Find label for title
         final item = _menuItems.firstWhere(
@@ -197,7 +199,7 @@ class _HomePageState extends State<HomePage> {
       case 'notifications': iconData = Icons.notifications; break;
       case 'analytics': iconData = Icons.analytics; break;
       case 'person': iconData = Icons.person; break;
-      case 'person': iconData = Icons.person; break;
+      case 'science': iconData = Icons.science; break;
       default: iconData = Icons.circle; break;
     }
     return Icon(iconData, color: isSelected ? Colors.green[800] : Colors.grey[700]);

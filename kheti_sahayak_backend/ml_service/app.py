@@ -393,6 +393,95 @@ async def get_crop_diseases(crop_type: str):
         "total": len(diseases)
     }
 
+class CropRecommendationRequest(BaseModel):
+    nitrogen: float
+    phosphorus: float
+    potassium: float
+    ph: float
+    rainfall: float
+    temperature: float
+    humidity: float
+    soil_type: str
+    season: str
+
+class CropRecommendationResponse(BaseModel):
+    recommended_crops: List[dict]
+    model_version: str = "mock-crop-v1.0"
+
+# Mock Crop Database (Simulating 100+ crops knowledge)
+CROP_DATABASE = [
+    {"name": "Rice", "nitrogen": 80, "phosphorus": 40, "potassium": 40, "ph": 6.5, "rainfall": 200, "soil": "clay"},
+    {"name": "Wheat", "nitrogen": 60, "phosphorus": 30, "potassium": 30, "ph": 6.5, "rainfall": 100, "soil": "loam"},
+    {"name": "Maize", "nitrogen": 70, "phosphorus": 40, "potassium": 40, "ph": 6.5, "rainfall": 100, "soil": "loam"},
+    {"name": "Cotton", "nitrogen": 90, "phosphorus": 50, "potassium": 50, "ph": 6.5, "rainfall": 100, "soil": "black"},
+    {"name": "Sugarcane", "nitrogen": 100, "phosphorus": 60, "potassium": 60, "ph": 7.0, "rainfall": 200, "soil": "loam"},
+    {"name": "Potato", "nitrogen": 50, "phosphorus": 60, "potassium": 100, "ph": 5.5, "rainfall": 80, "soil": "sandy"},
+    {"name": "Tomato", "nitrogen": 50, "phosphorus": 50, "potassium": 50, "ph": 6.0, "rainfall": 80, "soil": "loam"},
+    {"name": "Onion", "nitrogen": 60, "phosphorus": 50, "potassium": 50, "ph": 6.5, "rainfall": 60, "soil": "loam"},
+    {"name": "Soybean", "nitrogen": 20, "phosphorus": 60, "potassium": 40, "ph": 6.5, "rainfall": 100, "soil": "loam"},
+    {"name": "Groundnut", "nitrogen": 20, "phosphorus": 50, "potassium": 40, "ph": 6.0, "rainfall": 80, "soil": "sandy"},
+    {"name": "Chickpea", "nitrogen": 20, "phosphorus": 40, "potassium": 40, "ph": 7.0, "rainfall": 60, "soil": "loam"},
+    {"name": "Mustard", "nitrogen": 40, "phosphorus": 40, "potassium": 40, "ph": 7.0, "rainfall": 50, "soil": "loam"},
+    {"name": "Barley", "nitrogen": 30, "phosphorus": 30, "potassium": 30, "ph": 6.5, "rainfall": 50, "soil": "sandy"},
+    {"name": "Millet", "nitrogen": 20, "phosphorus": 20, "potassium": 20, "ph": 6.5, "rainfall": 40, "soil": "sandy"},
+    {"name": "Sorghum", "nitrogen": 30, "phosphorus": 30, "potassium": 30, "ph": 6.5, "rainfall": 60, "soil": "loam"},
+    {"name": "Jute", "nitrogen": 80, "phosphorus": 40, "potassium": 40, "ph": 6.5, "rainfall": 150, "soil": "clay"},
+    {"name": "Coffee", "nitrogen": 100, "phosphorus": 60, "potassium": 80, "ph": 6.0, "rainfall": 200, "soil": "loam"},
+    {"name": "Tea", "nitrogen": 100, "phosphorus": 40, "potassium": 60, "ph": 5.0, "rainfall": 250, "soil": "acidic"},
+    {"name": "Rubber", "nitrogen": 50, "phosphorus": 30, "potassium": 30, "ph": 5.5, "rainfall": 200, "soil": "acidic"},
+    {"name": "Coconut", "nitrogen": 60, "phosphorus": 40, "potassium": 80, "ph": 6.5, "rainfall": 150, "soil": "sandy"},
+    # Add more crops to simulate 100+
+]
+
+@app.post("/recommend-crops", response_model=CropRecommendationResponse)
+async def recommend_crops(request: CropRecommendationRequest):
+    """
+    Recommend crops based on soil and weather conditions using a mock ML model.
+    """
+    recommendations = []
+    
+    # Mock ML Logic: Calculate a "suitability score" for each crop
+    for crop in CROP_DATABASE:
+        score = 100.0
+        
+        # Penalize for soil mismatch (simplified)
+        if request.soil_type.lower() not in crop["soil"].lower() and crop["soil"] != "loam":
+             score -= 30
+        
+        # Penalize for rainfall difference
+        rainfall_diff = abs(request.rainfall - crop["rainfall"])
+        if rainfall_diff > 100:
+            score -= 40
+        elif rainfall_diff > 50:
+            score -= 20
+            
+        # Penalize for pH difference
+        ph_diff = abs(request.ph - crop["ph"])
+        if ph_diff > 1.5:
+            score -= 30
+        elif ph_diff > 0.5:
+            score -= 10
+            
+        # Add some randomness to simulate ML confidence
+        score += random.uniform(-5, 5)
+        
+        # Normalize score
+        score = max(0, min(100, score))
+        
+        if score > 60:
+            recommendations.append({
+                "crop": crop["name"],
+                "confidence": round(score / 100.0, 2),
+                "reason": f"Suitable for {request.soil_type} soil and current rainfall."
+            })
+            
+    # Sort by confidence
+    recommendations.sort(key=lambda x: x["confidence"], reverse=True)
+    
+    return CropRecommendationResponse(
+        recommended_crops=recommendations[:5] # Return top 5
+    )
+
 if __name__ == "__main__":
     print("""
     ╔═══════════════════════════════════════════════════════════╗

@@ -16,6 +16,14 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
   List<dynamic> _cropRecommendations = [];
   Map<String, dynamic>? _weatherRecommendations;
 
+  String _selectedSeason = 'Kharif';
+  String _selectedSoil = 'Loam';
+  String _selectedWater = 'Medium';
+
+  final List<String> _seasons = ['Kharif', 'Rabi', 'Zaid'];
+  final List<String> _soilTypes = ['Loam', 'Clay', 'Sandy', 'Black', 'Red'];
+  final List<String> _waterLevels = ['Low', 'Medium', 'High'];
+
   @override
   void initState() {
     super.initState();
@@ -26,8 +34,16 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      // Fetch crop recommendations (using default parameters for now)
-      final cropRes = await http.get(Uri.parse('${Constants.baseUrl}/api/diagnostics/recommendations?season=Kharif'));
+      // Fetch crop recommendations with filters
+      final queryParams = {
+        'season': _selectedSeason,
+        'soil_type': _selectedSoil,
+        'water_availability': _selectedWater.toLowerCase(),
+      };
+      final uri = Uri.parse('${Constants.baseUrl}/api/diagnostics/recommendations')
+          .replace(queryParameters: queryParams);
+      
+      final cropRes = await http.get(uri);
       
       // Fetch weather recommendations (using hardcoded location for demo)
       final weatherRes = await http.get(Uri.parse('${Constants.baseUrl}/api/weather/recommendations?lat=28.61&lon=77.20'));
@@ -75,10 +91,76 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildCropRecommendationsList(),
+                _buildCropRecommendationsTab(),
                 _buildWeatherRecommendationsList(),
               ],
             ),
+    );
+  }
+
+  Widget _buildCropRecommendationsTab() {
+    return Column(
+      children: [
+        _buildFilters(),
+        Expanded(child: _buildCropRecommendationsList()),
+      ],
+    );
+  }
+
+  Widget _buildFilters() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.green[50],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Customize Recommendations', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedSeason,
+                  decoration: const InputDecoration(labelText: 'Season', contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), border: OutlineInputBorder()),
+                  items: _seasons.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _selectedSeason = val);
+                      _loadData();
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedSoil,
+                  decoration: const InputDecoration(labelText: 'Soil', contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), border: OutlineInputBorder()),
+                  items: _soilTypes.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _selectedSoil = val);
+                      _loadData();
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+           DropdownButtonFormField<String>(
+              value: _selectedWater,
+              decoration: const InputDecoration(labelText: 'Water Availability', contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), border: OutlineInputBorder()),
+              items: _waterLevels.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _selectedWater = val);
+                  _loadData();
+                }
+              },
+            ),
+        ],
+      ),
     );
   }
 
@@ -91,28 +173,54 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
       itemCount: _cropRecommendations.length,
       itemBuilder: (context, index) {
         final item = _cropRecommendations[index];
+        // Handle both ML response (crop, confidence) and DB response (crop_name, etc.)
+        final name = item['crop'] ?? item['crop_name'];
+        final confidence = item['confidence'];
+        final reason = item['reason'];
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: ListTile(
-            title: Text(item['crop_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Season: ${item['season']}'),
+            leading: CircleAvatar(
+              backgroundColor: Colors.green[100],
+              child: Text(name[0], style: TextStyle(color: Colors.green[800])),
+            ),
+            title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (confidence != null)
+                  Text('Match Score: ${(confidence * 100).toInt()}%', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+                if (reason != null)
+                  Text(reason, style: const TextStyle(fontSize: 12)),
+                if (item['season'] != null)
+                  Text('Season: ${item['season']}'),
+              ],
+            ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               // Show details dialog
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(item['crop_name']),
+                  title: Text(name),
                   content: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Soil: ${item['soil_type']}'),
+                        if (confidence != null)
+                           Container(
+                             padding: const EdgeInsets.all(8),
+                             decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(8)),
+                             child: Row(children: [const Icon(Icons.verified, color: Colors.green), const SizedBox(width: 8), Text('AI Confidence: ${(confidence * 100).toInt()}%')])
+                           ),
+                        const SizedBox(height: 16),
+                        Text('Soil: ${item['soil_type'] ?? _selectedSoil}'),
                         const SizedBox(height: 8),
-                        Text('Water: ${item['water_requirement']}'),
+                        Text('Water: ${item['water_requirement'] ?? _selectedWater}'),
                         const SizedBox(height: 8),
-                        Text('Description: ${item['description'] ?? "N/A"}'),
+                        Text('Description: ${item['description'] ?? reason ?? "Recommended based on your farm profile."}'),
                       ],
                     ),
                   ),

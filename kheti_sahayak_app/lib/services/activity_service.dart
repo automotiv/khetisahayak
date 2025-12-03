@@ -12,6 +12,10 @@ class ActivityService {
     Map<String, dynamic> metadata = const {},
     DateTime? customTimestamp,
     double cost = 0.0,
+    List<String> photoPaths = const [],
+    double? latitude,
+    double? longitude,
+    double? locationAccuracy,
   }) async {
     final now = DateTime.now();
     final timestamp = customTimestamp ?? now;
@@ -31,6 +35,10 @@ class ActivityService {
       timezoneOffset: formattedOffset,
       metadata: metadata,
       cost: cost,
+      photoPaths: photoPaths,
+      latitude: latitude,
+      longitude: longitude,
+      locationAccuracy: locationAccuracy,
     );
 
     return await _dbHelper.insertActivityRecord(record.toMap());
