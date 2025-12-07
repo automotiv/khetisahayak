@@ -1,11 +1,12 @@
-const express = require('express');
+// Load environment variables FIRST before any other imports
 const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
 const cors = require('cors');
 // const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
 // const swaggerSpecs = require('./swagger');
-
-dotenv.config();
 
 const app = express();
 const port = 5002; // process.env.PORT || 3000;
