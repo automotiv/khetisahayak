@@ -35,10 +35,11 @@ async function deployBackend() {
         if (!servicesRes.ok) throw new Error(`Failed to list services: ${servicesRes.statusText}`);
 
         const services = await servicesRes.json();
-        const backendService = services.find(s => s.service.name === 'kheti_sahayak_backend'); // Adjust name if needed
+        const backendService = services.find(s => s.service.name === 'khetisahayak'); // Adjust name if needed
 
         if (!backendService) {
             console.error('❌ Error: Service "kheti_sahayak_backend" not found.');
+            console.log('Available services:', services.map(s => s.service.name).join(', '));
             process.exit(1);
         }
 
@@ -52,16 +53,21 @@ async function deployBackend() {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ clearCache: false })
+            body: JSON.stringify({ clearCache: "do_not_clear" })
         });
 
         if (!deployRes.ok) throw new Error(`Failed to trigger deploy: ${deployRes.statusText}`);
 
-        const deploy = await deployRes.json();
-        console.log(`✅ Deploy triggered successfully!`);
-        console.log(`   Deploy ID: ${deploy.id}`);
-        console.log(`   Status: ${deploy.status}`);
-        console.log(`   URL: https://dashboard.render.com/web/${serviceId}/deploys/${deploy.id}`);
+        const responseText = await deployRes.text();
+        try {
+            const deploy = JSON.parse(responseText);
+            console.log(`✅ Deploy triggered successfully!`);
+            console.log(`   Deploy ID: ${deploy.id}`);
+            console.log(`   Status: ${deploy.status}`);
+            console.log(`   URL: https://dashboard.render.com/web/${serviceId}/deploys/${deploy.id}`);
+        } catch (e) {
+            console.log(`✅ Deploy triggered (response not JSON): ${responseText}`);
+        }
 
     } catch (error) {
         console.error('❌ Error:', error.message);

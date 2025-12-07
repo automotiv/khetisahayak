@@ -10,6 +10,7 @@ import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/utils/logger.dart';
 import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 import 'package:kheti_sahayak_app/services/language_service.dart';
+import 'package:kheti_sahayak_app/services/notification_preferences_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'services/task/upload_queue.dart';
 import 'package:kheti_sahayak_app/services/local_notification_service.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider.value(value: LanguageService.instance),
+        ChangeNotifierProvider(create: (_) => NotificationPreferencesService()),
       ],
       child: const MyApp(),
     ),
@@ -100,9 +102,9 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           title: 'Kheti Sahayak',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.newDarkTheme,
-          darkTheme: AppTheme.newDarkTheme,
-          themeMode: ThemeMode.dark,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
           locale: languageService.locale,
           supportedLocales: const [
             Locale('en'), // English

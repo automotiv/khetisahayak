@@ -30,6 +30,9 @@ const expertRoutes = require('./routes/experts');
 const communityRoutes = require('./routes/community');
 const schemeRoutes = require('./routes/schemes');
 const logbookRoutes = require('./routes/logbook');
+const externalApiRoutes = require('./routes/external_apis');
+const newsRoutes = require('./routes/news'); // Added news routes
+const marketPriceRoutes = require('./routes/market_prices'); // Added market prices
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -70,6 +73,9 @@ app.use('/api/experts', expertRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/logbook', logbookRoutes);
+app.use('/api/news', newsRoutes); // Added news endpoint
+app.use('/api/market-prices', marketPriceRoutes); // Added market prices endpoint
+app.use('/api/external', externalApiRoutes);
 
 app.get('/', (req, res) => {
     res.json({
@@ -90,7 +96,8 @@ app.get('/', (req, res) => {
             cart: '/api/cart',
             payments: '/api/payments',
             equipment: '/api/equipment',
-            technology: '/api/technology'
+            technology: '/api/technology',
+            external: '/api/external (agro-weather, soil-data, market-prices, news, crop-calendar, pest-alerts)'
         }
     });
 });

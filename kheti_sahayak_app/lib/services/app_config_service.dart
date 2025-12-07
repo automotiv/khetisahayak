@@ -6,7 +6,7 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 class AppConfigService {
   static Future<List<MenuItem>> getMenuItems() async {
     try {
-      final response = await http.get(Uri.parse('${Constants.baseUrl}/api/app-config/menu'));
+      final response = await http.get(Uri.parse('${AppConstants.baseUrl}/app-config/menu'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

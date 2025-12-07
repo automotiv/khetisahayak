@@ -6,7 +6,7 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 class ExpertService {
   static Future<List<Expert>> getExperts() async {
     try {
-      final response = await http.get(Uri.parse('${Constants.baseUrl}/api/experts'));
+      final response = await http.get(Uri.parse('${AppConstants.baseUrl}/experts'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
