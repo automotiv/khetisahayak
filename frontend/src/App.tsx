@@ -16,6 +16,7 @@ import SharingPlatform from './components/sharing/SharingPlatform';
 import NotificationCenter from './components/notifications/NotificationCenter';
 import UserProfile from './components/profile/UserProfile';
 import LoginForm from './components/auth/LoginForm';
+// AgriculturalInsights removed - APIs integrated into dedicated sections
 import theme from './theme/theme';
 import { mockQuery } from './data/khetiSahayakMockData';
 import { enhancedMockQuery, enhancedMockStore } from './data/enhancedKhetiSahayakMockData';
@@ -29,16 +30,33 @@ const App: React.FC = () => {
   // Data State
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState(mockQuery.marketplaceProducts);
-  const [weather] = useState(enhancedMockQuery.weatherData);
+  const [weather, setWeather] = useState(enhancedMockQuery.weatherData);
   const [content, setContent] = useState(mockQuery.educationalContent);
   const [diagnostics] = useState(mockQuery.diagnosisHistory);
+  const [news, setNews] = useState([]); // News state
+
+  // Helper to map API weather to Enum
+  const mapWeatherCondition = (apiCondition: string): any => { // Using any for now to avoid strict type import issues in this snippet, but should be WeatherCondition
+    const condition = apiCondition?.toLowerCase() || '';
+    if (condition.includes('clear') || condition.includes('sun')) return 'sunny';
+    if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy';
+    if (condition.includes('cloud')) return 'cloudy';
+    if (condition.includes('storm')) return 'stormy';
+    if (condition.includes('fog') || condition.includes('mist')) return 'foggy';
+    if (condition.includes('wind')) return 'windy';
+    return 'cloudy'; // Default
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // Default location: Nashik, Maharashtra
+        const lat = 19.9975;
+        const lon = 73.7898;
+
         // Fetch data in parallel
-        const [productsData, contentData] = await Promise.all([
+        const [productsData, contentData, weatherRes, newsRes] = await Promise.all([
           khetiApi.getProducts().catch(e => {
             console.error("Failed to fetch products", e);
             return mockQuery.marketplaceProducts; // Fallback
@@ -46,8 +64,15 @@ const App: React.FC = () => {
           khetiApi.getEducationalContent().catch(e => {
             console.error("Failed to fetch content", e);
             return mockQuery.educationalContent; // Fallback
+          }),
+          khetiApi.getWeather(lat, lon).catch(e => {
+            console.error("Failed to fetch weather", e);
+            return null;
+          }),
+          khetiApi.getNews().catch(e => {
+            console.error("Failed to fetch news", e);
+            return { data: [] };
           })
-          // Add other fetches here as backend endpoints become available
         ]);
 
         if (productsData && productsData.data) {
@@ -55,6 +80,24 @@ const App: React.FC = () => {
         }
         if (contentData && contentData.data) {
           setContent(contentData.data);
+        }
+        if (newsRes && newsRes.data) {
+          setNews(newsRes.data);
+        }
+
+        if (weatherRes && weatherRes.success) {
+          setWeather({
+            current: {
+              temperature: weatherRes.current.temp,
+              humidity: weatherRes.current.humidity,
+              windSpeed: weatherRes.current.wind_speed,
+              condition: mapWeatherCondition(weatherRes.current.weather),
+              precipitation: 0, // Not available in current endpoint
+              uvIndex: 0 // Not available in current endpoint
+            },
+            daily: enhancedMockQuery.weatherData.daily, // Keep mock for now
+            hourly: enhancedMockQuery.weatherData.hourly // Keep mock for now
+          });
         }
 
         setLoading(false);
@@ -88,6 +131,7 @@ const App: React.FC = () => {
             weatherData={weather}
             diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
+            news={news}
           />
         );
       case 1:
@@ -165,12 +209,14 @@ const App: React.FC = () => {
             preferences={enhancedMockStore.userPreferences}
           />
         );
+      // case 13 removed - Agricultural Insights integrated into dedicated sections
       default:
         return (
           <Dashboard
             weatherData={weather}
             diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
+            news={news}
           />
         );
     }
