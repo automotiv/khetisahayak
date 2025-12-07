@@ -38,6 +38,12 @@ export interface AgroWeatherData {
         message_hi?: string;
     }>;
     source: string;
+    cache?: {
+        hit: boolean;
+        key: string;
+        ttl: number;
+        ttlFormatted: string;
+    };
 }
 
 export interface SoilData {
