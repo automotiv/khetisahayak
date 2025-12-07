@@ -76,10 +76,24 @@ const App: React.FC = () => {
           })
         ]);
 
+        // Transform API products to match expected format
+        const transformProducts = (apiProducts: any[]) => {
+          return apiProducts.map((p: any) => ({
+            id: p.id,
+            title: p.name || p.title,
+            category: (p.category || 'seeds').toLowerCase().replace(/\s+/g, '_'),
+            price: parseFloat(p.price) || 0,
+            rating: p.rating || 4.0,
+            vendor: p.seller_name || p.vendor || 'Kheti Sahayak',
+            imageUrl: p.image_urls?.[0] || p.imageUrl || '/placeholder-product.png',
+            inStock: p.is_available ?? p.inStock ?? (p.stock_quantity > 0)
+          }));
+        };
+
         if (productsData && productsData.products) {
-          setProducts(productsData.products);
+          setProducts(transformProducts(productsData.products));
         } else if (productsData && productsData.data) {
-          setProducts(productsData.data);
+          setProducts(transformProducts(productsData.data));
         }
 
         if (contentData && contentData.data) {
