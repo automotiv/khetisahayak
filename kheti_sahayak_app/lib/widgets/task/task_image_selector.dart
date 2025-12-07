@@ -212,6 +212,7 @@ class _TaskImageSelectorState extends State<TaskImageSelector> {
                     canEdit: widget.enabled,
                     onRemove: _removeImage,
                     onReplace: _replaceImage,
+                    onEdit: _editImage,
                     onAddMore: _pickImages,
                   ),
       ],

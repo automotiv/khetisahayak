@@ -13,8 +13,6 @@ import {
   Badge,
   Tabs,
   Tab,
-  Card,
-  CardContent,
   Chip,
   CircularProgress,
   Alert,

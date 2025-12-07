@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/widgets/primary_button.dart';
+import 'package:kheti_sahayak_app/services/product_service.dart';
+import 'package:kheti_sahayak_app/models/product.dart';
 
 class MarketplaceScreenNew extends StatefulWidget {
   const MarketplaceScreenNew({Key? key}) : super(key: key);
@@ -15,45 +17,7 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
   bool _isLoading = true;
   bool _isRefreshing = false;
   
-  // Sample product data
-  final List<Map<String, dynamic>> _products = [
-    {
-      'id': '1',
-      'name': 'Organic Tomato Seeds',
-      'price': '₹120',
-      'rating': 4.5,
-      'reviewCount': 24,
-      'discount': '10% OFF',
-      'category': 'Seeds',
-    },
-    {
-      'id': '2',
-      'name': 'NPK Fertilizer 20-20-20',
-      'price': '₹450',
-      'rating': 4.2,
-      'reviewCount': 18,
-      'discount': '5% OFF',
-      'category': 'Fertilizers',
-    },
-    {
-      'id': '3',
-      'name': 'Garden Trowel Set',
-      'price': '₹350',
-      'rating': 4.7,
-      'reviewCount': 32,
-      'discount': '15% OFF',
-      'category': 'Tools',
-    },
-    {
-      'id': '4',
-      'name': 'Drip Irrigation Kit',
-      'price': '₹1,299',
-      'rating': 4.0,
-      'reviewCount': 12,
-      'discount': '10% OFF',
-      'category': 'Irrigation',
-    },
-  ];
+  List<Product> _products = [];
   
   final List<Map<String, dynamic>> _categories = [
     {'name': 'All', 'icon': Icons.all_inclusive},
@@ -71,12 +35,28 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
   }
 
   Future<void> _loadProducts() async {
-    // Simulate network delay for initial load
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final products = await ProductService.getProducts();
+      if (mounted) {
+        setState(() {
+          _products = products;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading products: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load products: $e')),
+        );
+      }
     }
   }
 
@@ -84,19 +64,29 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
     setState(() {
       _isRefreshing = true;
     });
-    // Simulate network delay for refresh
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() {
-        _isRefreshing = false;
-      });
+    
+    try {
+      final products = await ProductService.getProducts();
+      if (mounted) {
+        setState(() {
+          _products = products;
+          _isRefreshing = false;
+        });
+      }
+    } catch (e) {
+      print('Error refreshing products: $e');
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+        });
+      }
     }
   }
   
-  List<Map<String, dynamic>> get _filteredProducts {
+  List<Product> get _filteredProducts {
     if (_selectedCategoryIndex == 0) return _products;
     final selectedCategory = _categories[_selectedCategoryIndex]['name'] as String;
-    return _products.where((product) => product['category'] == selectedCategory).toList();
+    return _products.where((product) => product.category == selectedCategory).toList();
   }
 
   @override
@@ -146,6 +136,9 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                   ),
+                  onSubmitted: (value) {
+                    // TODO: Implement search
+                  },
                 ),
                 
                 const SizedBox(height: 16),
@@ -259,7 +252,7 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
     );
   }
   
-  Widget _buildProductCard(ThemeData theme, ColorScheme colorScheme, Map<String, dynamic> product) {
+  Widget _buildProductCard(ThemeData theme, ColorScheme colorScheme, Product product) {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -279,10 +272,15 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 color: colorScheme.primary.withOpacity(0.1),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/placeholder_product.png'),
-                  fit: BoxFit.cover,
-                ),
+                image: product.imageUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(product.imageUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : const DecorationImage(
+                        image: AssetImage('assets/images/placeholder_product.png'),
+                        fit: BoxFit.cover,
+                      ),
               ),
               child: Stack(
                 children: [
@@ -302,28 +300,6 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
                       ),
                     ),
                   ),
-                  if (product['discount'] != null)
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          product['discount'] as String,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -335,7 +311,7 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['name'] as String,
+                    product.name,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -353,15 +329,8 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${product['rating']}',
+                        '4.5', // Placeholder rating
                         style: theme.textTheme.labelSmall,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(${product['reviewCount']})',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.hintColor,
-                        ),
                       ),
                     ],
                   ),
@@ -370,7 +339,7 @@ class _MarketplaceScreenNewState extends State<MarketplaceScreenNew> with Single
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        product['price'] as String,
+                        '₹${product.price}',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.primary,

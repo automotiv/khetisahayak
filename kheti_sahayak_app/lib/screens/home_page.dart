@@ -18,6 +18,9 @@ import 'package:kheti_sahayak_app/screens/system/notifications_screen.dart';
 import 'package:kheti_sahayak_app/screens/cart/cart_screen.dart';
 import 'package:kheti_sahayak_app/services/cart_service.dart';
 import 'package:kheti_sahayak_app/models/cart.dart';
+import 'package:kheti_sahayak_app/screens/fields/field_list_screen.dart';
+import 'package:kheti_sahayak_app/screens/analytics/analytics_screen.dart';
+import 'package:kheti_sahayak_app/screens/analytics/analytics_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,6 +46,39 @@ class _HomePageState extends State<HomePage> {
     final items = await AppConfigService.getMenuItems();
     if (mounted) {
       setState(() {
+        // Add "My Fields" if not present (temporary until backend update)
+        if (!items.any((i) => i.routeId == 'fields')) {
+          items.insert(1, MenuItem(
+            id: 999,
+            label: 'My Fields',
+            iconName: 'landscape',
+            routeId: 'fields',
+            displayOrder: 2,
+          ));
+        }
+        
+        // Add "Analytics" if not present
+        if (!items.any((i) => i.routeId == 'analytics')) {
+          items.insert(2, MenuItem(
+            id: 998,
+            label: 'Analytics',
+            iconName: 'analytics',
+            routeId: 'analytics',
+            displayOrder: 3,
+          ));
+        }
+        
+        // Add "Analytics" if not present
+        if (!items.any((i) => i.routeId == 'analytics')) {
+          items.insert(2, MenuItem(
+            id: 998,
+            label: 'Analytics',
+            iconName: 'analytics',
+            routeId: 'analytics',
+            displayOrder: 3,
+          ));
+        }
+
         _menuItems = items;
         _isLoadingMenu = false;
         // Ensure selected route exists in menu, else default to first or dashboard
@@ -89,6 +125,8 @@ class _HomePageState extends State<HomePage> {
         return const WeatherScreen();
       case 'diagnostics':
         return const DiagnosticsScreen();
+      case 'fields':
+        return const FieldListScreen();
       case 'marketplace':
         return const MarketplaceScreenNew();
       case 'education':
@@ -157,11 +195,14 @@ class _HomePageState extends State<HomePage> {
       case 'school': iconData = Icons.school; break;
       case 'people': iconData = Icons.people; break;
       case 'forum': iconData = Icons.forum; break;
+      case 'landscape': iconData = Icons.landscape; break;
       case 'book': iconData = Icons.book; break;
       case 'account_balance': iconData = Icons.account_balance; break;
       case 'lightbulb': iconData = Icons.lightbulb; break;
       case 'handyman': iconData = Icons.handyman; break;
       case 'notifications': iconData = Icons.notifications; break;
+      case 'analytics': iconData = Icons.analytics; break;
+      case 'person': iconData = Icons.person; break;
       case 'person': iconData = Icons.person; break;
       default: iconData = Icons.circle; break;
     }

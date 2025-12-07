@@ -18,7 +18,6 @@ import {
   Opacity,
   WbSunny,
   Grass,
-  Air,
   Thermostat,
   WaterDrop
 } from '@mui/icons-material';

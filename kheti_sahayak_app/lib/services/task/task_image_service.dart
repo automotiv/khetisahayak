@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart' as img;
@@ -19,6 +21,8 @@ class TaskImageService {
   static const int maxImageSizeMB = 10; // 10MB max file size
   static const int maxImageWidth = 4096; // Max image width in pixels
   static const int maxImageHeight = 4096; // Max image height in pixels
+  static const int minImageWidth = 800; // Min image width in pixels
+  static const int minImageHeight = 600; // Min image height in pixels
   static const int maxImagesPerTask = 5; // Maximum number of images per task
   static const List<String> allowedMimeTypes = [
     'image/jpeg',
@@ -155,6 +159,9 @@ class TaskImageService {
     if (image.width > maxImageWidth || image.height > maxImageHeight) {
       throw Exception('Image dimensions exceed maximum allowed size of ${maxImageWidth}x${maxImageHeight}');
     }
+    if (image.width < minImageWidth || image.height < minImageHeight) {
+      throw Exception('Image dimensions are too small. Minimum required is ${minImageWidth}x${minImageHeight}');
+    }
 
     // Create a thumbnail (optional, can be done later when needed)
     // final thumbnail = await _createThumbnail(file);
@@ -277,5 +284,34 @@ class TaskImageService {
     if (ext == '.png') return 'image/png';
     if (ext == '.webp') return 'image/webp';
     return 'application/octet-stream';
+  }
+
+  /// Crop an image
+  Future<TaskImage?> cropImage(File imageFile) async {
+    try {
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: imageFile.path,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Edit Image',
+            toolbarColor: const Color(0xFF2E7D32), // Green color
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+          ),
+          IOSUiSettings(
+            title: 'Edit Image',
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        return _processImageFile(XFile(croppedFile.path));
+      }
+      return null;
+    } catch (e) {
+      AppLogger.error('Error cropping image', e);
+      return null;
+    }
   }
 }

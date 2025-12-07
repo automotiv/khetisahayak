@@ -16,7 +16,6 @@ import SharingPlatform from './components/sharing/SharingPlatform';
 import NotificationCenter from './components/notifications/NotificationCenter';
 import UserProfile from './components/profile/UserProfile';
 import LoginForm from './components/auth/LoginForm';
-// AgriculturalInsights removed - APIs integrated into dedicated sections
 import theme from './theme/theme';
 import { mockQuery } from './data/khetiSahayakMockData';
 import { enhancedMockQuery, enhancedMockStore } from './data/enhancedKhetiSahayakMockData';
@@ -27,16 +26,16 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Data State
-  // Data State
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState(mockQuery.marketplaceProducts);
   const [weather, setWeather] = useState(enhancedMockQuery.weatherData);
   const [content, setContent] = useState(mockQuery.educationalContent);
   const [diagnostics] = useState(mockQuery.diagnosisHistory);
-  const [news, setNews] = useState([]); // News state
+  const [equipment, setEquipment] = useState(enhancedMockQuery.equipmentListings);
+  const [news, setNews] = useState<any[]>([]);
 
   // Helper to map API weather to Enum
-  const mapWeatherCondition = (apiCondition: string): any => { // Using any for now to avoid strict type import issues in this snippet, but should be WeatherCondition
+  const mapWeatherCondition = (apiCondition: string): any => {
     const condition = apiCondition?.toLowerCase() || '';
     if (condition.includes('clear') || condition.includes('sun')) return 'sunny';
     if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy';
@@ -44,26 +43,28 @@ const App: React.FC = () => {
     if (condition.includes('storm')) return 'stormy';
     if (condition.includes('fog') || condition.includes('mist')) return 'foggy';
     if (condition.includes('wind')) return 'windy';
-    return 'cloudy'; // Default
+    return 'cloudy';
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Default location: Nashik, Maharashtra
         const lat = 19.9975;
         const lon = 73.7898;
 
-        // Fetch data in parallel
-        const [productsData, contentData, weatherRes, newsRes] = await Promise.all([
+        const [productsData, contentData, equipmentData, weatherRes, newsRes] = await Promise.all([
           khetiApi.getProducts().catch(e => {
             console.error("Failed to fetch products", e);
-            return mockQuery.marketplaceProducts; // Fallback
+            return { data: mockQuery.marketplaceProducts };
           }),
           khetiApi.getEducationalContent().catch(e => {
             console.error("Failed to fetch content", e);
-            return mockQuery.educationalContent; // Fallback
+            return { data: mockQuery.educationalContent };
+          }),
+          khetiApi.getEquipmentListings().catch(e => {
+            console.error("Failed to fetch equipment", e);
+            return { data: enhancedMockQuery.equipmentListings };
           }),
           khetiApi.getWeather(lat, lon).catch(e => {
             console.error("Failed to fetch weather", e);
@@ -75,12 +76,20 @@ const App: React.FC = () => {
           })
         ]);
 
-        if (productsData && productsData.data) {
+        if (productsData && productsData.products) {
+          setProducts(productsData.products);
+        } else if (productsData && productsData.data) {
           setProducts(productsData.data);
         }
+
         if (contentData && contentData.data) {
           setContent(contentData.data);
         }
+
+        if (equipmentData && equipmentData.data) {
+          setEquipment(equipmentData.data);
+        }
+
         if (newsRes && newsRes.data) {
           setNews(newsRes.data);
         }
@@ -92,17 +101,16 @@ const App: React.FC = () => {
               humidity: weatherRes.current.humidity,
               windSpeed: weatherRes.current.wind_speed,
               condition: mapWeatherCondition(weatherRes.current.weather),
-              precipitation: 0, // Not available in current endpoint
-              uvIndex: 0 // Not available in current endpoint
+              precipitation: 0,
+              uvIndex: 0
             },
-            daily: enhancedMockQuery.weatherData.daily, // Keep mock for now
-            hourly: enhancedMockQuery.weatherData.hourly // Keep mock for now
+            daily: enhancedMockQuery.weatherData.daily,
+            hourly: enhancedMockQuery.weatherData.hourly
           });
         }
-
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
         setLoading(false);
       }
     };
@@ -191,7 +199,7 @@ const App: React.FC = () => {
       case 10:
         return (
           <SharingPlatform
-            equipment={enhancedMockQuery.equipmentListings}
+            equipment={equipment}
             labor={enhancedMockQuery.laborProfiles}
           />
         );
@@ -209,7 +217,6 @@ const App: React.FC = () => {
             preferences={enhancedMockStore.userPreferences}
           />
         );
-      // case 13 removed - Agricultural Insights integrated into dedicated sections
       default:
         return (
           <Dashboard

@@ -5,9 +5,13 @@ import 'package:kheti_sahayak_app/screens/diagnostics/diagnostics_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/educational_content_screen.dart';
 import 'package:kheti_sahayak_app/screens/profile/profile_screen.dart';
 import 'package:kheti_sahayak_app/routes/routes.dart';
+import 'package:kheti_sahayak_app/widgets/dashboard/weather_widget.dart';
+import 'package:kheti_sahayak_app/widgets/dashboard/task_summary_widget.dart';
+import 'package:kheti_sahayak_app/widgets/dashboard/alerts_widget.dart';
+import 'package:kheti_sahayak_app/widgets/dashboard/yield_trends_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
@@ -77,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 // This is the Home screen content with the four-card grid
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -86,42 +90,78 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Kheti Sahayak'),
         backgroundColor: const Color(0xFF4CAF50),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          children: <Widget>[
-            _buildDashboardCard(
-              context,
-              'Weather Forecast',
-              '/weather',
-              Icons.wb_sunny,
-              Colors.orange,
-            ),
-            _buildDashboardCard(
-              context,
-              'Crop Advisory',
-              AppRoutes.cropAdvisory,
-              Icons.grass,
-              Colors.green,
-            ),
-            _buildDashboardCard(
-              context,
-              'Market Prices',
-              AppRoutes.marketPrices,
-              Icons.trending_up,
-              Colors.blue,
-            ),
-            _buildDashboardCard(
-              context,
-              'Pest & Disease Info',
-              AppRoutes.diagnostics,
-              Icons.bug_report,
-              Colors.red,
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Weather Widget
+              const WeatherWidget(),
+              const SizedBox(height: 16),
+
+              // Task Summary Widget
+              const TaskSummaryWidget(),
+              const SizedBox(height: 16),
+
+              // Alerts Widget
+              const AlertsWidget(),
+              const SizedBox(height: 16),
+
+              // Yield Trends Widget
+              const YieldTrendsWidget(),
+              const SizedBox(height: 24),
+
+              // Quick Access Grid Header
+              const Text(
+                'Quick Access',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Existing Grid
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: <Widget>[
+                  _buildDashboardCard(
+                    context,
+                    'Weather Forecast',
+                    '/weather',
+                    Icons.wb_sunny,
+                    Colors.orange,
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Crop Advisory',
+                    AppRoutes.cropAdvisory,
+                    Icons.grass,
+                    Colors.green,
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Market Prices',
+                    AppRoutes.marketPrices,
+                    Icons.trending_up,
+                    Colors.blue,
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    'Pest & Disease Info',
+                    AppRoutes.diagnostics,
+                    Icons.bug_report,
+                    Colors.red,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,8 +190,8 @@ class HomeScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
+                color.withValues(alpha: 0.1),
+                color.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -161,7 +201,7 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, size: 40.0, color: color),

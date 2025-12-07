@@ -52,6 +52,8 @@ dependencies:
   sqflite:
   path_provider:
   connectivity_plus: ^6.1.0
+  permission_handler: ^11.3.1
+  flutter_local_notifications: ^17.0.0
 
   # Form Validation
   form_validator:
@@ -73,6 +75,7 @@ dependencies:
 
   # Image Processing
   image:
+  image_cropper: ^8.0.0
   path:
   google_fonts: ^6.3.0
 
@@ -81,6 +84,8 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  mockito: ^5.4.4
+  build_runner: ^2.4.9
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

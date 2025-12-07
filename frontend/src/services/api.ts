@@ -38,6 +38,12 @@ export interface AgroWeatherData {
         message_hi?: string;
     }>;
     source: string;
+    cache?: {
+        hit: boolean;
+        key: string;
+        ttl: number;
+        ttlFormatted: string;
+    };
 }
 
 export interface SoilData {
@@ -177,7 +183,7 @@ export const khetiApi = {
 
     // Marketplace
     getProducts: async () => {
-        const response = await api.get('/marketplace/products');
+        const response = await api.get('/marketplace');
         return response.data;
     },
 
@@ -196,6 +202,12 @@ export const khetiApi = {
     // Experts
     getExperts: async () => {
         const response = await api.get('/experts');
+        return response.data;
+    },
+
+    // Equipment
+    getEquipmentListings: async () => {
+        const response = await api.get('/equipment/listings');
         return response.data;
     },
 
