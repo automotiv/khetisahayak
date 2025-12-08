@@ -158,8 +158,8 @@ export interface PestAlertData {
     source: string;
 }
 
-// Use environment variable or default to localhost
-const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000/api';
+// Use environment variable or default to localhost:5002 (backend port)
+const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5002/api';
 
 const api = axios.create({
     baseURL: API_URL,
