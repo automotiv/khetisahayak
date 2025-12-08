@@ -9,6 +9,12 @@ class ActivityRecord {
   final Map<String, dynamic> metadata;
   final int synced;
   final double cost;
+  
+  // Photo and GPS fields
+  final List<String> photoPaths;
+  final double? latitude;
+  final double? longitude;
+  final double? locationAccuracy;
 
   ActivityRecord({
     this.id,
@@ -19,6 +25,10 @@ class ActivityRecord {
     this.metadata = const {},
     this.synced = 0,
     this.cost = 0.0,
+    this.photoPaths = const [],
+    this.latitude,
+    this.longitude,
+    this.locationAccuracy,
   });
 
   // Convert a ActivityRecord into a Map. The keys must correspond to the names of the
@@ -33,10 +43,27 @@ class ActivityRecord {
       'metadata': jsonEncode(metadata),
       'synced': synced,
       'cost': cost,
+      'photo_paths': photoPaths.isNotEmpty ? jsonEncode(photoPaths) : null,
+      'latitude': latitude,
+      'longitude': longitude,
+      'location_accuracy': locationAccuracy,
     };
   }
 
   factory ActivityRecord.fromMap(Map<String, dynamic> map) {
+    // Parse photo paths from JSON
+    List<String> photos = [];
+    if (map['photo_paths'] != null && map['photo_paths'] is String) {
+      try {
+        final decoded = jsonDecode(map['photo_paths']);
+        if (decoded is List) {
+          photos = decoded.cast<String>();
+        }
+      } catch (e) {
+        print('Error parsing photo_paths: $e');
+      }
+    }
+    
     return ActivityRecord(
       id: map['id'],
       fieldId: map['field_id'],
@@ -46,6 +73,10 @@ class ActivityRecord {
       metadata: map['metadata'] != null ? jsonDecode(map['metadata']) : {},
       synced: map['synced'] ?? 0,
       cost: (map['cost'] as num?)?.toDouble() ?? 0.0,
+      photoPaths: photos,
+      latitude: (map['latitude'] as num?)?.toDouble(),
+      longitude: (map['longitude'] as num?)?.toDouble(),
+      locationAccuracy: (map['location_accuracy'] as num?)?.toDouble(),
     );
   }
 

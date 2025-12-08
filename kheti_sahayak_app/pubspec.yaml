@@ -40,10 +40,10 @@ dependencies:
   image_picker:
   intl:
   fl_chart: ^0.68.0 # New chart dependency
-  
+
   # State Management
   provider:
-  
+
   # Network & Storage
   http:
   dio:
@@ -61,6 +61,7 @@ dependencies:
   # Utils
   logger:
   uuid:
+  timeago:
   url_launcher:
 
   # Environment variables

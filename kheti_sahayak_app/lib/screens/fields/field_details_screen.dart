@@ -7,6 +7,7 @@ import 'package:kheti_sahayak_app/models/activity_record.dart';
 import 'package:kheti_sahayak_app/services/database_helper.dart';
 import 'package:kheti_sahayak_app/services/activity_service.dart';
 import 'package:kheti_sahayak_app/widgets/charts/yield_trend_chart.dart';
+import 'package:kheti_sahayak_app/widgets/activity_type_dropdown.dart';
 
 class FieldDetailsScreen extends StatefulWidget {
   final Field field;
@@ -356,7 +357,7 @@ class _AddActivityDialog extends StatefulWidget {
 
 class _AddActivityDialogState extends State<_AddActivityDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _typeController = TextEditingController();
+  String _selectedActivityType = 'Planting';
   final _costController = TextEditingController();
   final ActivityService _activityService = ActivityService();
 
@@ -366,7 +367,7 @@ class _AddActivityDialogState extends State<_AddActivityDialog> {
     try {
       await _activityService.createActivityRecord(
         fieldId: widget.fieldId,
-        activityType: _typeController.text,
+        activityType: _selectedActivityType,
         cost: double.tryParse(_costController.text) ?? 0.0,
       );
 
@@ -386,11 +387,12 @@ class _AddActivityDialogState extends State<_AddActivityDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              controller: _typeController,
-              decoration: const InputDecoration(labelText: 'Activity Type (e.g., Sowing)'),
-              validator: (v) => v!.isEmpty ? 'Required' : null,
+            ActivityTypeDropdown(
+              value: _selectedActivityType,
+              onChanged: (value) => setState(() => _selectedActivityType = value!),
+              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _costController,
               decoration: const InputDecoration(labelText: 'Cost (₹)'),
