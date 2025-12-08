@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/field.dart';
 import 'package:kheti_sahayak_app/models/crop_rotation.dart';
+import 'package:kheti_sahayak_app/models/yield_record.dart';
 import 'package:kheti_sahayak_app/services/field_service.dart';
 import 'package:kheti_sahayak_app/models/activity_record.dart';
 import 'package:kheti_sahayak_app/services/database_helper.dart';
@@ -120,8 +121,7 @@ class _FieldDetailsScreenState extends State<FieldDetailsScreen> {
               const SizedBox(height: 24),
             ],
             
-              ],
-            ),
+
             const SizedBox(height: 16),
 
             // Action Buttons

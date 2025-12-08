@@ -3,6 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Modern Light Theme for Farming App
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: const Color(0xFFF5F7FA), // Light gray background
@@ -73,7 +79,7 @@ class AppTheme {
     ),
 
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
