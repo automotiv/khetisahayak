@@ -1,11 +1,12 @@
-const express = require('express');
+// Load environment variables FIRST before any other imports
 const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
 const cors = require('cors');
 // const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
 // const swaggerSpecs = require('./swagger');
-
-dotenv.config();
 
 const app = express();
 const port = 5002; // process.env.PORT || 3000;
@@ -30,6 +31,9 @@ const expertRoutes = require('./routes/experts');
 const communityRoutes = require('./routes/community');
 const schemeRoutes = require('./routes/schemes');
 const logbookRoutes = require('./routes/logbook');
+const externalApiRoutes = require('./routes/external_apis');
+const newsRoutes = require('./routes/news'); // Added news routes
+const marketPriceRoutes = require('./routes/market_prices'); // Added market prices
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Middleware
@@ -70,6 +74,9 @@ app.use('/api/experts', expertRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/logbook', logbookRoutes);
+app.use('/api/news', newsRoutes); // Added news endpoint
+app.use('/api/market-prices', marketPriceRoutes); // Added market prices endpoint
+app.use('/api/external', externalApiRoutes);
 
 app.get('/', (req, res) => {
     res.json({
@@ -90,7 +97,8 @@ app.get('/', (req, res) => {
             cart: '/api/cart',
             payments: '/api/payments',
             equipment: '/api/equipment',
-            technology: '/api/technology'
+            technology: '/api/technology',
+            external: '/api/external (agro-weather, soil-data, market-prices, news, crop-calendar, pest-alerts)'
         }
     });
 });

@@ -1119,7 +1119,15 @@ class DatabaseHelper {
     );
   }
 
-
+  /// Delete an activity record
+  Future<int> deleteActivityRecord(int id) async {
+    final db = await database;
+    return await db.delete(
+      'activity_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
   /// Get unsynced activity records
   Future<List<Map<String, dynamic>>> getUnsyncedActivityRecords() async {

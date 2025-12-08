@@ -17,7 +17,7 @@ class SchemeService {
     try {
       if (isOnline) {
         // 2. Fetch from API
-        final response = await http.get(Uri.parse('${Constants.baseUrl}/api/schemes'));
+        final response = await http.get(Uri.parse('${AppConstants.baseUrl}/schemes'));
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
@@ -27,7 +27,7 @@ class SchemeService {
 
             // 3. Cache schemes
             await _cacheSchemes(items.cast<Map<String, dynamic>>());
-            
+
             return schemes;
           }
         }

@@ -4,8 +4,14 @@ Thumbs.db
 
 # Environment variables
 .env
-.env*
+**/.env
 !.env.example
+!**/.env.example
+
+# Log files
+**/*.log
+**/analyze_log.txt
+**/build_log.txt
 
 # Terraform
 **/.terraform/

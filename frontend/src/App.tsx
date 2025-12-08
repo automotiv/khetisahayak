@@ -28,35 +28,72 @@ const App: React.FC = () => {
   // Data State
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState(mockQuery.marketplaceProducts);
-  const [weather] = useState(enhancedMockQuery.weatherData);
+  const [weather, setWeather] = useState(enhancedMockQuery.weatherData);
   const [content, setContent] = useState(mockQuery.educationalContent);
   const [diagnostics] = useState(mockQuery.diagnosisHistory);
   const [equipment, setEquipment] = useState(enhancedMockQuery.equipmentListings);
+  const [news, setNews] = useState<any[]>([]);
+
+  // Helper to map API weather to Enum
+  const mapWeatherCondition = (apiCondition: string): any => {
+    const condition = apiCondition?.toLowerCase() || '';
+    if (condition.includes('clear') || condition.includes('sun')) return 'sunny';
+    if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy';
+    if (condition.includes('cloud')) return 'cloudy';
+    if (condition.includes('storm')) return 'stormy';
+    if (condition.includes('fog') || condition.includes('mist')) return 'foggy';
+    if (condition.includes('wind')) return 'windy';
+    return 'cloudy';
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch data in parallel
-        const [productsData, contentData, equipmentData] = await Promise.all([
+        const lat = 19.9975;
+        const lon = 73.7898;
+
+        const [productsData, contentData, equipmentData, weatherRes, newsRes] = await Promise.all([
           khetiApi.getProducts().catch(e => {
             console.error("Failed to fetch products", e);
-            return { data: mockQuery.marketplaceProducts }; // Fallback
+            return { data: mockQuery.marketplaceProducts };
           }),
           khetiApi.getEducationalContent().catch(e => {
             console.error("Failed to fetch content", e);
-            return { data: mockQuery.educationalContent }; // Fallback
+            return { data: mockQuery.educationalContent };
           }),
           khetiApi.getEquipmentListings().catch(e => {
             console.error("Failed to fetch equipment", e);
-            return { data: enhancedMockQuery.equipmentListings }; // Fallback
+            return { data: enhancedMockQuery.equipmentListings };
+          }),
+          khetiApi.getWeather(lat, lon).catch(e => {
+            console.error("Failed to fetch weather", e);
+            return null;
+          }),
+          khetiApi.getNews().catch(e => {
+            console.error("Failed to fetch news", e);
+            return { data: [] };
           })
         ]);
 
+        // Transform API products to match expected format
+        const transformProducts = (apiProducts: any[]) => {
+          return apiProducts.map((p: any) => ({
+            id: p.id,
+            title: p.name || p.title,
+            category: (p.category || 'seeds').toLowerCase().replace(/\s+/g, '_'),
+            price: parseFloat(p.price) || 0,
+            rating: p.rating || 4.0,
+            vendor: p.seller_name || p.vendor || 'Kheti Sahayak',
+            imageUrl: p.image_urls?.[0] || p.imageUrl || '/placeholder-product.png',
+            inStock: p.is_available ?? p.inStock ?? (p.stock_quantity > 0)
+          }));
+        };
+
         if (productsData && productsData.products) {
-          setProducts(productsData.products);
+          setProducts(transformProducts(productsData.products));
         } else if (productsData && productsData.data) {
-          setProducts(productsData.data);
+          setProducts(transformProducts(productsData.data));
         }
 
         if (contentData && contentData.data) {
@@ -65,6 +102,25 @@ const App: React.FC = () => {
 
         if (equipmentData && equipmentData.data) {
           setEquipment(equipmentData.data);
+        }
+
+        if (newsRes && newsRes.data) {
+          setNews(newsRes.data);
+        }
+
+        if (weatherRes && weatherRes.success) {
+          setWeather({
+            current: {
+              temperature: weatherRes.current.temp,
+              humidity: weatherRes.current.humidity,
+              windSpeed: weatherRes.current.wind_speed,
+              condition: mapWeatherCondition(weatherRes.current.weather),
+              precipitation: 0,
+              uvIndex: 0
+            },
+            daily: enhancedMockQuery.weatherData.daily,
+            hourly: enhancedMockQuery.weatherData.hourly
+          });
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -97,6 +153,7 @@ const App: React.FC = () => {
             weatherData={weather}
             diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
+            news={news}
           />
         );
       case 1:
@@ -180,6 +237,7 @@ const App: React.FC = () => {
             weatherData={weather}
             diagnosisHistory={diagnostics}
             userName={enhancedMockStore.user.name}
+            news={news}
           />
         );
     }

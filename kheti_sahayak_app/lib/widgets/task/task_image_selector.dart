@@ -4,6 +4,7 @@ import '../../../services/task/task_image_service.dart';
 import '../../../models/task/task_image.dart';
 import 'image_gallery.dart';
 import '../../../utils/dialogs.dart';
+import '../../../utils/logger.dart';
 
 class TaskImageSelector extends StatefulWidget {
   final List<TaskImage> initialImages;
@@ -212,7 +213,6 @@ class _TaskImageSelectorState extends State<TaskImageSelector> {
                     canEdit: widget.enabled,
                     onRemove: _removeImage,
                     onReplace: _replaceImage,
-                    onEdit: _editImage,
                     onAddMore: _pickImages,
                   ),
       ],
