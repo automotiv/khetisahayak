@@ -12,7 +12,7 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 /// - Crop Calendar
 /// - Pest Alerts
 class ExternalApiService {
-  static const String _externalBaseUrl = '${AppConstants.baseUrl}/external';
+  static const String _externalBaseUrl = '${Constants.baseUrl}/api/external';
 
   // ============================================================================
   // Agricultural Weather Data (Open-Meteo API)

@@ -40,13 +40,13 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
         'soil_type': _selectedSoil,
         'water_availability': _selectedWater.toLowerCase(),
       };
-      final uri = Uri.parse('${AppConstants.baseUrl}/diagnostics/recommendations')
+      final uri = Uri.parse('${Constants.baseUrl}/api/diagnostics/recommendations')
           .replace(queryParameters: queryParams);
 
       final cropRes = await http.get(uri);
 
       // Fetch weather recommendations (using hardcoded location for demo)
-      final weatherRes = await http.get(Uri.parse('${AppConstants.baseUrl}/weather/recommendations?lat=28.61&lon=77.20'));
+      final weatherRes = await http.get(Uri.parse('${Constants.baseUrl}/api/weather/recommendations?lat=28.61&lon=77.20'));
 
       if (mounted) {
         setState(() {

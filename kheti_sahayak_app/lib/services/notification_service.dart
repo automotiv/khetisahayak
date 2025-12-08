@@ -16,7 +16,7 @@ class NotificationService {
       if (token == null) return [];
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/notifications'),
+        Uri.parse('${Constants.baseUrl}/api/notifications'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ class NotificationService {
       if (token == null) return false;
 
       final response = await http.put(
-        Uri.parse('${AppConstants.baseUrl}/notifications/$id/read'),
+        Uri.parse('${Constants.baseUrl}/api/notifications/$id/read'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ class NotificationService {
       if (token == null) return false;
 
       final response = await http.put(
-        Uri.parse('${AppConstants.baseUrl}/notifications/read-all'),
+        Uri.parse('${Constants.baseUrl}/api/notifications/read-all'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

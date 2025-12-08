@@ -6,7 +6,7 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 class CommunityService {
   static Future<List<CommunityPost>> getPosts() async {
     try {
-      final response = await http.get(Uri.parse('${AppConstants.baseUrl}/community/posts'));
+      final response = await http.get(Uri.parse('${Constants.baseUrl}/api/community/posts'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

@@ -36,7 +36,7 @@ class ApiService {
       endpoint = endpoint.substring(1);
     }
 
-    String url = '${AppConstants.baseUrl}/$endpoint';
+    String url = '${Constants.baseUrl}/api/$endpoint';
 
     if (queryParams != null && queryParams.isNotEmpty) {
       final queryString = queryParams.entries

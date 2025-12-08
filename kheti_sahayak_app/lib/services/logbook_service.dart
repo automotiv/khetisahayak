@@ -16,7 +16,7 @@ class LogbookService {
       if (token == null) return [];
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/logbook'),
+        Uri.parse('${Constants.baseUrl}/api/logbook'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ class LogbookService {
       if (token == null) return false;
 
       final response = await http.post(
-        Uri.parse('${AppConstants.baseUrl}/logbook'),
+        Uri.parse('${Constants.baseUrl}/api/logbook'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ class LogbookService {
       if (token == null) return false;
 
       final response = await http.delete(
-        Uri.parse('${AppConstants.baseUrl}/logbook/$id'),
+        Uri.parse('${Constants.baseUrl}/api/logbook/$id'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
