@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/educational_content.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:kheti_sahayak_app/widgets/optimized_network_image.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   final EducationalContent article;
@@ -46,10 +47,10 @@ class ArticleDetailScreen extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: NetworkImage(article.imageUrl!), 
+                  child: OptimizedNetworkImage(
+                    imageUrl: article.imageUrl!,
                     fit: BoxFit.cover,
                   ),
                 ),

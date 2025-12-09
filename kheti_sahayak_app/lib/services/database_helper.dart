@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 11,
+      version: 17,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -189,6 +189,31 @@ class DatabaseHelper {
     
     await db.execute('CREATE INDEX idx_cached_schemes_name ON cached_schemes(name)');
     await db.execute('CREATE INDEX idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
+
+    // Activity Records (added for sync support)
+    await db.execute('''
+      CREATE TABLE activity_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_type TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        metadata TEXT,
+        synced INTEGER DEFAULT 0,
+        timezone_offset TEXT DEFAULT "",
+        field_id INTEGER,
+        cost REAL DEFAULT 0.0,
+        photo_paths TEXT,
+        latitude REAL,
+        longitude REAL,
+        location_accuracy REAL,
+        version INTEGER DEFAULT 0,
+        deleted INTEGER DEFAULT 0,
+        dirty INTEGER DEFAULT 0,
+        backend_id TEXT
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_activity_records_synced ON activity_records(synced)');
+    await db.execute('CREATE INDEX idx_activity_records_timestamp ON activity_records(timestamp DESC)');
+    await db.execute('CREATE INDEX idx_activity_records_dirty ON activity_records(dirty)');
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
@@ -446,6 +471,464 @@ class DatabaseHelper {
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_name ON cached_schemes(name)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
     }
+
+    if (oldVersion < 12) {
+      // Add sync fields to activity_records for version 12
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN version INTEGER DEFAULT 0');
+        await db.execute('ALTER TABLE activity_records ADD COLUMN deleted INTEGER DEFAULT 0');
+        await db.execute('ALTER TABLE activity_records ADD COLUMN dirty INTEGER DEFAULT 0');
+        await db.execute('ALTER TABLE activity_records ADD COLUMN backend_id TEXT');
+      } catch (e) {
+        print('Error adding sync columns to activity_records: $e');
+      }
+      
+      // Create index on dirty flag for efficient sync
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_dirty ON activity_records(dirty)');
+    }
+
+    if (oldVersion < 13) {
+      // Add soil_data table for version 13
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS soil_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          field_id INTEGER NOT NULL,
+          test_date TEXT NOT NULL,
+          ph REAL,
+          organic_carbon REAL,
+          nitrogen REAL,
+          phosphorus REAL,
+          potassium REAL,
+          notes TEXT,
+          FOREIGN KEY (field_id) REFERENCES fields(id) ON DELETE CASCADE
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_soil_data_field ON soil_data(field_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_soil_data_date ON soil_data(test_date DESC)');
+    }
+
+    if (oldVersion < 14) {
+      // Add weather_snapshot to activity_records for version 14
+      try {
+        await db.execute('ALTER TABLE activity_records ADD COLUMN weather_snapshot TEXT');
+      } catch (e) {
+        print('Error adding weather_snapshot column: $e');
+      }
+    }
+
+    if (oldVersion < 15) {
+      // Add community tables for version 15
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS communities (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          region TEXT,
+          member_count INTEGER DEFAULT 0,
+          image_url TEXT,
+          is_joined INTEGER DEFAULT 0,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS community_posts (
+          id INTEGER PRIMARY KEY, -- Local ID if negative, Server ID if positive? Or use separate local_id
+          -- Let's use auto-increment for local PK, and store backend_id separately
+          -- But for simplicity in sync, let's stick to the pattern used in activity_records if possible, 
+          -- or a simpler one: id is local PK. backend_id is server ID.
+          
+          -- Actually, for posts fetched from server, we want to keep their server ID.
+          -- For new offline posts, we need a temp ID.
+          
+          -- Let's use:
+          local_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          backend_id INTEGER, -- Nullable for new offline posts
+          community_id INTEGER NOT NULL,
+          user_name TEXT NOT NULL,
+          user_image TEXT,
+          content TEXT NOT NULL,
+          image_url TEXT,
+          local_image_path TEXT,
+          likes INTEGER DEFAULT 0,
+          comments_count INTEGER DEFAULT 0,
+          timestamp TEXT NOT NULL,
+          
+          -- Sync fields
+          synced INTEGER DEFAULT 1, -- 1 if from server, 0 if created offline
+          dirty INTEGER DEFAULT 0
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_community_posts_community ON community_posts(community_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_community_posts_timestamp ON community_posts(timestamp DESC)');
+    }
+
+    if (oldVersion < 16) {
+      // Add education tables for version 16
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS courses (
+          id INTEGER PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT,
+          thumbnail_url TEXT,
+          language TEXT,
+          difficulty TEXT,
+          total_lessons INTEGER DEFAULT 0,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS modules (
+          id INTEGER PRIMARY KEY,
+          course_id INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          order_index INTEGER DEFAULT 0,
+          FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS lessons (
+          id INTEGER PRIMARY KEY,
+          module_id INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          type TEXT NOT NULL,
+          content_url TEXT,
+          local_content_path TEXT,
+          duration INTEGER DEFAULT 0,
+          FOREIGN KEY (module_id) REFERENCES modules (id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS user_course_progress (
+          lesson_id INTEGER PRIMARY KEY,
+          course_id INTEGER NOT NULL,
+          is_completed INTEGER DEFAULT 0,
+          completed_at TEXT,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id) ON DELETE CASCADE
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_modules_course ON modules(course_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_lessons_module ON lessons(module_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_progress_course ON user_course_progress(course_id)');
+    }
+
+    if (oldVersion < 17) {
+      // Add marketplace tables for version 17
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sellers (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          business_name TEXT,
+          rating REAL DEFAULT 0.0,
+          review_count INTEGER DEFAULT 0,
+          is_verified INTEGER DEFAULT 0,
+          image_url TEXT,
+          location TEXT,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS products (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          price REAL NOT NULL,
+          category TEXT,
+          image_url TEXT,
+          created_at TEXT,
+          seller_id TEXT,
+          cached_at TEXT NOT NULL,
+          FOREIGN KEY (seller_id) REFERENCES sellers (id)
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cart_items (
+          id TEXT PRIMARY KEY,
+          product_id TEXT NOT NULL,
+          quantity INTEGER NOT NULL,
+          unit_price REAL NOT NULL,
+          total_price REAL NOT NULL,
+          created_at TEXT,
+          updated_at TEXT,
+          product_name TEXT,
+          product_image TEXT,
+          FOREIGN KEY (product_id) REFERENCES products (id)
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS orders (
+          id TEXT PRIMARY KEY,
+          total_amount REAL NOT NULL,
+          status TEXT NOT NULL,
+          payment_method TEXT,
+          shipping_address TEXT,
+          created_at TEXT,
+          items_json TEXT -- Store items as JSON string for simplicity in local history
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id)');
+    }
+  }
+
+  // ================== MARKETPLACE OPERATIONS ==================
+
+  /// Cache products and sellers
+  Future<void> cacheProducts(List<Map<String, dynamic>> products) async {
+    final db = await database;
+    final batch = db.batch();
+    
+    for (var prod in products) {
+      batch.insert(
+        'products',
+        {
+          'id': prod['id'],
+          'name': prod['name'],
+          'description': prod['description'],
+          'price': prod['price'],
+          'category': prod['category'],
+          'image_url': prod['image_url'],
+          'created_at': prod['created_at'],
+          'seller_id': prod['seller_id'],
+          'cached_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  /// Get cached products
+  Future<List<Map<String, dynamic>>> getCachedProducts({String? category}) async {
+    final db = await database;
+    if (category != null) {
+      return await db.query('products', where: 'category = ?', whereArgs: [category]);
+    }
+    return await db.query('products');
+  }
+
+  /// Add to cart
+  Future<void> addToCart(Map<String, dynamic> item) async {
+    final db = await database;
+    await db.insert(
+      'cart_items',
+      item,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get cart items
+  Future<List<Map<String, dynamic>>> getCartItems() async {
+    final db = await database;
+    return await db.query('cart_items');
+  }
+
+  /// Update cart item quantity
+  Future<void> updateCartItemQuantity(String id, int quantity, double totalPrice) async {
+    final db = await database;
+    if (quantity <= 0) {
+      await db.delete('cart_items', where: 'id = ?', whereArgs: [id]);
+    } else {
+      await db.update(
+        'cart_items',
+        {'quantity': quantity, 'total_price': totalPrice, 'updated_at': DateTime.now().toIso8601String()},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
+  }
+
+  /// Clear cart
+  Future<void> clearCart() async {
+    final db = await database;
+    await db.delete('cart_items');
+  }
+
+  /// Save order locally
+  Future<void> saveOrder(Map<String, dynamic> order) async {
+    final db = await database;
+    await db.insert('orders', order, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  // ================== EDUCATION OPERATIONS ==================
+
+  /// Cache course structure
+  Future<void> cacheCourse(Map<String, dynamic> course, List<Map<String, dynamic>> modules, List<Map<String, dynamic>> lessons) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Insert Course
+      await txn.insert(
+        'courses',
+        course,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Insert Modules
+      for (var module in modules) {
+        await txn.insert(
+          'modules',
+          module,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+
+      // Insert Lessons
+      for (var lesson in lessons) {
+        await txn.insert(
+          'lessons',
+          lesson,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
+  /// Get cached courses
+  Future<List<Map<String, dynamic>>> getCachedCourses() async {
+    final db = await database;
+    return await db.query('courses');
+  }
+
+  /// Get cached modules for a course
+  Future<List<Map<String, dynamic>>> getCachedModules(int courseId) async {
+    final db = await database;
+    return await db.query(
+      'modules',
+      where: 'course_id = ?',
+      whereArgs: [courseId],
+      orderBy: 'order_index ASC',
+    );
+  }
+
+  /// Get cached lessons for a module
+  Future<List<Map<String, dynamic>>> getCachedLessons(int moduleId) async {
+    final db = await database;
+    return await db.query(
+      'lessons',
+      where: 'module_id = ?',
+      whereArgs: [moduleId],
+    );
+  }
+
+  /// Get lesson progress
+  Future<Map<int, bool>> getCourseProgress(int courseId) async {
+    final db = await database;
+    final results = await db.query(
+      'user_course_progress',
+      where: 'course_id = ?',
+      whereArgs: [courseId],
+    );
+    
+    final Map<int, bool> progress = {};
+    for (var row in results) {
+      progress[row['lesson_id'] as int] = (row['is_completed'] as int) == 1;
+    }
+    return progress;
+  }
+
+  /// Mark lesson as completed
+  Future<void> markLessonCompleted(int lessonId, int courseId) async {
+    final db = await database;
+    await db.insert(
+      'user_course_progress',
+      {
+        'lesson_id': lessonId,
+        'course_id': courseId,
+        'is_completed': 1,
+        'completed_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ================== COMMUNITY OPERATIONS ==================
+
+  /// Cache communities
+  Future<void> cacheCommunities(List<Map<String, dynamic>> communities) async {
+    final db = await database;
+    final batch = db.batch();
+    
+    // Optional: Clear old cache or just upsert
+    // batch.delete('communities'); 
+    
+    for (var comm in communities) {
+      batch.insert(
+        'communities',
+        {
+          'id': comm['id'],
+          'name': comm['name'],
+          'description': comm['description'],
+          'region': comm['region'],
+          'member_count': comm['member_count'],
+          'image_url': comm['image_url'],
+          'is_joined': comm['is_joined'] == true ? 1 : 0,
+          'cached_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  /// Get cached communities
+  Future<List<Map<String, dynamic>>> getCachedCommunities() async {
+    final db = await database;
+    return await db.query('communities', orderBy: 'name ASC');
+  }
+
+  /// Insert or update a community post
+  Future<int> insertCommunityPost(Map<String, dynamic> post) async {
+    final db = await database;
+    return await db.insert(
+      'community_posts',
+      post,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get cached posts for a community
+  Future<List<Map<String, dynamic>>> getCachedCommunityPosts(int communityId) async {
+    final db = await database;
+    return await db.query(
+      'community_posts',
+      where: 'community_id = ?',
+      whereArgs: [communityId],
+      orderBy: 'timestamp DESC',
+    );
+  }
+
+  /// Get dirty posts (created offline)
+  Future<List<Map<String, dynamic>>> getDirtyCommunityPosts() async {
+    final db = await database;
+    return await db.query(
+      'community_posts',
+      where: 'synced = 0',
+    );
+  }
+
+  /// Mark post as synced
+  Future<int> markPostSynced(int localId, int backendId) async {
+    final db = await database;
+    return await db.update(
+      'community_posts',
+      {
+        'backend_id': backendId,
+        'synced': 1,
+        'dirty': 0,
+      },
+      where: 'local_id = ?',
+      whereArgs: [localId],
+    );
   }
 
   // ================== PENDING DIAGNOSTICS OPERATIONS ==================
@@ -938,16 +1421,7 @@ class DatabaseHelper {
       limit: limit,
     );
   }
-    final db = await database;
-    final cutoffDate = DateTime.now()
-        .subtract(Duration(days: daysToKeep))
-        .toIso8601String();
-    return await db.delete(
-      'cached_products',
-      where: 'cached_at < ?',
-      whereArgs: [cutoffDate],
-    );
-  }
+
 
   // ================== CACHED CART OPERATIONS ==================
 
@@ -1105,6 +1579,7 @@ class DatabaseHelper {
       'metadata': record['metadata'], // JSON string
       'synced': 0,
       'cost': record['cost'] ?? 0.0,
+      'weather_snapshot': record['weather_snapshot'],
     });
   }
 
@@ -1434,6 +1909,7 @@ class DatabaseHelper {
   /// Get aggregated yield data grouped by year and crop
   Future<List<Map<String, dynamic>>> getYieldAggregates({
     int? fieldId,
+    String? cropName,
     int years = 5,
   }) async {
     final db = await database;
@@ -1445,6 +1921,11 @@ class DatabaseHelper {
     if (fieldId != null) {
       whereClause += ' AND field_id = ?';
       args.add(fieldId);
+    }
+
+    if (cropName != null) {
+      whereClause += ' AND crop_name LIKE ?';
+      args.add('%$cropName%');
     }
 
     // Extract year from harvest_date string (YYYY-MM-DD...)
@@ -1491,6 +1972,109 @@ class DatabaseHelper {
       'net_profit': netProfit,
       'roi_percentage': roi,
     };
+  }
+
+
+  // ================== LOGBOOK SYNC OPERATIONS ==================
+
+  /// Get dirty activity records (local changes)
+  Future<List<Map<String, dynamic>>> getDirtyActivityRecords() async {
+    final db = await database;
+    return await db.query(
+      'activity_records',
+      where: 'dirty = 1',
+    );
+  }
+
+  /// Update sync status after successful upload
+  Future<int> updateActivityRecordSyncStatus({
+    required int localId,
+    required String backendId,
+    required int version,
+    required int dirty,
+  }) async {
+    final db = await database;
+    return await db.update(
+      'activity_records',
+      {
+        'backend_id': backendId,
+        'version': version,
+        'dirty': dirty,
+        'synced': 1, // Legacy flag
+      },
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
+  }
+
+  /// Get activity record by backend ID
+  Future<Map<String, dynamic>?> getActivityRecordByBackendId(String backendId) async {
+    final db = await database;
+    final results = await db.query(
+      'activity_records',
+      where: 'backend_id = ?',
+      whereArgs: [backendId],
+    );
+    return results.isNotEmpty ? results.first : null;
+  }
+
+  /// Update activity record from backend (Server Wins)
+  Future<int> updateActivityRecordFromBackend(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.update(
+      'activity_records',
+      {
+        'activity_type': data['activity_type'],
+        'timestamp': data['date'], // Map date to timestamp
+        'metadata': jsonEncode({'description': data['description']}), // Map description to metadata for now
+        'cost': data['cost'],
+        'version': data['version'],
+        'deleted': data['deleted'] == true ? 1 : 0,
+        'dirty': 0,
+        'synced': 1,
+      },
+      where: 'backend_id = ?',
+      whereArgs: [data['id']],
+    );
+  }
+
+  /// Insert activity record from backend
+  Future<int> insertActivityRecordFromBackend(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert(
+      'activity_records',
+      {
+        'backend_id': data['id'],
+        'activity_type': data['activity_type'],
+        'timestamp': data['date'],
+        'metadata': jsonEncode({'description': data['description']}),
+        'cost': data['cost'],
+        'version': data['version'],
+        'deleted': data['deleted'] == true ? 1 : 0,
+        'dirty': 0,
+        'synced': 1,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ================== SOIL DATA OPERATIONS ==================
+
+  /// Insert soil data
+  Future<int> insertSoilData(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert('soil_data', data);
+  }
+
+  /// Get soil data for a field
+  Future<List<Map<String, dynamic>>> getSoilData(int fieldId) async {
+    final db = await database;
+    return await db.query(
+      'soil_data',
+      where: 'field_id = ?',
+      whereArgs: [fieldId],
+      orderBy: 'test_date DESC',
+    );
   }
 }
 

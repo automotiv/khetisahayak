@@ -12,6 +12,10 @@ class UserProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
   String? get error => _error;
+  
+  // Accessibility State
+  bool _isHighContrastMode = false;
+  bool get isHighContrastMode => _isHighContrastMode;
 
   // Initialize the provider
   UserProvider() {
@@ -179,6 +183,12 @@ class UserProvider with ChangeNotifier {
   // Clear any errors
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  // Toggle High Contrast Mode
+  void toggleHighContrast() {
+    _isHighContrastMode = !_isHighContrastMode;
     notifyListeners();
   }
 

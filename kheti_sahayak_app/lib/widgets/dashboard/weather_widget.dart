@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/weather_model.dart';
 import 'package:kheti_sahayak_app/services/weather_service.dart';
 import 'package:intl/intl.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
+import 'package:kheti_sahayak_app/services/weather_marketplace_service.dart';
+import 'package:kheti_sahayak_app/models/product.dart';
+import 'package:kheti_sahayak_app/screens/marketplace/product_detail_screen.dart';
 
 class WeatherWidget extends StatefulWidget {
   const WeatherWidget({super.key});
@@ -16,6 +20,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   String? _error;
   UnifiedWeather? _weather;
   String _locationName = 'Loading...';
+  List<Product> _recommendations = [];
 
   @override
   void initState() {
@@ -26,10 +31,14 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   Future<void> _loadWeather() async {
     try {
       final data = await _weatherService.getWeatherData();
+      final weather = data['forecast'] as UnifiedWeather;
+      final recommendations = await WeatherMarketplaceService.getRecommendedProducts(weather);
+      
       if (mounted) {
         setState(() {
-          _weather = data['forecast'] as UnifiedWeather;
+          _weather = weather;
           _locationName = data['locationName'] as String;
+          _recommendations = recommendations;
           _isLoading = false;
         });
       }
@@ -65,6 +74,8 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   }
 
   Widget _buildContent() {
+    final localizations = AppLocalizations.of(context);
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.white),
@@ -77,7 +88,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           const Icon(Icons.error_outline, color: Colors.white, size: 32),
           const SizedBox(height: 8),
           Text(
-            _error!,
+            _error!, // Error messages from service might be in English, consider localizing service errors too
             style: const TextStyle(color: Colors.white),
           ),
           TextButton(
@@ -85,14 +96,14 @@ class _WeatherWidgetState extends State<WeatherWidget> {
               setState(() => _isLoading = true);
               _loadWeather();
             },
-            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: Text(localizations.retry, style: const TextStyle(color: Colors.white)),
           )
         ],
       );
     }
 
     if (_weather == null) {
-      return const Text('No weather data', style: TextStyle(color: Colors.white));
+      return Text(localizations.noData, style: const TextStyle(color: Colors.white));
     }
 
     return Column(
@@ -123,14 +134,14 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
-                          'PRECISION',
+                          'PRECISION', // Keep as technical term or add to translations
                           style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),
                   ],
                 ),
                 Text(
-                  DateFormat('EEE, MMM d').format(DateTime.now()),
+                  DateFormat.yMMMd(localizations.locale.toString()).format(DateTime.now()),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 14,
@@ -187,8 +198,94 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                   child: _buildWeatherDetail(Icons.wb_sunny_outlined, 'UV: ${_weather!.uvi}'),
                 ),
               if (_weather!.rainChance != null)
-                _buildWeatherDetail(Icons.umbrella, 'Rain: ${(_weather!.rainChance! * 100).round()}%'),
+                _buildWeatherDetail(Icons.umbrella, '${localizations.rainfall}: ${(_weather!.rainChance! * 100).round()}%'),
             ],
+          ),
+        ],
+        if (_recommendations.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const Divider(color: Colors.white30),
+          const SizedBox(height: 8),
+          Text(
+            'Recommended for you:', // Add to translations
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _recommendations.length,
+              itemBuilder: (context, index) {
+                final product = _recommendations[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(product: product),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 200,
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                            image: product.images.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(product.images.first),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: product.images.isEmpty
+                              ? const Icon(Icons.image, size: 20, color: Colors.grey)
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                product.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '₹${product.price}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ],

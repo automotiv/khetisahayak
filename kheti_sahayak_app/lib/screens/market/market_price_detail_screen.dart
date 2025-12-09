@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:kheti_sahayak_app/widgets/optimized_network_image.dart';
 
 class MarketPriceDetailScreen extends StatelessWidget {
   final Map<String, String> commodity;
@@ -26,14 +27,13 @@ class MarketPriceDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text('Price History (Last 7 Days)', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            Container(
+            SizedBox(
               height: 200,
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(12.0),
-                 image: const DecorationImage(
-                  image: NetworkImage('https://img.icons8.com/plasticine/100/banana.png'), // Placeholder image
+                child: OptimizedNetworkImage(
+                  imageUrl: 'https://img.icons8.com/plasticine/100/banana.png',
                   fit: BoxFit.contain,
                 ),
               ),

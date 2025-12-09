@@ -43,7 +43,59 @@ const db = require('../db');
  */
 router.get('/', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM schemes WHERE active = true ORDER BY created_at DESC');
+        const {
+            farm_size,
+            crop,
+            state,
+            district,
+            income,
+            land_ownership
+        } = req.query;
+
+        let query = 'SELECT * FROM schemes WHERE active = true';
+        const params = [];
+        let paramIndex = 1;
+
+        if (farm_size) {
+            query += ` AND (min_farm_size IS NULL OR min_farm_size <= $${paramIndex}) AND (max_farm_size IS NULL OR max_farm_size >= $${paramIndex})`;
+            params.push(parseFloat(farm_size));
+            paramIndex++;
+        }
+
+        if (crop) {
+            // Check if crop is in the crops JSON array or if crops is null (all crops)
+            query += ` AND (crops IS NULL OR crops::jsonb ? $${paramIndex})`;
+            params.push(crop);
+            paramIndex++;
+        }
+
+        if (state) {
+            query += ` AND (states IS NULL OR states::jsonb ? $${paramIndex})`;
+            params.push(state);
+            paramIndex++;
+        }
+
+        if (district) {
+            query += ` AND (districts IS NULL OR districts::jsonb ? $${paramIndex})`;
+            params.push(district);
+            paramIndex++;
+        }
+
+        if (income) {
+            query += ` AND (min_income IS NULL OR min_income <= $${paramIndex}) AND (max_income IS NULL OR max_income >= $${paramIndex})`;
+            params.push(parseFloat(income));
+            paramIndex++;
+        }
+
+        if (land_ownership) {
+            query += ` AND (land_ownership_type IS NULL OR land_ownership_type = $${paramIndex})`;
+            params.push(land_ownership);
+            paramIndex++;
+        }
+
+        query += ' ORDER BY created_at DESC';
+
+        const result = await db.query(query, params);
         res.json({
             success: true,
             data: result.rows

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:kheti_sahayak_app/widgets/optimized_network_image.dart';
 
 class CropDetailScreen extends StatelessWidget {
   final String cropName;
@@ -19,14 +20,13 @@ class CropDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // Placeholder for a crop image
-            Container(
+            SizedBox(
               height: 200,
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(12.0),
-                image: const DecorationImage(
-                  image: NetworkImage('https://img.icons8.com/plasticine/100/banana.png'), // Placeholder image
+                child: OptimizedNetworkImage(
+                  imageUrl: 'https://img.icons8.com/plasticine/100/banana.png',
                   fit: BoxFit.contain,
                 ),
               ),

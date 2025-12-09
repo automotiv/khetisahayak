@@ -5,6 +5,7 @@ import 'package:kheti_sahayak_app/providers/user_provider.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/routes/routes.dart';
 import 'package:kheti_sahayak_app/services/language_service.dart';
+import 'package:kheti_sahayak_app/widgets/optimized_network_image.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -99,7 +100,14 @@ class ProfileScreen extends StatelessWidget {
             CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.yellow.withOpacity(0.2),
-                backgroundImage: const NetworkImage('https://img.icons8.com/plasticine/100/banana.png'), // Nano banana image
+                child: ClipOval(
+                  child: OptimizedNetworkImage(
+                    imageUrl: 'https://img.icons8.com/plasticine/100/banana.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
+                ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -140,6 +148,16 @@ class ProfileScreen extends StatelessWidget {
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.changePassword);
             },
+          ),
+          const Divider(height: 0, indent: 16, endIndent: 16),
+          SwitchListTile(
+            secondary: const Icon(Icons.contrast, color: Color(0xFF4CAF50)),
+            title: const Text('High Contrast Mode'),
+            value: Provider.of<UserProvider>(context).isHighContrastMode,
+            onChanged: (value) {
+              Provider.of<UserProvider>(context, listen: false).toggleHighContrast();
+            },
+            activeColor: const Color(0xFF4CAF50),
           ),
           const Divider(height: 0, indent: 16, endIndent: 16),
           ListTile(

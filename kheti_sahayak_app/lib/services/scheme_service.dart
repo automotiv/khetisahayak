@@ -9,15 +9,32 @@ class SchemeService {
   static final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   /// Get schemes (online first, then cache)
-  static Future<List<Scheme>> getSchemes({bool forceRefresh = false}) async {
+  static Future<List<Scheme>> getSchemes({
+    bool forceRefresh = false,
+    double? farmSize,
+    String? crop,
+    String? state,
+    String? district,
+    double? income,
+    String? landOwnership,
+  }) async {
     // 1. Check connectivity
     final connectivityResult = await Connectivity().checkConnectivity();
     final isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
     try {
       if (isOnline) {
-        // 2. Fetch from API
-        final response = await http.get(Uri.parse('${Constants.baseUrl}/api/schemes'));
+        // 2. Fetch from API with filters
+        final queryParams = <String, String>{};
+        if (farmSize != null) queryParams['farm_size'] = farmSize.toString();
+        if (crop != null) queryParams['crop'] = crop;
+        if (state != null) queryParams['state'] = state;
+        if (district != null) queryParams['district'] = district;
+        if (income != null) queryParams['income'] = income.toString();
+        if (landOwnership != null) queryParams['land_ownership'] = landOwnership;
+
+        final uri = Uri.parse('${AppConstants.baseUrl}/api/schemes').replace(queryParameters: queryParams);
+        final response = await http.get(uri);
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
@@ -25,8 +42,14 @@ class SchemeService {
             final List<dynamic> items = data['data'];
             final schemes = items.map((item) => Scheme.fromJson(item)).toList();
 
-            // 3. Cache schemes
-            await _cacheSchemes(items.cast<Map<String, dynamic>>());
+            // 3. Cache schemes (only if no filters applied, or handle partial cache?)
+            // For simplicity, we only cache "all schemes" fetch (no filters).
+            // Or we just cache everything we get.
+            // If filters are applied, we might not want to overwrite the "full list" cache with a partial list.
+            // So let's only cache if no filters are applied.
+            if (queryParams.isEmpty) {
+              await _cacheSchemes(items.cast<Map<String, dynamic>>());
+            }
             
             return schemes;
           }
@@ -36,10 +59,38 @@ class SchemeService {
       print('Error fetching schemes from API: $e');
     }
 
-    // 4. Fallback to cache
+    // 4. Fallback to cache (and apply local filtering if needed)
     print('Fetching schemes from cache...');
     final cachedData = await _dbHelper.getCachedSchemes();
-    return cachedData.map((item) => Scheme.fromJson(item)).toList();
+    var schemes = cachedData.map((item) => Scheme.fromJson(item)).toList();
+
+    // Apply local filtering if offline or API failed
+    if (farmSize != null) {
+      schemes = schemes.where((s) => 
+        (s.minFarmSize == null || s.minFarmSize! <= farmSize) && 
+        (s.maxFarmSize == null || s.maxFarmSize! >= farmSize)
+      ).toList();
+    }
+    if (crop != null) {
+      schemes = schemes.where((s) => s.crops.isEmpty || s.crops.contains('All') || s.crops.contains(crop)).toList();
+    }
+    if (state != null) {
+      schemes = schemes.where((s) => s.states.isEmpty || s.states.contains('All') || s.states.contains(state)).toList();
+    }
+    if (district != null) {
+      schemes = schemes.where((s) => s.districts.isEmpty || s.districts.contains('All') || s.districts.contains(district)).toList();
+    }
+    if (income != null) {
+      schemes = schemes.where((s) => 
+        (s.minIncome == null || s.minIncome! <= income) && 
+        (s.maxIncome == null || s.maxIncome! >= income)
+      ).toList();
+    }
+    if (landOwnership != null) {
+      schemes = schemes.where((s) => s.landOwnershipType == null || s.landOwnershipType == 'Any' || s.landOwnershipType == landOwnership).toList();
+    }
+
+    return schemes;
   }
 
   /// Search schemes (local DB)

@@ -3,6 +3,9 @@ const { Pool } = require('pg');
 const connectionString = process.env.DATABASE_URL;
 const isExternalRender = connectionString && connectionString.includes('render.com');
 
+const host = process.env.DB_HOST || 'localhost';
+const isLocal = host === 'localhost' || host === '127.0.0.1';
+
 const pool = new Pool(
   connectionString
     ? {
@@ -11,11 +14,11 @@ const pool = new Pool(
     }
     : {
       user: process.env.DB_USER,
-      host: process.env.DB_HOST,
+      host: host,
       database: process.env.DB_NAME,
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT,
-      ssl: process.env.DB_HOST === 'localhost' ? false : { rejectUnauthorized: false },
+      ssl: isLocal ? false : { rejectUnauthorized: false },
     }
 );
 

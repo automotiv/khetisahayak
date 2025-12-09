@@ -3,6 +3,7 @@ import 'package:kheti_sahayak_app/models/field.dart';
 import 'package:kheti_sahayak_app/services/field_service.dart';
 import 'package:kheti_sahayak_app/screens/fields/add_field_screen.dart';
 import 'package:kheti_sahayak_app/screens/fields/field_details_screen.dart';
+import 'package:kheti_sahayak_app/screens/fields/bulk_field_update_screen.dart';
 
 class FieldListScreen extends StatefulWidget {
   const FieldListScreen({super.key});
@@ -78,10 +79,33 @@ class _FieldListScreenState extends State<FieldListScreen> {
                     ],
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _fields.length,
-                  itemBuilder: (context, index) {
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const BulkFieldUpdateScreen()),
+                            );
+                            if (result == true) {
+                              _loadFields();
+                            }
+                          },
+                          icon: const Icon(Icons.edit_note),
+                          label: const Text('Bulk Update Fields'),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        itemCount: _fields.length,
+                        itemBuilder: (context, index) {
                     final field = _fields[index];
                     return Card(
                       elevation: 2,

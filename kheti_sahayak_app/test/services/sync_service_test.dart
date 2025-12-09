@@ -1,50 +1,60 @@
 import 'package:flutter_test/flutter_test.dart';
-
-class SyncResult {
-  final bool success;
-  final String message;
-  final int itemsSynced;
-  final int itemsFailed;
-  final List<String> errors;
-
-  SyncResult({
-    required this.success,
-    required this.message,
-    required this.itemsSynced,
-    this.itemsFailed = 0,
-    this.errors = const [],
-  });
-}
+import 'package:kheti_sahayak_app/services/database_helper.dart';
+import 'package:kheti_sahayak_app/services/sync_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  group('SyncService Logic', () {
-    test('should return correct SyncResult structure', () {
-      final result = SyncResult(
-        success: true,
-        message: 'Synced 5 items',
-        itemsSynced: 5,
-      );
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
 
-      expect(result.success, true);
-      expect(result.message, 'Synced 5 items');
-      expect(result.itemsSynced, 5);
-      expect(result.itemsFailed, 0);
-      expect(result.errors, isEmpty);
+  group('SyncService Tests', () {
+    test('Offline Data Creation sets dirty flag', () async {
+      final dbHelper = DatabaseHelper.instance;
+      
+      // Simulate creating a record offline
+      // Note: We need to expose a method to insert activity record or use raw insert
+      final db = await dbHelper.database;
+      await db.insert('activity_records', {
+        'activity_type': 'Sowing',
+        'timestamp': DateTime.now().toIso8601String(),
+        'metadata': '{}',
+        'dirty': 1, // Logic should set this
+        'version': 0,
+      });
+      
+      final dirty = await dbHelper.getDirtyActivityRecords();
+      expect(dirty.length, 1);
+      expect(dirty.first['activity_type'], 'Sowing');
     });
 
-    test('should handle failure result', () {
-      final result = SyncResult(
-        success: false,
-        message: 'Sync failed',
-        itemsSynced: 2,
-        itemsFailed: 1,
-        errors: ['Network error'],
+    // Note: Full sync test requires mocking ApiService which is static.
+    // For now we verify the database helper methods which are crucial for sync.
+    
+    test('Update Sync Status clears dirty flag', () async {
+      final dbHelper = DatabaseHelper.instance;
+      final db = await dbHelper.database;
+      
+      final id = await db.insert('activity_records', {
+        'activity_type': 'Harvesting',
+        'timestamp': DateTime.now().toIso8601String(),
+        'dirty': 1,
+      });
+      
+      await dbHelper.updateActivityRecordSyncStatus(
+        localId: id,
+        backendId: 'uuid-123',
+        version: 1,
+        dirty: 0,
       );
-
-      expect(result.success, false);
-      expect(result.itemsSynced, 2);
-      expect(result.itemsFailed, 1);
-      expect(result.errors.first, 'Network error');
+      
+      final dirty = await dbHelper.getDirtyActivityRecords();
+      expect(dirty.where((r) => r['id'] == id), isEmpty);
+      
+      final record = await dbHelper.getActivityRecordByBackendId('uuid-123');
+      expect(record, isNotNull);
+      expect(record!['version'], 1);
     });
   });
 }

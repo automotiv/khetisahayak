@@ -63,6 +63,25 @@ class WeatherService {
     }
   }
 
+  Future<UnifiedWeather> getHistoricalWeather(DateTime date) async {
+    Position position = await _determinePosition();
+    // Unix timestamp for the specific date
+    final int timestamp = date.millisecondsSinceEpoch ~/ 1000;
+    
+    // One Call 2.5 Time Machine endpoint
+    // https://api.openweathermap.org/data/2.5/onecall/timemachine?lat={lat}&lon={lon}&dt={time}&appid={API key}
+    final Uri uri = Uri.parse('$_oneCallUrl/timemachine?lat=${position.latitude}&lon=${position.longitude}&dt=$timestamp&appid=$_apiKey&units=metric');
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return UnifiedWeather.fromHistorical(jsonResponse);
+    } else {
+      throw Exception('Failed to load historical weather: ${response.statusCode}');
+    }
+  }
+
   void _checkAndNotifySevereWeather(UnifiedWeather weather) {
     // Simple logic: Notify if Thunderstorm or heavy rain
     // In a real app, we would check specific IDs or alert fields from One Call API

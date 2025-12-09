@@ -55,7 +55,74 @@ class AppTheme {
     ),
   );
 
-  // Keeping the old themes just in case, but they won't be used for now.
-  static final ThemeData lightTheme = newDarkTheme; // Defaulting to dark
-  static final ThemeData darkTheme = newDarkTheme;
+  // High Contrast Theme
+  static final ThemeData highContrastTheme = ThemeData(
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: Colors.black,
+    fontFamily: 'SF Pro Display',
+    
+    colorScheme: const ColorScheme.dark(
+      primary: Colors.yellow, // High contrast yellow
+      secondary: Colors.cyanAccent, // High contrast cyan
+      surface: Colors.black,
+      onPrimary: Colors.black,
+      onSecondary: Colors.black,
+      onSurface: Colors.white,
+      background: Colors.black,
+      error: Colors.redAccent,
+    ),
+
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.black,
+      elevation: 0,
+      titleTextStyle: TextStyle(
+        fontSize: 28, 
+        fontWeight: FontWeight.bold, 
+        color: Colors.white
+      ),
+      iconTheme: IconThemeData(color: Colors.yellow),
+    ),
+
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Colors.white),
+      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.yellow),
+      bodyLarge: TextStyle(fontSize: 18, color: Colors.white),
+      bodyMedium: TextStyle(fontSize: 16, color: Colors.white),
+      labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.yellow),
+    ),
+
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.yellow,
+        unselectedItemColor: Colors.white,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+    ),
+    
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.yellow,
+        foregroundColor: Colors.black,
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        side: const BorderSide(color: Colors.white, width: 2),
+      ),
+    ),
+    
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.black,
+      labelStyle: TextStyle(color: Colors.yellow, fontWeight: FontWeight.bold),
+      hintStyle: TextStyle(color: Colors.white70),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.white, width: 2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.yellow, width: 3),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.redAccent, width: 2),
+      ),
+    ),
+  );
 }

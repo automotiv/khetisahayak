@@ -48,20 +48,23 @@ class LocalNotificationService {
     required String title,
     required String body,
     String? payload,
+    String channelId = 'weather_alerts_channel',
+    String channelName = 'Weather Alerts',
+    String channelDescription = 'Notifications for severe weather alerts',
   }) async {
     if (!_isInitialized) await initialize();
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'weather_alerts_channel',
-      'Weather Alerts',
-      channelDescription: 'Notifications for severe weather alerts',
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
       importance: Importance.max,
       priority: Priority.high,
       showWhen: true,
     );
 
-    const NotificationDetails platformChannelSpecifics =
+    final NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _notificationsPlugin.show(
@@ -70,6 +73,22 @@ class LocalNotificationService {
       body,
       platformChannelSpecifics,
       payload: payload,
+    );
+  }
+
+  Future<void> showApplicationStatusNotification({
+    required String schemeName,
+    required String status,
+    required String applicationId,
+  }) async {
+    await showNotification(
+      id: applicationId.hashCode,
+      title: 'Application Update: $schemeName',
+      body: 'Your application status has been updated to: $status',
+      payload: '/application/$applicationId',
+      channelId: 'application_updates_channel',
+      channelName: 'Application Updates',
+      channelDescription: 'Notifications for application status changes',
     );
   }
 }

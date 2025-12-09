@@ -7,6 +7,8 @@ import 'package:kheti_sahayak_app/services/database_helper.dart';
 import 'package:kheti_sahayak_app/services/activity_service.dart';
 import 'package:kheti_sahayak_app/widgets/charts/yield_trend_chart.dart';
 import 'package:kheti_sahayak_app/widgets/activity_type_dropdown.dart';
+import 'package:kheti_sahayak_app/screens/fields/soil_data_screen.dart';
+import 'package:kheti_sahayak_app/screens/activity/add_activity_screen.dart';
 
 class FieldDetailsScreen extends StatefulWidget {
   final Field field;
@@ -121,7 +123,28 @@ class _FieldDetailsScreenState extends State<FieldDetailsScreen> {
               const SizedBox(height: 24),
             ],
             
-              ],
+            ],
+            ),
+            const SizedBox(height: 16),
+
+            // Soil Health Section
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SoilDataScreen(fieldId: widget.field.id!),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.science),
+                label: const Text('View Soil Health Records'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -157,10 +180,31 @@ class _FieldDetailsScreenState extends State<FieldDetailsScreen> {
                   'Crop Rotation History',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                TextButton.icon(
-                  onPressed: _showAddRotationDialog,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Plan'),
+                ),
+                Row(
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        // Add Fallow Period
+                        // We can reuse the dialog but pre-fill "Fallow"
+                        showDialog(
+                          context: context,
+                          builder: (context) => _AddRotationDialog(
+                            fieldId: widget.field.id!,
+                            onSaved: _loadData,
+                            isFallow: true,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.pause_circle_outline),
+                      label: const Text('Add Fallow'),
+                    ),
+                    TextButton.icon(
+                      onPressed: _showAddRotationDialog,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Plan'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -190,25 +234,6 @@ class _FieldDetailsScreenState extends State<FieldDetailsScreen> {
                               ),
                               title: Text('${rotation.cropName} (${rotation.season} ${rotation.year})'),
                               subtitle: Text(rotation.status),
-                              trailing: rotation.notes != null
-                                  ? IconButton(
-                                      icon: const Icon(Icons.note),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text('Notes'),
-                                            content: Text(rotation.notes!),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Close'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    )
                                   : null,
                             ),
                           );
@@ -248,8 +273,13 @@ class _FieldDetailsScreenState extends State<FieldDetailsScreen> {
 class _AddRotationDialog extends StatefulWidget {
   final int fieldId;
   final VoidCallback onSaved;
+  final bool isFallow;
 
-  const _AddRotationDialog({required this.fieldId, required this.onSaved});
+  const _AddRotationDialog({
+    required this.fieldId,
+    required this.onSaved,
+    this.isFallow = false,
+  });
 
   @override
   State<_AddRotationDialog> createState() => _AddRotationDialogState();
@@ -268,6 +298,10 @@ class _AddRotationDialogState extends State<_AddRotationDialog> {
   void initState() {
     super.initState();
     _yearController.text = DateTime.now().year.toString();
+    if (widget.isFallow) {
+      _cropController.text = 'Fallow';
+      _selectedStatus = 'Active'; // Usually fallow is current or planned
+    }
   }
 
   Future<void> _save() async {
