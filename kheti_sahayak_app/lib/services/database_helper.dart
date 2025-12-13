@@ -938,6 +938,9 @@ class DatabaseHelper {
       limit: limit,
     );
   }
+
+  /// Cleanup old cached products
+  Future<int> cleanupOldProductCache({int daysToKeep = 30}) async {
     final db = await database;
     final cutoffDate = DateTime.now()
         .subtract(Duration(days: daysToKeep))
