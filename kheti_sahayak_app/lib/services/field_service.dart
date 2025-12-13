@@ -2,6 +2,7 @@ import 'package:kheti_sahayak_app/models/field.dart';
 import 'package:kheti_sahayak_app/models/crop_rotation.dart';
 import 'package:kheti_sahayak_app/models/yield_record.dart';
 import 'package:kheti_sahayak_app/services/database_helper.dart';
+import 'package:kheti_sahayak_app/models/soil_data.dart';
 
 class FieldService {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -69,9 +70,14 @@ class FieldService {
   /// Get aggregated yield trends (grouped by year)
   Future<List<Map<String, dynamic>>> getYieldTrends({
     int? fieldId,
+    String? cropName,
     int years = 5,
   }) async {
-    return await _dbHelper.getYieldAggregates(fieldId: fieldId, years: years);
+    return await _dbHelper.getYieldAggregates(
+      fieldId: fieldId,
+      cropName: cropName,
+      years: years,
+    );
   }
 
   /// Get seasonal comparison for a specific crop on a field
@@ -141,5 +147,46 @@ class FieldService {
   /// Get ROI metrics for a field
   Future<Map<String, double>> getROIData(int fieldId) async {
     return await _dbHelper.getROIMetrics(fieldId);
+  }
+
+  // ================== SOIL DATA OPERATIONS ==================
+
+  /// Add soil data
+  Future<int> addSoilData(SoilData data) async {
+    return await _dbHelper.insertSoilData(data.toMap());
+  }
+
+  /// Get soil data history for a field
+  Future<List<SoilData>> getSoilDataHistory(int fieldId) async {
+    final maps = await _dbHelper.getSoilData(fieldId);
+    return maps.map((map) => SoilData.fromMap(map)).toList();
+  }
+
+  // ================== BULK OPERATIONS ==================
+
+  /// Update multiple fields at once
+  Future<void> updateFieldsBulk({
+    required List<int> fieldIds,
+    String? cropType,
+    // Add other updateable fields here
+  }) async {
+    final db = await _dbHelper.database;
+    final batch = db.batch();
+
+    for (var id in fieldIds) {
+      final Map<String, dynamic> updates = {};
+      if (cropType != null) updates['crop_type'] = cropType;
+
+      if (updates.isNotEmpty) {
+        batch.update(
+          'fields',
+          updates,
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    }
+
+    await batch.commit(noResult: true);
   }
 }

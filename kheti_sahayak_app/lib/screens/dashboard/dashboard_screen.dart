@@ -9,6 +9,9 @@ import 'package:kheti_sahayak_app/widgets/dashboard/weather_widget.dart';
 import 'package:kheti_sahayak_app/widgets/dashboard/task_summary_widget.dart';
 import 'package:kheti_sahayak_app/widgets/dashboard/alerts_widget.dart';
 import 'package:kheti_sahayak_app/widgets/dashboard/yield_trends_widget.dart';
+import 'package:kheti_sahayak_app/widgets/dashboard/yield_trends_widget.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
+import 'package:kheti_sahayak_app/screens/recommendations/recommendations_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -46,27 +49,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: AppLocalizations.of(context).home,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.store_outlined),
             activeIcon: Icon(Icons.store),
-            label: 'Market',
+            label: AppLocalizations.of(context).marketplace,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.health_and_safety_outlined),
             activeIcon: Icon(Icons.health_and_safety),
-            label: 'Diagnose',
+            label: AppLocalizations.of(context).diagnosis,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_outlined),
             activeIcon: Icon(Icons.menu_book),
-            label: 'Learn',
+            label: AppLocalizations.of(context).education,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppLocalizations.of(context).profile,
           ),
         ],
         currentIndex: _selectedIndex,
@@ -87,7 +90,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kheti Sahayak'),
+        title: Text(AppLocalizations.of(context).appName),
         backgroundColor: const Color(0xFF4CAF50),
       ),
       body: SingleChildScrollView(
@@ -113,9 +116,9 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Quick Access Grid Header
-              const Text(
-                'Quick Access',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).quickAccess,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -132,28 +135,35 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   _buildDashboardCard(
                     context,
-                    'Weather Forecast',
+                    AppLocalizations.of(context).weatherForecast,
                     '/weather',
                     Icons.wb_sunny,
                     Colors.orange,
                   ),
                   _buildDashboardCard(
                     context,
-                    'Crop Advisory',
+                    'Smart Recommendations',
+                    '/recommendations',
+                    Icons.lightbulb,
+                    Colors.purple,
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    AppLocalizations.of(context).cropAdvisory,
                     AppRoutes.cropAdvisory,
                     Icons.grass,
                     Colors.green,
                   ),
                   _buildDashboardCard(
                     context,
-                    'Market Prices',
+                    AppLocalizations.of(context).marketPrices,
                     AppRoutes.marketPrices,
                     Icons.trending_up,
                     Colors.blue,
                   ),
                   _buildDashboardCard(
                     context,
-                    'Pest & Disease Info',
+                    AppLocalizations.of(context).pestDiseaseInfo,
                     AppRoutes.diagnostics,
                     Icons.bug_report,
                     Colors.red,
@@ -178,7 +188,13 @@ class HomeScreen extends StatelessWidget {
           if (route == AppRoutes.diagnostics) {
             // Find the parent DashboardScreen and ask it to switch tabs
             final screenState = context.findAncestorStateOfType<_DashboardScreenState>();
+            final screenState = context.findAncestorStateOfType<_DashboardScreenState>();
             screenState?._onItemTapped(2); // 2 is the index for Diagnose
+          } else if (route == '/recommendations') {
+             Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RecommendationsScreen()),
+            );
           } else {
             Navigator.pushNamed(context, route);
           }

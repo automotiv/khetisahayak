@@ -10,6 +10,7 @@ class PrimaryButton extends StatelessWidget {
   final double height;
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
+  final String? semanticLabel;
 
   const PrimaryButton({
     Key? key,
@@ -22,6 +23,7 @@ class PrimaryButton extends StatelessWidget {
     this.height = 50.0,
     this.borderRadius = 8.0,
     this.padding,
+    this.semanticLabel,
   }) : super(key: key);
 
   @override
@@ -29,37 +31,42 @@ class PrimaryButton extends StatelessWidget {
     final theme = Theme.of(context);
     final buttonColor = color ?? theme.primaryColor;
     
-    return SizedBox(
-      width: width,
-      height: height,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: buttonColor,
-          foregroundColor: textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
+    return Semantics(
+      label: semanticLabel ?? text,
+      button: true,
+      enabled: !isLoading && onPressed != null,
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonColor,
+            foregroundColor: textColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            padding: padding,
+            elevation: 2,
           ),
-          padding: padding,
-          elevation: 2,
+          child: isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
         ),
-        child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Text(
-                text,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
       ),
     );
   }

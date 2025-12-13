@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/field.dart';
 import 'package:kheti_sahayak_app/services/field_service.dart';
 import 'package:kheti_sahayak_app/widgets/charts/seasonal_comparison_chart.dart';
+import 'package:kheti_sahayak_app/widgets/charts/annual_yield_chart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -21,8 +22,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   final List<String> _cropOptions = ['Wheat', 'Rice', 'Corn', 'Sugarcane', 'Cotton'];
   
   List<Map<String, dynamic>> _comparisonData = [];
+  List<Map<String, dynamic>> _annualData = [];
   Map<String, double> _roiData = {};
   bool _isLoading = false;
+  
+  // View Mode: 'seasonal' or 'annual'
+  String _viewMode = 'seasonal';
+  int _selectedYears = 5;
 
   @override
   void initState() {
@@ -53,10 +59,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     try {
       // Load Seasonal Comparison (if crop selected)
       List<Map<String, dynamic>> comparisonData = [];
+      List<Map<String, dynamic>> annualData = [];
+      
       if (_selectedCrop != null) {
         comparisonData = await _fieldService.getSeasonalComparison(
           fieldId: _selectedField!.id!,
           cropName: _selectedCrop!,
+        );
+        
+        annualData = await _fieldService.getYieldTrends(
+          fieldId: _selectedField!.id!,
+          cropName: _selectedCrop!,
+          years: _selectedYears,
         );
       }
 
@@ -65,6 +79,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
       setState(() {
         _comparisonData = comparisonData;
+        _annualData = annualData;
         _roiData = roiData;
         _isLoading = false;
       });
@@ -153,30 +168,93 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               const SizedBox(height: 24),
             ],
 
-            // Chart
+            // Chart Section
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
-            else if (_comparisonData.isEmpty)
-              const Center(child: Text('No seasonal data available for selected crop.'))
             else ...[
-              const Text(
-                'Yield Trends',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Yield Trends',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  ToggleButtons(
+                    isSelected: [_viewMode == 'seasonal', _viewMode == 'annual'],
+                    onPressed: (index) {
+                      setState(() {
+                        _viewMode = index == 0 ? 'seasonal' : 'annual';
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    constraints: const BoxConstraints(minHeight: 36, minWidth: 80),
+                    children: const [
+                      Text('Seasonal'),
+                      Text('Annual'),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 300,
-                child: Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SeasonalComparisonChart(
-                      data: _comparisonData,
-                      cropName: _selectedCrop!,
+              const SizedBox(height: 12),
+              
+              if (_viewMode == 'seasonal') ...[
+                if (_comparisonData.isEmpty)
+                  const Center(child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('No seasonal data available for selected crop.'),
+                  ))
+                else
+                  SizedBox(
+                    height: 300,
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SeasonalComparisonChart(
+                          data: _comparisonData,
+                          cropName: _selectedCrop!,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+              ] else ...[
+                // Annual View
+                if (_annualData.isEmpty)
+                  const Center(child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('No annual data available for selected crop.'),
+                  ))
+                else ...[
+                  // Year Filter for Annual View
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text('Show last: '),
+                      DropdownButton<int>(
+                        value: _selectedYears,
+                        items: [5, 10, 15].map((y) => DropdownMenuItem(value: y, child: Text('$y Years'))).toList(),
+                        onChanged: (v) {
+                          setState(() => _selectedYears = v!);
+                          _loadData();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 300,
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: AnnualYieldChart(
+                          data: _annualData,
+                          cropName: _selectedCrop!,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: 16),
               // Summary Table
               const Text(

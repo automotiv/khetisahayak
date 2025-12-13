@@ -19,7 +19,7 @@ import 'package:kheti_sahayak_app/screens/crop/crop_advisory_screen.dart';
 import 'package:kheti_sahayak_app/screens/market/market_prices_screen.dart';
 import 'package:kheti_sahayak_app/screens/crop/crop_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/market/market_price_detail_screen.dart';
-import 'package:kheti_sahayak_app/screens/profile/edit_profile_screen.dart'; // New import
+import 'package:kheti_sahayak_app/screens/tracking/application_tracking_screen.dart';
 
 class AppRoutes {
   // Route names
@@ -43,7 +43,8 @@ class AppRoutes {
   static const String marketPrices = '/market-prices';
   static const String cropDetail = '/crop-detail'; 
   static const String marketPriceDetail = '/market-price-detail';
-  static const String editProfile = '/edit-profile'; // New route name
+  static const String editProfile = '/edit-profile';
+  static const String applicationTracking = '/application-tracking';
 
 
   // Routes map
@@ -88,7 +89,8 @@ class AppRoutes {
       final commodity = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
       return MarketPriceDetailScreen(commodity: commodity);
     },
-    editProfile: (context) => const EditProfileScreen(), // New route definition
+    editProfile: (context) => const EditProfileScreen(),
+    applicationTracking: (context) => const ApplicationTrackingScreen(),
   };
 
   // Auth guard

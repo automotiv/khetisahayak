@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
-  final String label;
-  final IconData icon;
+  final String? label;
+  final String? hintText;
+  final IconData? icon;
   final bool obscureText;
   final TextInputType? keyboardType;
   final int? maxLines;
@@ -14,12 +15,14 @@ class CustomTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final TextInputAction? textInputAction;
   final void Function(String)? onFieldSubmitted;
+  final String? semanticLabel;
 
   const CustomTextField({
     Key? key,
     required this.controller,
-    required this.label,
-    required this.icon,
+    this.label,
+    this.hintText,
+    this.icon,
     this.obscureText = false,
     this.keyboardType,
     this.maxLines = 1,
@@ -30,30 +33,37 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.textInputAction,
     this.onFieldSubmitted,
+    this.semanticLabel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      maxLength: maxLength,
+    return Semantics(
+      label: semanticLabel ?? label ?? hintText,
+      textField: true,
       enabled: enabled,
-      validator: validator,
-      onChanged: onChanged,
-      textInputAction: textInputAction,
-      onFieldSubmitted: onFieldSubmitted,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        enabled: enabled,
+        validator: validator,
+        onChanged: onChanged,
+        textInputAction: textInputAction,
+        onFieldSubmitted: onFieldSubmitted,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          prefixIcon: icon != null ? Icon(icon) : null,
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          filled: !enabled,
+          fillColor: Colors.grey[200],
         ),
-        filled: !enabled,
-        fillColor: Colors.grey[200],
       ),
     );
   }

@@ -101,8 +101,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LanguageService>(
-      builder: (context, languageService, child) {
+    return Consumer2<LanguageService, UserProvider>(
+      builder: (context, languageService, userProvider, child) {
         return MaterialApp(
           title: 'Kheti Sahayak',
           debugShowCheckedModeBanner: false,
@@ -114,6 +114,10 @@ class _MyAppState extends State<MyApp> {
             Locale('en'), // English
             Locale('hi'), // Hindi
             Locale('mr'), // Marathi
+            Locale('ta'), // Tamil
+            Locale('kn'), // Kannada
+            Locale('te'), // Telugu
+            Locale('gu'), // Gujarati
           ],
           localizationsDelegates: const [
             AppLocalizations.delegate,

@@ -234,6 +234,29 @@ class UnifiedWeather {
       dailyForecasts: dailyList,
     );
   }
+
+  // Factory for Historical Data (One Call Time Machine)
+  factory UnifiedWeather.fromHistorical(Map<String, dynamic> json) {
+    final current = json['current']; // Time machine returns 'current' for the requested timestamp
+    final weather = current['weather'][0];
+    
+    // Historical data usually doesn't have daily forecast in the same way, 
+    // but might have hourly. We'll focus on the 'current' snapshot for the requested time.
+    
+    return UnifiedWeather(
+      temp: (current['temp'] as num).toDouble(),
+      tempMin: (current['temp'] as num).toDouble(), // Min/Max not available in single point historical
+      tempMax: (current['temp'] as num).toDouble(),
+      humidity: current['humidity'],
+      windSpeed: (current['wind_speed'] as num).toDouble(),
+      condition: weather['main'],
+      icon: weather['icon'],
+      description: weather['description'],
+      uvi: (current['uvi'] as num?)?.toDouble(),
+      isPrecision: true,
+      dailyForecasts: [], // No forecast for historical
+    );
+  }
 }
 
 class DailyForecast {

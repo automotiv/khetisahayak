@@ -404,6 +404,97 @@ class SyncService {
     }
   }
 
+  /// Bidirectional sync for logbook (activity records)
+  Future<SyncResult> syncLogbookBidirectional() async {
+    if (_isSyncing) return SyncResult(success: false, message: 'Sync in progress', itemsSynced: 0);
+
+    final online = await isOnline();
+    if (!online) return SyncResult(success: false, message: 'No internet', itemsSynced: 0);
+
+    _isSyncing = true;
+    final syncLogId = await _dbHelper.startSyncLog('logbook_bidirectional');
+    
+    try {
+      // 1. Get dirty records (local changes)
+      final dirtyRecords = await _dbHelper.getDirtyActivityRecords();
+      
+      // 2. Get last sync timestamp (or version)
+      // For now we use timestamp based on last successful sync
+      final lastSync = _lastSyncTime?.toIso8601String();
+      
+      // 3. Send to backend
+      final response = await ApiService.syncLogbook(
+        lastSyncTimestamp: lastSync,
+        changes: dirtyRecords,
+      );
+      
+      if (response['success'] == true) {
+        final serverChanges = response['server_changes'] as List;
+        final processedChanges = response['processed_changes'] as List;
+        
+        // 4. Process server acknowledgements (update local records with backend_id and version, clear dirty)
+        for (final processed in processedChanges) {
+          if (processed['status'] == 'synced') {
+            await _dbHelper.updateActivityRecordSyncStatus(
+              localId: processed['local_id'],
+              backendId: processed['backend_id'],
+              version: processed['version'],
+              dirty: 0,
+            );
+          } else if (processed['status'] == 'error') {
+             // Handle error (maybe mark as error in DB or log)
+             print('Error syncing record ${processed['local_id']}: ${processed['error']}');
+          }
+        }
+        
+        // 5. Apply server changes (Delta Sync)
+        int serverUpdates = 0;
+        for (final change in serverChanges) {
+          // Check if we have this record
+          final localRecord = await _dbHelper.getActivityRecordByBackendId(change['id']);
+          
+          if (localRecord != null) {
+            // Conflict resolution: Server Wins (overwrite local)
+            // Unless local is dirty? If local is dirty and we just sent it, it should be in processedChanges.
+            // If local is dirty but was NOT sent (e.g. modified during sync), we have a conflict.
+            // For MVP, Server Wins.
+            await _dbHelper.updateActivityRecordFromBackend(change);
+            serverUpdates++;
+          } else {
+            // Insert new record from server
+            await _dbHelper.insertActivityRecordFromBackend(change);
+            serverUpdates++;
+          }
+        }
+        
+        _lastSyncTime = DateTime.now();
+        
+        await _dbHelper.completeSyncLog(
+          id: syncLogId,
+          status: 'completed',
+          itemsSynced: processedChanges.length + serverUpdates,
+        );
+        
+        return SyncResult(
+          success: true,
+          message: 'Synced ${processedChanges.length} local, $serverUpdates server changes',
+          itemsSynced: processedChanges.length + serverUpdates,
+        );
+      } else {
+        throw Exception(response['message'] ?? 'Sync failed');
+      }
+    } catch (e) {
+      await _dbHelper.completeSyncLog(
+        id: syncLogId,
+        status: 'failed',
+        errorMessage: e.toString(),
+      );
+      return SyncResult(success: false, message: 'Sync failed: $e', itemsSynced: 0);
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
   /// Auto-sync when connectivity is restored
   Future<void> startAutoSync() async {
     onConnectivityChanged.listen((List<ConnectivityResult> results) async {
@@ -415,7 +506,11 @@ class SyncService {
           print('Connectivity restored. Auto-syncing $pendingCount pending items...');
           await syncPendingDiagnostics();
           await syncPendingTasks();
-          await syncPendingActivityRecords();
+          print('Connectivity restored. Auto-syncing $pendingCount pending items...');
+          await syncPendingDiagnostics();
+          await syncPendingTasks();
+          // await syncPendingActivityRecords(); // Deprecated in favor of bidirectional
+          await syncLogbookBidirectional();
           await syncSchemes();
         } else {
           // Even if no pending uploads, we might want to sync schemes (download)

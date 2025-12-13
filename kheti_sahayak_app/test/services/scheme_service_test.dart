@@ -64,5 +64,43 @@ void main() {
       expect(recent.length, 1);
       expect(recent.first.id, 2);
     });
+    test('Filter Schemes Locally', () async {
+      final dbHelper = DatabaseHelper.instance;
+      
+      final schemes = [
+        {
+          'id': 3,
+          'name': 'Small Farm Scheme',
+          'description': 'For small farms',
+          'min_farm_size': 0.0,
+          'max_farm_size': 2.0,
+          'crops': jsonEncode(['Wheat']),
+        },
+        {
+          'id': 4,
+          'name': 'Large Farm Scheme',
+          'description': 'For large farms',
+          'min_farm_size': 5.0,
+          'max_farm_size': 100.0,
+          'crops': jsonEncode(['Rice']),
+        }
+      ];
+      
+      await dbHelper.cacheSchemes(schemes);
+      
+      // Test farm size filter
+      final small = await SchemeService.getSchemes(farmSize: 1.0);
+      expect(small.length, 1);
+      expect(small.first.name, 'Small Farm Scheme');
+      
+      final large = await SchemeService.getSchemes(farmSize: 10.0);
+      expect(large.length, 1);
+      expect(large.first.name, 'Large Farm Scheme');
+      
+      // Test crop filter
+      final wheat = await SchemeService.getSchemes(crop: 'Wheat');
+      expect(wheat.length, 1);
+      expect(wheat.first.name, 'Small Farm Scheme');
+    });
   });
 }

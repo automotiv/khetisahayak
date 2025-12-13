@@ -9,6 +9,7 @@ class ActivityRecord {
   final Map<String, dynamic> metadata;
   final int synced;
   final double cost;
+  final Map<String, dynamic>? weatherSnapshot;
   
   // Photo and GPS fields
   final List<String> photoPaths;
@@ -25,6 +26,7 @@ class ActivityRecord {
     this.metadata = const {},
     this.synced = 0,
     this.cost = 0.0,
+    this.weatherSnapshot,
     this.photoPaths = const [],
     this.latitude,
     this.longitude,
@@ -43,6 +45,7 @@ class ActivityRecord {
       'metadata': jsonEncode(metadata),
       'synced': synced,
       'cost': cost,
+      'weather_snapshot': weatherSnapshot != null ? jsonEncode(weatherSnapshot) : null,
       'photo_paths': photoPaths.isNotEmpty ? jsonEncode(photoPaths) : null,
       'latitude': latitude,
       'longitude': longitude,
@@ -73,6 +76,7 @@ class ActivityRecord {
       metadata: map['metadata'] != null ? jsonDecode(map['metadata']) : {},
       synced: map['synced'] ?? 0,
       cost: (map['cost'] as num?)?.toDouble() ?? 0.0,
+      weatherSnapshot: map['weather_snapshot'] != null ? jsonDecode(map['weather_snapshot']) : null,
       photoPaths: photos,
       latitude: (map['latitude'] as num?)?.toDouble(),
       longitude: (map['longitude'] as num?)?.toDouble(),

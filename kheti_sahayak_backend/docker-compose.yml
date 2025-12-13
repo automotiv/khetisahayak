@@ -1,20 +1,50 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - ml_service
+
   backend:
     build: .
     command: npm run dev
     ports:
       - "3000:3000"
     volumes:
-      # Mounts the project directory to the container for hot-reloading
       - .:/usr/src/app
-      # Uses an anonymous volume to prevent host node_modules from overwriting the container's
       - /usr/src/app/node_modules
     env_file:
       - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://ml_service:8000
     depends_on:
       - db
+      - redis
+      - ml_service
+
+  ml_service:
+    build: ./ml_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ml_service:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   db:
     image: postgres:14-alpine
@@ -29,3 +59,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

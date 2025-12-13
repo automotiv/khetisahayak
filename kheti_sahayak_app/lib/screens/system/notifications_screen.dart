@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/notification_item.dart';
 import 'package:kheti_sahayak_app/services/notification_service.dart';
 import 'package:intl/intl.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -47,21 +48,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (success) {
       _loadNotifications();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All notifications marked as read')),
+        SnackBar(content: Text('${AppLocalizations.of(context).success}: All marked as read')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(localizations.notifications),
         backgroundColor: Colors.green[700],
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: 'Mark all as read',
+            tooltip: 'Mark all as read', // Add to translations
             onPressed: _notifications.isNotEmpty ? _markAllAsRead : null,
           ),
         ],
@@ -69,13 +72,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _notifications.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.notifications_off, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('No notifications yet', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      const Icon(Icons.notifications_off, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(localizations.noData, style: const TextStyle(fontSize: 18, color: Colors.grey)),
                     ],
                   ),
                 )
@@ -103,7 +106,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               Text(item.message),
                               const SizedBox(height: 4),
                               Text(
-                                _formatDate(item.createdAt),
+                                _formatDate(item.createdAt, localizations),
                                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                               ),
                             ],
@@ -130,18 +133,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  String _formatDate(String dateStr) {
+  String _formatDate(String dateStr, AppLocalizations localizations) {
     try {
       final date = DateTime.parse(dateStr);
       final now = DateTime.now();
       final difference = now.difference(date);
 
       if (difference.inDays == 0) {
-        return DateFormat('h:mm a').format(date);
+        return DateFormat.jm(localizations.locale.toString()).format(date);
       } else if (difference.inDays < 7) {
-        return DateFormat('E, h:mm a').format(date);
+        return DateFormat.E(localizations.locale.toString()).add_jm().format(date);
       } else {
-        return DateFormat('MMM d, yyyy').format(date);
+        return DateFormat.yMMMd(localizations.locale.toString()).format(date);
       }
     } catch (e) {
       return dateStr;

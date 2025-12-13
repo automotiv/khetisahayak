@@ -92,36 +92,40 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 40),
 
                           // Animated logo
-                          Hero(
-                            tag: 'app_logo',
-                            child: TweenAnimationBuilder(
-                              duration: const Duration(milliseconds: 800),
-                              tween: Tween<double>(begin: 0, end: 1),
-                              builder: (context, double value, child) {
-                                return Transform.scale(
-                                  scale: value,
-                                  child: Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      gradient: AppTheme.primaryGradient,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: colorScheme.primary.withOpacity(0.3),
-                                          blurRadius: 20,
-                                          offset: const Offset(0, 10),
-                                        ),
-                                      ],
+                          Semantics(
+                            label: 'Kheti Sahayak Logo',
+                            image: true,
+                            child: Hero(
+                              tag: 'app_logo',
+                              child: TweenAnimationBuilder(
+                                duration: const Duration(milliseconds: 800),
+                                tween: Tween<double>(begin: 0, end: 1),
+                                builder: (context, double value, child) {
+                                  return Transform.scale(
+                                    scale: value,
+                                    child: Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        gradient: AppTheme.primaryGradient,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: colorScheme.primary.withOpacity(0.3),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 10),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.agriculture,
+                                        size: 50,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                    child: const Icon(
-                                      Icons.agriculture,
-                                      size: 50,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
 
@@ -142,13 +146,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: Column(
                               children: [
-                                Text(
-                                  'Welcome Back',
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
+                                Semantics(
+                                  header: true,
+                                  child: Text(
+                                    'Welcome Back',
+                                    style: theme.textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(

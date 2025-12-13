@@ -6,6 +6,7 @@ import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/services/educational_content_service.dart';
 import 'package:kheti_sahayak_app/models/educational_content.dart';
 import 'package:kheti_sahayak_app/widgets/weather_icons.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -84,6 +85,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -103,33 +106,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _weatherError.isNotEmpty
               ? _buildSectionCard(
                   context,
-                  title: 'Current Weather',
+                  title: localizations.currentWeather,
                   child: Text(_weatherError, style: const TextStyle(color: Colors.red)),
                 )
               : _weatherData == null
                   ? _buildSectionCard(
                       context,
-                      title: 'Current Weather',
+                      title: localizations.currentWeather,
                       child: const Center(child: CircularProgressIndicator()),
                     )
-                  : WeatherCard(
-                      condition: _weatherData!['condition'] as String?,
-                      iconCode: _weatherData!['icon'] as String?,
-                      temperature: '${_weatherData!['temperature']}°C',
-                      location: _weatherData!['location'] as String?,
-                      humidity: '${_weatherData!['humidity']}%',
-                      windSpeed: '${_weatherData!['wind_speed']} m/s',
+                  : Semantics(
+                      label: '${localizations.currentWeather}: ${_weatherData!['condition']}, ${_weatherData!['temperature']} degrees Celsius',
+                      child: WeatherCard(
+                        condition: _weatherData!['condition'] as String?,
+                        iconCode: _weatherData!['icon'] as String?,
+                        temperature: '${_weatherData!['temperature']}°C',
+                        location: _weatherData!['location'] as String?,
+                        humidity: '${_weatherData!['humidity']}%',
+                        windSpeed: '${_weatherData!['wind_speed']} m/s',
+                      ),
                     ),
           const SizedBox(height: 20),
 
           // Recent Diagnostics Section
           _buildSectionCard(
             context,
-            title: 'Recent Diagnostics',
+            title: localizations.diagnostics,
             child: _diagnosticsError.isNotEmpty
                 ? Text(_diagnosticsError, style: const TextStyle(color: Colors.red))
                 : _recentDiagnostics.isEmpty
-                    ? const Text('No recent diagnostics found.')
+                    ? Text(localizations.noData)
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -159,11 +165,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Featured Educational Content Section
           _buildSectionCard(
             context,
-            title: 'Featured Educational Content',
+            title: localizations.education,
             child: _contentError.isNotEmpty
                 ? Text(_contentError, style: const TextStyle(color: Colors.red))
                 : _featuredContent.isEmpty
-                    ? const Text('No featured content available.')
+                    ? Text(localizations.noData)
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),

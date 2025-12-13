@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
 
 /// Weather Icons Widget
 ///
@@ -189,6 +190,7 @@ class WeatherCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
 
     return Card(
       elevation: 4,
@@ -261,14 +263,14 @@ class WeatherCard extends StatelessWidget {
                       _buildWeatherDetail(
                         context,
                         Icons.water_drop,
-                        'Humidity',
+                        localizations.humidity,
                         humidity!,
                       ),
                     if (windSpeed != null)
                       _buildWeatherDetail(
                         context,
                         Icons.air,
-                        'Wind',
+                        localizations.windSpeed,
                         windSpeed!,
                       ),
                   ],

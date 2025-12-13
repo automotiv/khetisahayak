@@ -5,6 +5,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 import '../../models/task/task_image.dart';
+import '../../widgets/optimized_network_image.dart';
 
 class ImageGallery extends StatefulWidget {
   final List<TaskImage> images;
@@ -107,11 +108,9 @@ class _ImageGalleryState extends State<ImageGallery> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
                     )
-                  : CachedNetworkImage(
+                  : OptimizedNetworkImage(
                       imageUrl: image.thumbnailUrl ?? image.url!,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => _buildLoadingWidget(),
-                      errorWidget: (context, url, error) => _buildErrorWidget(),
                     ),
             ),
           ),

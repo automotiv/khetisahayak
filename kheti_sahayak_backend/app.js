@@ -8,6 +8,9 @@ const port = 5002;
 
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
+const syncRoutes = require('./routes/sync');
+app.use('/api/sync', syncRoutes);
+
 app.get('/', (req, res) => {
   res.json({
     message: 'Kheti Sahayak Backend API',

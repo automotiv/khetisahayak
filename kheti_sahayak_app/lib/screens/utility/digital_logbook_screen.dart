@@ -3,6 +3,11 @@ import 'package:kheti_sahayak_app/models/logbook_entry.dart';
 import 'package:kheti_sahayak_app/services/logbook_service.dart';
 import 'package:kheti_sahayak_app/widgets/activity_type_dropdown.dart';
 import 'package:intl/intl.dart';
+import 'package:kheti_sahayak_app/services/language_service.dart';
+import 'package:kheti_sahayak_app/screens/utility/add_logbook_entry_screen.dart';
+import 'package:kheti_sahayak_app/screens/utility/logbook_analytics_tab.dart';
+import 'package:kheti_sahayak_app/models/field.dart';
+import 'package:kheti_sahayak_app/services/field_service.dart';
 
 class DigitalLogbookScreen extends StatefulWidget {
   const DigitalLogbookScreen({Key? key}) : super(key: key);
@@ -11,97 +16,97 @@ class DigitalLogbookScreen extends StatefulWidget {
   _DigitalLogbookScreenState createState() => _DigitalLogbookScreenState();
 }
 
-class _DigitalLogbookScreenState extends State<DigitalLogbookScreen> {
+class _DigitalLogbookScreenState extends State<DigitalLogbookScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   List<LogbookEntry> _entries = [];
+  List<Field> _fields = [];
+  int? _filterFieldId;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadEntries();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadData();
   }
 
-  Future<void> _loadEntries() async {
+  Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    final entries = await LogbookService.getEntries();
-    if (mounted) {
-      setState(() {
-        _entries = entries;
-        _isLoading = false;
-      });
+    try {
+      final fields = await FieldService().getFields();
+      final entries = await LogbookService.getEntries(fieldId: _filterFieldId);
+      
+      if (mounted) {
+        setState(() {
+          _fields = fields;
+          _entries = entries;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading logbook data: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _addEntry() async {
-    // Show dialog to add entry
-    final result = await showDialog<LogbookEntry>(
-      context: context,
-      builder: (context) => const AddLogbookEntryDialog(),
+    final result = await Navigator.push<LogbookEntry>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddLogbookEntryScreen()),
     );
 
     if (result != null) {
       final success = await LogbookService.createEntry(result);
-      if (success) {
-        _loadEntries();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Entry added successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add entry')),
-        );
+      if (mounted) {
+        if (success) {
+          _loadData();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).success)),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).failed)),
+          );
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Digital Logbook'),
         backgroundColor: Colors.green[700],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Activities'),
+            Tab(text: 'Analytics'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sync),
+            onPressed: () async {
+              await LogbookService.syncEntries();
+              _loadData();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sync triggered')),
+              );
+            },
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _entries.isEmpty
-              ? const Center(child: Text('No entries found. Add one!'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _entries.length,
-                  itemBuilder: (context, index) {
-                    final entry = _entries[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.green[100],
-                          child: Icon(
-                            _getActivityIcon(entry.activityType),
-                            color: Colors.green[700],
-                          ),
-                        ),
-                        title: Text(entry.activityType),
-                        subtitle: Text(DateFormat('MMM d, yyyy').format(DateTime.parse(entry.date))),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (entry.income > 0)
-                              Text(
-                                '+₹${entry.income}',
-                                style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                              ),
-                            if (entry.cost > 0)
-                              Text(
-                                '-₹${entry.cost}',
-                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildActivitiesTab(localizations),
+          const LogbookAnalyticsTab(),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addEntry,
         backgroundColor: Colors.green[700],
@@ -110,97 +115,106 @@ class _DigitalLogbookScreenState extends State<DigitalLogbookScreen> {
     );
   }
 
-  IconData _getActivityIcon(String type) {
-    // Use the same icon mapping as ActivityTypeDropdown
-    final iconMap = ActivityTypeDropdown.activityTypes;
-    return iconMap[type] ?? Icons.edit_note;
-  }
-}
-
-class AddLogbookEntryDialog extends StatefulWidget {
-  const AddLogbookEntryDialog({Key? key}) : super(key: key);
-
-  @override
-  _AddLogbookEntryDialogState createState() => _AddLogbookEntryDialogState();
-}
-
-class _AddLogbookEntryDialogState extends State<AddLogbookEntryDialog> {
-  final _formKey = GlobalKey<FormState>();
-  String _activityType = 'Planting';
-  DateTime _selectedDate = DateTime.now();
-  final _descriptionController = TextEditingController();
-  final _costController = TextEditingController();
-  final _incomeController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Add New Entry'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ActivityTypeDropdown(
-                value: _activityType,
-                onChanged: (value) => setState(() => _activityType = value!),
+  Widget _buildActivitiesTab(AppLocalizations localizations) {
+    return Column(
+      children: [
+        if (_fields.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: DropdownButtonFormField<int>(
+              value: _filterFieldId,
+              decoration: const InputDecoration(
+                labelText: 'Filter by Field',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.filter_list),
               ),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text('Date: ${DateFormat('MMM d, yyyy').format(_selectedDate)}'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
+              items: [
+                const DropdownMenuItem<int>(value: null, child: Text('All Fields')),
+                ..._fields.map((field) {
+                  return DropdownMenuItem<int>(
+                    value: field.id,
+                    child: Text(field.name),
                   );
-                  if (picked != null) setState(() => _selectedDate = picked);
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                maxLines: 2,
-              ),
-              TextFormField(
-                controller: _costController,
-                decoration: const InputDecoration(labelText: 'Cost (₹)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextFormField(
-                controller: _incomeController,
-                decoration: const InputDecoration(labelText: 'Income (₹)'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
+                }),
+              ],
+              onChanged: (val) {
+                setState(() => _filterFieldId = val);
+                _loadData();
+              },
+            ),
           ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final entry = LogbookEntry(
-                id: 0, // ID will be assigned by backend
-                activityType: _activityType,
-                date: _selectedDate.toIso8601String(),
-                description: _descriptionController.text,
-                cost: double.tryParse(_costController.text) ?? 0.0,
-                income: double.tryParse(_incomeController.text) ?? 0.0,
-              );
-              Navigator.pop(context, entry);
-            }
-          },
-          child: const Text('Add'),
+        Expanded(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _entries.isEmpty
+                  ? Center(child: Text(localizations.noData))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = _entries[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.green[100],
+                              child: Icon(
+                                _getActivityIcon(entry.activityType),
+                                color: Colors.green[700],
+                              ),
+                            ),
+                            title: Text(entry.activityType),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(DateFormat.yMMMd(localizations.locale.toString()).format(DateTime.parse(entry.date))),
+                                if (entry.fieldId != null)
+                                  Text(
+                                    'Field: ${_getFieldName(entry.fieldId!)}',
+                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                  ),
+                              ],
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (entry.income > 0)
+                                  Text(
+                                    '+₹${entry.income}',
+                                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                  ),
+                                if (entry.cost > 0)
+                                  Text(
+                                    '-₹${entry.cost}',
+                                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                                  ),
+                                if (!entry.synced)
+                                  const Icon(Icons.cloud_off, size: 12, color: Colors.grey),
+                              ],
+                            ),
+                            onTap: () {
+                              // TODO: Show details or edit
+                            },
+                          ),
+                        );
+                      },
+                    ),
         ),
       ],
     );
+  }
+
+  String _getFieldName(int id) {
+    try {
+      return _fields.firstWhere((f) => f.id == id).name;
+    } catch (e) {
+      return 'Unknown Field';
+    }
+  }
+
+  IconData _getActivityIcon(String type) {
+    final iconMap = ActivityTypeDropdown.activityTypes;
+    return iconMap[type] ?? Icons.edit_note;
   }
 }
