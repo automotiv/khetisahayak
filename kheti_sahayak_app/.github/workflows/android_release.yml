@@ -56,3 +56,14 @@ jobs:
       with:
         name: app-release-bundle
         path: build/app/outputs/bundle/release/app-release.aab
+
+    - name: Publish to Play Store
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        packageName: com.automotiv.khetisahayak # Update with your actual package name
+        releaseFiles: build/app/outputs/bundle/release/app-release.aab
+        track: internal
+        status: draft
+        inAppUpdatePriority: 2
+

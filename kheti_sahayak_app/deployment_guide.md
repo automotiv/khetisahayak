@@ -40,3 +40,28 @@ Add the following 4 secrets:
 3.  You will see "Android Release Build" running.
 4.  Once completed, click on the run and download the `app-release-bundle` artifact.
 5.  Upload this `.aab` file to the [Google Play Console](https://play.google.com/console).
+
+## 5. Automated Publishing Setup (Opt-in)
+To have GitHub automatically upload the `.aab` to the Play Store Internal Track:
+
+### A. Create Service Account
+1.  Go to **Google Cloud Console** > **IAM & Admin** > **Service Accounts**.
+2.  Click **Create Service Account**.
+3.  Name it (e.g., `github-actions-deploy`).
+4.  Grant Role: **Service Account User**.
+5.  Click **Done**.
+6.  Click on the newly created email > **Keys** > **Add Key** > **Create new key** > **JSON**.
+7.  Save the `.json` file to your computer.
+
+### B. Grant Play Console Access
+1.  Go to **Google Play Console** > **Users and permissions** > **Invite new users**.
+2.  Enter the service account email (from step A).
+3.  Grant permissions: **Admin (all permissions)** or specifically **Releases > Release to production, exclude devices, and use Play App Signing**.
+4.  Click **Invite User**.
+
+### C. Add Secret to GitHub
+1.  Open the `.json` key file you downloaded in a text editor.
+2.  Copy the entire content.
+3.  Go to GitHub Secrets.
+4.  Create new secret: `PLAY_SERVICE_ACCOUNT_JSON` with the content.
+
