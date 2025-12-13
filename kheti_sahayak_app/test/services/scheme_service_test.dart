@@ -46,7 +46,7 @@ void main() {
       expect(results.length, 1);
       expect(results.first.name, 'PM Kisan');
       
-      final all = await SchemeService.searchSchemes(''); // Empty query returns all? No, searchSchemes returns filtered.
+      // final all = await SchemeService.searchSchemes(''); // Empty query returns all? No, searchSchemes returns filtered.
       // Let's check getSchemes fallback logic if we could mock http/connectivity.
       // Instead, let's test getCachedSchemes directly from helper to verify DB logic.
       
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('Recent Schemes Logic', () async {
-      final dbHelper = DatabaseHelper.instance;
+      // final dbHelper = DatabaseHelper.instance;
       
       // Mark ID 2 as accessed
       await SchemeService.markSchemeAccessed(2);

@@ -1,18 +1,29 @@
 import 'package:kheti_sahayak_app/models/cart.dart';
 import 'package:kheti_sahayak_app/services/api_service.dart';
+import 'package:kheti_sahayak_app/services/database_helper.dart';
 
 class CartService {
+  static final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
   // Get all cart items with product details
   static Future<Cart> getCart() async {
     try {
       final response = await ApiService.get('api/cart');
 
       if (response['success'] == true && response['data'] != null) {
+        // Cache the cart
+        await _dbHelper.cacheCart(response['data']);
         return Cart.fromJson(response['data']);
       } else {
         throw Exception(response['error'] ?? 'Failed to get cart');
       }
     } catch (e) {
+      // Try to load from cache
+      final cachedCart = await _dbHelper.getCachedCart();
+      if (cachedCart != null) {
+        return Cart.fromJson(cachedCart);
+      }
+      // If no cache, rethrow error
       throw Exception('Failed to get cart: ${e.toString()}');
     }
   }

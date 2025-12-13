@@ -102,10 +102,16 @@ Pincode: ${_pincodeController.text.trim()}
           arguments: order.id,
         );
 
+        final isOffline = order.status == 'pending_sync' || order.status == 'Pending (Offline)';
+        final message = isOffline 
+            ? 'You are offline. Order saved and will be synced later.'
+            : 'Order placed successfully! Order ID: ${order.id.substring(0, 8)}';
+            
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order placed successfully! Order ID: ${order.id.substring(0, 8)}'),
-            backgroundColor: Colors.green,
+            content: Text(message),
+            backgroundColor: isOffline ? Colors.orange : Colors.green,
+            duration: const Duration(seconds: 4),
           ),
         );
       }

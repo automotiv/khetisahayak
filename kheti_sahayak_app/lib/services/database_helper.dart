@@ -470,6 +470,37 @@ class DatabaseHelper {
       
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_name ON cached_schemes(name)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
+    if (oldVersion < 12) {
+      // Add cached_orders table for version 12
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_orders (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER,
+          status TEXT NOT NULL,
+          total_amount REAL NOT NULL,
+          payment_status TEXT NOT NULL,
+          payment_method TEXT,
+          shipping_address TEXT,
+          created_at TEXT NOT NULL,
+          synced INTEGER DEFAULT 0
+        )
+      ''');
+
+      // Add cached_order_items table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_order_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          order_id TEXT NOT NULL,
+          product_id INTEGER,
+          product_name TEXT NOT NULL,
+          quantity INTEGER NOT NULL,
+          unit_price REAL NOT NULL,
+          FOREIGN KEY (order_id) REFERENCES cached_orders(id) ON DELETE CASCADE
+        )
+      ''');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_orders_user ON cached_orders(user_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_order_items_order ON cached_order_items(order_id)');
     }
 
     if (oldVersion < 12) {
@@ -1994,6 +2025,7 @@ class DatabaseHelper {
     };
   }
 
+<<<<<<< HEAD
 
   // ================== LOGBOOK SYNC OPERATIONS ==================
 
@@ -2096,5 +2128,189 @@ class DatabaseHelper {
       orderBy: 'test_date DESC',
     );
   }
+=======
+  // ================== FIELD & YIELD OPERATIONS ==================
+
+  /// Insert a field
+  Future<int> insertField(Map<String, dynamic> field) async {
+    final db = await database;
+    return await db.insert('fields', field);
+  }
+
+  /// Get all fields
+  Future<List<Map<String, dynamic>>> getFields() async {
+    final db = await database;
+    return await db.query('fields');
+  }
+
+  /// Insert a yield record
+  Future<int> insertYieldRecord(Map<String, dynamic> record) async {
+    final db = await database;
+    return await db.insert('yield_records', record);
+  }
+
+  /// Get yield records for a field
+  Future<List<Map<String, dynamic>>> getYieldRecords({required int fieldId}) async {
+    final db = await database;
+    return await db.query(
+      'yield_records',
+      where: 'field_id = ?',
+      whereArgs: [fieldId],
+      orderBy: 'harvest_date DESC',
+    );
+  }
+
+  /// Get yield aggregates grouped by year
+  Future<List<Map<String, dynamic>>> getYieldAggregates({required int fieldId}) async {
+    final db = await database;
+    
+    // SQLite query to sum yield by year
+    // Assumes harvest_date is in ISO-8601 format (YYYY-MM-DD...)
+    final result = await db.rawQuery('''
+      SELECT 
+        strftime('%Y', harvest_date) as year,
+        SUM(yield_amount) as total_yield
+      FROM yield_records
+      WHERE field_id = ?
+      GROUP BY year
+      ORDER BY year DESC
+    ''', [fieldId]);
+    
+    return result;
+  }
+
+  // ================== ORDER OPERATIONS ==================
+
+  /// Cache an order locally
+  Future<void> cacheOrder(Map<String, dynamic> order, List<Map<String, dynamic>> items) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.insert(
+        'cached_orders',
+        order,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      for (final item in items) {
+        // Ensure order_id is set
+        final itemData = Map<String, dynamic>.from(item);
+        itemData['order_id'] = order['id'];
+        await txn.insert(
+          'cached_order_items',
+          itemData,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
+  /// Get all cached orders
+  Future<List<Map<String, dynamic>>> getCachedOrders() async {
+    final db = await database;
+    final orders = await db.query(
+      'cached_orders',
+      orderBy: 'created_at DESC',
+    );
+    return orders;
+  }
+
+  /// Get specific cached order with items
+  Future<Map<String, dynamic>?> getCachedOrder(String orderId) async {
+    final db = await database;
+    
+    final orders = await db.query(
+      'cached_orders',
+      where: 'id = ?',
+      whereArgs: [orderId],
+    );
+
+    if (orders.isEmpty) return null;
+
+    final order = Map<String, dynamic>.from(orders.first);
+    
+    final items = await db.query(
+      'cached_order_items',
+      where: 'order_id = ?',
+      whereArgs: [orderId],
+    );
+
+    order['items'] = items;
+    return order;
+  }
+
+  // ================== CART OPERATIONS ==================
+
+  /// Cache cart locally
+  Future<void> cacheCart(Map<String, dynamic> cartData) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Clear existing cart cache for this user (assuming single user for now or handled by logic)
+      await txn.delete('cached_cart'); 
+      await txn.delete('cached_cart_items');
+
+      // Insert Cart Summary/Metadata
+      await txn.insert(
+        'cached_cart',
+        {
+          'id': cartData['id'], // Cart ID
+          'user_id': cartData['user_id'] ?? 1,
+          'subtotal': cartData['subtotal'],
+          'delivery_charge': cartData['delivery_charge'],
+          'discount': cartData['discount'],
+          'total': cartData['total'],
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Insert Items
+      if (cartData['items'] != null) {
+        for (final item in cartData['items']) {
+          // Convert item to map if it's not
+          final itemMap = item is Map<String, dynamic> ? item : (item as dynamic).toMap(); 
+          // Note: CartItem.toMap might be needed if inputs are objects
+          
+          await txn.insert(
+            'cached_cart_items',
+            {
+               'id': itemMap['id'],
+               'cart_id': cartData['id'],
+               'product_id': itemMap['product_id'],
+               'quantity': itemMap['quantity'],
+               'unit_price': itemMap['unit_price'],
+               'total_price': itemMap['total_price'],
+               'product_name': itemMap['product_name'],
+               'product_image': itemMap['product_image'],
+               'created_at': itemMap['created_at'] ?? DateTime.now().toIso8601String(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+  }
+
+  /// Get cached cart
+  Future<Map<String, dynamic>?> getCachedCart() async {
+    final db = await database;
+    
+    final carts = await db.query('cached_cart');
+    if (carts.isEmpty) return null;
+
+    final cart = Map<String, dynamic>.from(carts.first);
+    
+    final items = await db.query('cached_cart_items'); // Get all items (assuming 1 cart)
+    
+    cart['items'] = items;
+    return cart;
+  }
+
+  /// Clear cached cart
+  Future<void> clearCachedCart() async {
+    final db = await database;
+    await db.delete('cached_cart');
+    await db.delete('cached_cart_items');
+  }
+>>>>>>> 34a8a7ab (Implement Offline Order Flow and Fix Android Build Config)
 }
 

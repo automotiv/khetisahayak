@@ -591,6 +591,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       case 'cancelled':
         color = Colors.red;
         break;
+      case 'pending_sync':
+        color = Colors.amber;
+        break;
       default:
         color = Colors.grey;
     }

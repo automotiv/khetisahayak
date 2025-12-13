@@ -13,6 +13,11 @@ class OfflineService {
   bool _isOnline = false;
   bool get isOnline => _isOnline;
 
+  // Helper for testing
+  void setOnlineStatusForTest(bool status) {
+    _isOnline = status;
+  }
+
   // Singleton setup
   static final OfflineService _instance = OfflineService._internal();
   factory OfflineService() => _instance;

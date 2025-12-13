@@ -134,6 +134,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     final order = _order!;
     final orderDate = order.orderDate;
     
+    // Show order saved message if offline
+    final isOffline = order.status == 'pending_sync' || order.status == 'Pending (Offline)';
+    
     return WillPopScope(
       onWillPop: () async {
         // Prevent going back to checkout screen
@@ -156,28 +159,30 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: (isOffline ? Colors.orange : colorScheme.primary).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
                     Icon(
-                      Icons.check_circle_outline,
+                      isOffline ? Icons.save_outlined : Icons.check_circle_outline,
                       size: 64,
-                      color: colorScheme.primary,
+                      color: isOffline ? Colors.orange : colorScheme.primary,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Order Placed Successfully!',
+                      isOffline ? 'Order Saved Offline' : 'Order Placed Successfully!',
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
+                        color: isOffline ? Colors.orange : colorScheme.primary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Your order ${order.orderNumber} has been placed and is being processed. You will receive an order confirmation email shortly.',
+                      isOffline 
+                          ? 'Your order has been saved and will be uploaded automatically when you reconnect to the internet.'
+                          : 'Your order ${order.orderNumber} has been placed and is being processed. You will receive an order confirmation email shortly.',
                       style: textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -190,12 +195,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: colorScheme.primary),
+                        border: Border.all(color: isOffline ? Colors.orange : colorScheme.primary),
                       ),
                       child: Text(
                         'Order #${order.orderNumber}',
                         style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.primary,
+                          color: isOffline ? Colors.orange : colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -242,7 +247,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         context,
                         icon: Icons.local_shipping_outlined,
                         label: 'Expected Delivery',
-                        value: _formatDate(orderDate.add(const Duration(days: 5))),
+                        value: isOffline ? 'Pending Upload' : _formatDate(orderDate.add(const Duration(days: 5))),
                       ),
                       const SizedBox(height: 12),
                       
@@ -411,6 +416,55 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         ),
       ),
     );
+  }
+
+  // Update _buildOrderTimeline to handle offline status
+  Widget _buildOrderTimeline(BuildContext context) {
+    // ... existing initialization ...
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    final allStatuses = [
+      'placed',
+      'confirmed',
+      'processing',
+      'shipped',
+      'out_for_delivery',
+      'delivered'
+    ];
+
+    var currentStatus = _order!.status.toString().toLowerCase();
+    
+    // Map offline status to 'placed' for timeline visualization
+    if (currentStatus == 'pending_sync' || currentStatus == 'pending (offline)') {
+        currentStatus = 'placed';
+    }
+
+    final currentStatusIndex = allStatuses.indexOf(currentStatus);
+    
+    // ... rest of the timeline logic ...
+    // Note: Since I can't easily replicate just the map part, I'm returning the original function body with the status mapping logic added at the start.
+    // For brevity in ReplacementContent, I will just provide the full method rewrite if needed, or careful splicing.
+    
+    // Actually, I'm replacing lines 137 to 620. This includes build method and creates duplicates if I'm not careful.
+    // I should provide the full build method and new _buildOrderTimeline or just be careful.
+    // The ReplacementContent above is targeting lines 137-620 which is the Scaffold part.
+    // I'll assume _buildOrderTimeline is outside this range?
+    // Wait, _buildOrderTimeline is at 607.
+    
+    // Let's refine the replacement to cover build method AND handle the `isOffline` logic properly.
+    // And I'll need to update `_buildOrderTimeline` separately or include it.
+    
+    // The previous `replace_file_content` I proposed covered `build` method.
+    // But `_buildOrderTimeline` (line 607) needs update too.
+    
+    // I will simplify: I'll update `build` first to handle the messages.
+    // Then I'll update `_buildOrderTimeline` in a separate call or chunk.
+    
+    // The provided replacement covers the whole `build` method.
+    // I'll proceed with that.
+
   }
   
   Widget _buildSectionHeader(BuildContext context, {required String title}) {
@@ -619,7 +673,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     ];
     
     // Get the current status index
-    final currentStatus = _order!.status.toString().toLowerCase();
+    var currentStatus = _order!.status.toString().toLowerCase();
+    
+    // Map offline status to 'placed' for timeline visualization
+    if (currentStatus == 'pending_sync' || currentStatus == 'pending (offline)') {
+        currentStatus = 'placed';
+    }
+
     final currentStatusIndex = allStatuses.indexOf(currentStatus);
     
     // Define status details

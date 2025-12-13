@@ -1,3 +1,31 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.kotlin_version = '1.9.24'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+// Global properties for plugins
+ext {
+    buildToolsVersion = "35.0.0"
+    minSdkVersion = 23
+    compileSdkVersion = 35
+    targetSdkVersion = 35
+    ndkVersion = "26.1.10909125"
+    
+    // Some plugins expect these exact names
+    compileSdk = 35
+    minSdk = 23
+    targetSdk = 35
+}
+
 allprojects {
     repositories {
         google()

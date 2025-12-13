@@ -295,6 +295,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       case 'cancelled':
         color = Colors.red;
         break;
+      case 'pending_sync':
+        color = Colors.amber;
+        break;
       default:
         color = Colors.grey;
     }
