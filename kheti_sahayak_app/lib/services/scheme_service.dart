@@ -42,15 +42,11 @@ class SchemeService {
             final List<dynamic> items = data['data'];
             final schemes = items.map((item) => Scheme.fromJson(item)).toList();
 
-            // 3. Cache schemes (only if no filters applied, or handle partial cache?)
-            // For simplicity, we only cache "all schemes" fetch (no filters).
-            // Or we just cache everything we get.
-            // If filters are applied, we might not want to overwrite the "full list" cache with a partial list.
-            // So let's only cache if no filters are applied.
+            // 3. Cache schemes (only if no filters applied)
             if (queryParams.isEmpty) {
               await _cacheSchemes(items.cast<Map<String, dynamic>>());
             }
-            
+
             return schemes;
           }
         }

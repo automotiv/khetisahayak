@@ -32,6 +32,7 @@ import {
   Lightbulb,
   Share
 } from '@mui/icons-material';
+import NotificationCenter from '../common/NotificationCenter';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -72,11 +73,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             Kheti Sahayak
           </Typography>
 
-          <IconButton color="inherit">
-            <Badge badgeContent={notificationCount} color="error">
-              <Notifications />
-            </Badge>
-          </IconButton>
+          <NotificationCenter />
 
           <IconButton color="inherit">
             <AccountCircle />
@@ -192,6 +189,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <ListItemText primary="Profile" />
               </ListItemButton>
             </ListItem>
+
           </List>
         </Box>
       </Drawer>

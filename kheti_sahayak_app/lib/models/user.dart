@@ -13,6 +13,13 @@ class User {
   final bool isEmailVerified;
   final bool isPhoneVerified;
 
+  // Farm details
+  final double? farmSize;
+  final String? soilType;
+  final String? irrigationType;
+  final List<String>? primaryCrops;
+  final bool isVerifiedFarmer;
+
   User({
     required this.id,
     required this.username,
@@ -27,6 +34,11 @@ class User {
     this.updatedAt,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
+    this.farmSize,
+    this.soilType,
+    this.irrigationType,
+    this.primaryCrops,
+    this.isVerifiedFarmer = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -37,6 +49,16 @@ class User {
       final lastName = json['last_name'] ?? '';
       fullName = '$firstName $lastName'.trim();
       if (fullName.isEmpty) fullName = null;
+    }
+
+    // Parse primary crops
+    List<String>? crops;
+    if (json['primary_crops'] != null) {
+      if (json['primary_crops'] is List) {
+        crops = List<String>.from(json['primary_crops']);
+      } else if (json['primary_crops'] is String) {
+        crops = (json['primary_crops'] as String).split(',').map((e) => e.trim()).toList();
+      }
     }
 
     return User(
@@ -57,6 +79,11 @@ class User {
           : null,
       isEmailVerified: json['is_email_verified'] ?? json['is_verified'] ?? false,
       isPhoneVerified: json['is_phone_verified'] ?? false,
+      farmSize: json['farm_size'] != null ? double.tryParse(json['farm_size'].toString()) : null,
+      soilType: json['soil_type'],
+      irrigationType: json['irrigation_type'],
+      primaryCrops: crops,
+      isVerifiedFarmer: json['is_verified_farmer'] ?? false,
     );
   }
 
@@ -75,6 +102,11 @@ class User {
       'updated_at': updatedAt?.toIso8601String(),
       'is_email_verified': isEmailVerified,
       'is_phone_verified': isPhoneVerified,
+      if (farmSize != null) 'farm_size': farmSize,
+      if (soilType != null) 'soil_type': soilType,
+      if (irrigationType != null) 'irrigation_type': irrigationType,
+      if (primaryCrops != null) 'primary_crops': primaryCrops,
+      'is_verified_farmer': isVerifiedFarmer,
     };
   }
 
@@ -90,6 +122,11 @@ class User {
     String? role,
     bool? isEmailVerified,
     bool? isPhoneVerified,
+    double? farmSize,
+    String? soilType,
+    String? irrigationType,
+    List<String>? primaryCrops,
+    bool? isVerifiedFarmer,
   }) {
     return User(
       id: id,
@@ -105,6 +142,11 @@ class User {
       updatedAt: updatedAt,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      farmSize: farmSize ?? this.farmSize,
+      soilType: soilType ?? this.soilType,
+      irrigationType: irrigationType ?? this.irrigationType,
+      primaryCrops: primaryCrops ?? this.primaryCrops,
+      isVerifiedFarmer: isVerifiedFarmer ?? this.isVerifiedFarmer,
     );
   }
 }

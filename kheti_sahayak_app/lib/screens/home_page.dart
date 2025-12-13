@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
       case 'dashboard':
         return const DashboardScreen();
       case 'weather':
-        return const WeatherScreen(); // Assumes WeatherScreen exists
+        return const WeatherScreen();
       case 'diagnostics':
         return const DiagnosticsScreen();
       case 'fields':
@@ -135,13 +135,13 @@ class _HomePageState extends State<HomePage> {
         return const ExpertConnectScreen();
       case 'community':
         return const CommunityScreen();
-      case 'book':
+      case 'schemes':
         return const GovernmentSchemesScreen();
-      case 'lightbulb':
+      case 'recommendations':
         return const RecommendationsScreen();
-      case 'edit_note':
+      case 'logbook':
         return const DigitalLogbookScreen();
-      case 'agriculture':
+      case 'equipment':
         return const EquipmentScreen();
       case 'notifications':
         return const NotificationsScreen();
@@ -160,6 +160,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getIconWidget(String iconName, bool isSelected) {
+    // Check for existing assets first
     String? assetName;
     switch (iconName) {
       case 'dashboard': assetName = 'dashboard.png'; break;
@@ -169,7 +170,12 @@ class _HomePageState extends State<HomePage> {
       case 'school': assetName = 'school.png'; break;
       case 'people': assetName = 'people.png'; break;
       case 'forum': assetName = 'forum.png'; break;
-      // Add other mappings as generated
+      case 'book': assetName = 'book.png'; break;
+      case 'account_balance': assetName = 'account_balance.png'; break;
+      case 'lightbulb': assetName = 'lightbulb.png'; break;
+      case 'handyman': assetName = 'handyman.png'; break;
+      case 'notifications': assetName = 'notifications.png'; break;
+      case 'person': assetName = 'person.png'; break;
     }
 
     if (assetName != null) {
@@ -177,11 +183,11 @@ class _HomePageState extends State<HomePage> {
         'assets/icons/$assetName',
         width: 24,
         height: 24,
-        color: isSelected ? Colors.green[800] : Colors.grey[700],
+        // No tint to show original colors
       );
     }
 
-    // Fallback to IconData
+    // Fallback to Material Icons
     IconData iconData;
     switch (iconName) {
       case 'dashboard': iconData = Icons.dashboard; break;

@@ -1422,6 +1422,18 @@ class DatabaseHelper {
     );
   }
 
+  /// Cleanup old cached products
+  Future<int> cleanupOldProductCache({int daysToKeep = 30}) async {
+    final db = await database;
+    final cutoffDate = DateTime.now()
+        .subtract(Duration(days: daysToKeep))
+        .toIso8601String();
+    return await db.delete(
+      'cached_products',
+      where: 'cached_at < ?',
+      whereArgs: [cutoffDate],
+    );
+  }
 
   // ================== CACHED CART OPERATIONS ==================
 
@@ -1594,7 +1606,15 @@ class DatabaseHelper {
     );
   }
 
-
+  /// Delete an activity record
+  Future<int> deleteActivityRecord(int id) async {
+    final db = await database;
+    return await db.delete(
+      'activity_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
   /// Get unsynced activity records
   Future<List<Map<String, dynamic>>> getUnsyncedActivityRecords() async {

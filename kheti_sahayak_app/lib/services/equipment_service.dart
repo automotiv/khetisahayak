@@ -16,7 +16,7 @@ class EquipmentService {
       if (token == null) return [];
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/api/equipment/listings'),
+        Uri.parse('${Constants.baseUrl}/api/equipment/listings'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

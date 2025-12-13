@@ -40,93 +40,176 @@ const FORECAST_API_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 router.get('/current', async (req, res) => {
   const { lat, lon, city } = req.query;
 
-  if (!city && (!lat || !lon)) {
-    return res.status(400).json({
-      success: false,
-      error: 'Either city name or lat/lon coordinates are required'
-    });
+  if (!lat || !lon) {
+    if (!city) {
+      return res.status(400).json({
+        success: false,
+        error: 'Either city name or lat/lon coordinates are required'
+      });
+    }
   }
 
   try {
     const apiKey = process.env.WEATHER_API_KEY;
-    if (!apiKey) {
-      console.error('WEATHER_API_KEY is not set in .env file');
-      return res.status(500).json({
-        success: false,
-        error: 'Server configuration error: Missing weather API key'
-      });
-    }
-
-    // Create cache key based on location
     const cacheKey = city ? `weather:${city}` : `weather:${lat},${lon}`;
 
     // Try to get data from Redis cache
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving weather data from Redis cache');
-      return res.json(JSON.parse(cachedData));
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        console.log('Serving weather data from Redis cache');
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (redisError) {
+      console.warn('Redis error:', redisError.message);
     }
 
-    // Build API parameters
-    const params = {
-      appid: apiKey,
-      units: 'metric'
-    };
+    let weatherData = null;
 
-    if (city) {
-      params.q = city;
-    } else {
-      params.lat = lat;
-      params.lon = lon;
+    // PRIMARY: OpenWeatherMap (if key exists)
+    if (apiKey) {
+      try {
+        const params = { appid: apiKey, units: 'metric' };
+        if (city) params.q = city;
+        else { params.lat = lat; params.lon = lon; }
+
+        const response = await axios.get(WEATHER_API_URL, { params });
+        weatherData = {
+          success: true,
+          source: 'OpenWeatherMap',
+          location: {
+            name: response.data.name,
+            country: response.data.sys.country,
+            lat: response.data.coord.lat,
+            lon: response.data.coord.lon
+          },
+          current: {
+            temp: response.data.main.temp,
+            feels_like: response.data.main.feels_like,
+            temp_min: response.data.main.temp_min,
+            temp_max: response.data.main.temp_max,
+            pressure: response.data.main.pressure,
+            humidity: response.data.main.humidity,
+            weather: response.data.weather[0].main,
+            description: response.data.weather[0].description,
+            icon: response.data.weather[0].icon,
+            wind_speed: response.data.wind.speed,
+            wind_deg: response.data.wind.deg,
+            clouds: response.data.clouds.all,
+            visibility: response.data.visibility,
+            sunrise: response.data.sys.sunrise,
+            sunset: response.data.sys.sunset
+          },
+          timestamp: response.data.dt
+        };
+      } catch (err) {
+        console.warn('OpenWeatherMap failed, falling back to Open-Meteo', err.message);
+      }
     }
 
-    // Fetch from OpenWeatherMap API
-    const response = await axios.get(WEATHER_API_URL, { params });
-    const weatherData = {
-      success: true,
-      location: {
-        name: response.data.name,
-        country: response.data.sys.country,
-        lat: response.data.coord.lat,
-        lon: response.data.coord.lon
-      },
-      current: {
-        temp: response.data.main.temp,
-        feels_like: response.data.main.feels_like,
-        temp_min: response.data.main.temp_min,
-        temp_max: response.data.main.temp_max,
-        pressure: response.data.main.pressure,
-        humidity: response.data.main.humidity,
-        weather: response.data.weather[0].main,
-        description: response.data.weather[0].description,
-        icon: response.data.weather[0].icon,
-        wind_speed: response.data.wind.speed,
-        wind_deg: response.data.wind.deg,
-        clouds: response.data.clouds.all,
-        visibility: response.data.visibility,
-        sunrise: response.data.sys.sunrise,
-        sunset: response.data.sys.sunset
-      },
-      timestamp: response.data.dt
-    };
+    // FALLBACK / DEFAULT: Open-Meteo (Free, No Key)
+    if (!weatherData) {
+      // Open-Meteo requires lat/lon. If only city provided, we'd need a geocoding step.
+      // For now, assume lat/lon is passed (common for mobile apps) or default to a central location if city only.
+      // NOTE: In a real "best way" scenario, we'd add a Geocoding service here.
+
+      let targetLat = lat;
+      let targetLon = lon;
+
+      if (!targetLat && city) {
+        // Quick Geocoding Fallback using Open-Meteo Geocoding API
+        try {
+          const geoRes = await axios.get(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=en&format=json`);
+          if (geoRes.data.results && geoRes.data.results.length > 0) {
+            targetLat = geoRes.data.results[0].latitude;
+            targetLon = geoRes.data.results[0].longitude;
+          }
+        } catch (geoErr) {
+          console.warn('Geocoding failed for city:', city);
+        }
+      }
+
+      if (!targetLat || !targetLon) {
+        throw new Error('Could not resolve location for Open-Meteo');
+      }
+
+      const omUrl = 'https://api.open-meteo.com/v1/forecast';
+      const omParams = {
+        latitude: targetLat,
+        longitude: targetLon,
+        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
+        daily: 'sunrise,sunset',
+        timezone: 'auto'
+      };
+
+      const omResponse = await axios.get(omUrl, { params: omParams });
+      const current = omResponse.data.current;
+      const daily = omResponse.data.daily;
+
+      // Map Open-Meteo WMO codes to text/icons
+      // This is a simplified mapping
+      const wmoCodeToText = (code) => {
+        if (code === 0) return { main: 'Clear', desc: 'Clear sky', icon: '01d' };
+        if (code <= 3) return { main: 'Clouds', desc: 'Partly cloudy', icon: '02d' };
+        if (code <= 48) return { main: 'Fog', desc: 'Foggy', icon: '50d' };
+        if (code <= 67) return { main: 'Rain', desc: 'Rain', icon: '10d' };
+        if (code <= 77) return { main: 'Snow', desc: 'Snow', icon: '13d' };
+        if (code <= 82) return { main: 'Rain', desc: 'Showers', icon: '09d' };
+        if (code <= 99) return { main: 'Thunderstorm', desc: 'Thunderstorm', icon: '11d' };
+        return { main: 'Unknown', desc: 'Unknown', icon: '01d' };
+      };
+
+      const weatherInfo = wmoCodeToText(current.weather_code);
+
+      weatherData = {
+        success: true,
+        source: 'Open-Meteo (Public API)',
+        location: {
+          name: city || 'Unknown Location',
+          country: '',
+          lat: targetLat,
+          lon: targetLon
+        },
+        current: {
+          temp: current.temperature_2m,
+          feels_like: current.apparent_temperature,
+          temp_min: current.temperature_2m, // Open-Meteo current doesn't give min/max for *now*, use daily for that if needed
+          temp_max: current.temperature_2m,
+          pressure: current.pressure_msl,
+          humidity: current.relative_humidity_2m,
+          weather: weatherInfo.main,
+          description: weatherInfo.desc,
+          icon: weatherInfo.icon,
+          wind_speed: current.wind_speed_10m,
+          wind_deg: current.wind_direction_10m,
+          clouds: current.cloud_cover,
+          visibility: 10000, // Default good visibility
+          sunrise: daily.sunrise[0] ? new Date(daily.sunrise[0]).getTime() / 1000 : 0,
+          sunset: daily.sunset[0] ? new Date(daily.sunset[0]).getTime() / 1000 : 0
+        },
+        timestamp: Math.floor(Date.now() / 1000)
+      };
+    }
 
     // Store in Redis cache with 10 minutes expiration
-    await redisClient.setex(cacheKey, 600, JSON.stringify(weatherData));
-    console.log('Serving weather data from API and caching');
-    res.json(weatherData);
+    if (weatherData) {
+      try {
+        await redisClient.setex(cacheKey, 600, JSON.stringify(weatherData));
+        console.log('Serving weather data from APIs and caching');
+      } catch (redisError) {
+        console.warn('Redis set error:', redisError.message);
+      }
+      return res.json(weatherData);
+    }
+
+    throw new Error('No weather data providers available');
+
   } catch (error) {
     console.error('Error fetching weather data:', error.message);
-    if (error.response) {
-      res.status(error.response.status).json({
-        success: false,
-        error: error.response.data.message || 'Failed to fetch weather data'
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch weather data'
-      });
-    }
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch weather data: ' + error.message
+    });
   }
 });
 

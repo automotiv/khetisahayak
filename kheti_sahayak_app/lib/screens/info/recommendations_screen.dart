@@ -42,9 +42,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
       };
       final uri = Uri.parse('${Constants.baseUrl}/api/diagnostics/recommendations')
           .replace(queryParameters: queryParams);
-      
+
       final cropRes = await http.get(uri);
-      
+
       // Fetch weather recommendations (using hardcoded location for demo)
       final weatherRes = await http.get(Uri.parse('${Constants.baseUrl}/api/weather/recommendations?lat=28.61&lon=77.20'));
 
@@ -56,7 +56,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
               _cropRecommendations = data['recommendations'];
             }
           }
-          
+
           if (weatherRes.statusCode == 200) {
             final data = json.decode(weatherRes.body);
             if (data['success'] == true) {
@@ -177,7 +177,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
         final name = item['crop'] ?? item['crop_name'];
         final confidence = item['confidence'];
         final reason = item['reason'];
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: ListTile(
@@ -243,9 +243,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> with Sing
     if (_weatherRecommendations == null) {
       return const Center(child: Text('No weather recommendations available.'));
     }
-    
+
     final activities = _weatherRecommendations!['activity_recommendations'] as List<dynamic>? ?? [];
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: activities.length,

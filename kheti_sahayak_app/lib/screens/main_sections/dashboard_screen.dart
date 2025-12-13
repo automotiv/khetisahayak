@@ -55,9 +55,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchRecentDiagnostics() async {
     try {
-      final diagnostics = await DiagnosticService.getUserDiagnostics(_currentUserId);
+      final result = await DiagnosticService.getUserDiagnostics();
+      final List<Diagnostic> diagnosticsList = result['diagnostics'] ?? [];
       setState(() {
-        _recentDiagnostics = diagnostics.take(3).toList(); // Show up to 3 recent diagnostics
+        _recentDiagnostics = diagnosticsList.take(3).toList(); // Show up to 3 recent diagnostics
         _diagnosticsError = '';
       });
     } catch (e) {
@@ -69,9 +70,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchFeaturedContent() async {
     try {
-      final content = await EducationalContentService.getEducationalContent();
+      final result = await EducationalContentService.getEducationalContent();
+      final List<EducationalContent> contentList = result['content'] ?? [];
       setState(() {
-        _featuredContent = content.take(3).toList(); // Show up to 3 featured content
+        _featuredContent = contentList.take(3).toList(); // Show up to 3 featured content
         _contentError = '';
       });
     } catch (e) {

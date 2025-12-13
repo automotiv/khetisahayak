@@ -4,7 +4,7 @@ import 'package:kheti_sahayak_app/screens/auth/new_login_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/register_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/forgot_password_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/change_password_screen.dart';
-import 'package:kheti_sahayak_app/screens/dashboard/dashboard_screen.dart';
+import 'package:kheti_sahayak_app/screens/home_page.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/marketplace_screen.dart';
 import 'package:kheti_sahayak_app/screens/marketplace/product_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/cart/cart_screen.dart';
@@ -53,7 +53,7 @@ class AppRoutes {
     login: (context) => const NewLoginScreen(),
     register: (context) => const RegisterScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
-    dashboard: (context) => const DashboardScreen(),
+    dashboard: (context) => const HomePage(),
     marketplace: (context) => const MarketplaceScreen(),
     productDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
