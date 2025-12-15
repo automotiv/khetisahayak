@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:kheti_sahayak_app/services/auth_service.dart';
+import 'package:kheti_sahayak_app/utils/constants.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:5002/api'; // Android Emulator
-  // static const String baseUrl = 'http://localhost:5002/api'; // iOS Simulator / Web
+  static const String baseUrl = '${AppConstants.baseUrl}/api'; // Production API
 
   static Future<Map<String, dynamic>> syncLogbook({
     String? lastSyncTimestamp,

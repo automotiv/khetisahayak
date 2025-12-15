@@ -71,8 +71,8 @@ android {
     buildTypes {
         release {
             // Enable code shrinking, obfuscation, and optimization for release builds
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // Use release signing config if key.properties exists, otherwise use debug
