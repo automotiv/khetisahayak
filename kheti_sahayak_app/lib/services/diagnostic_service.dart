@@ -2,6 +2,7 @@ import 'package:kheti_sahayak_app/services/api_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
 import 'package:kheti_sahayak_app/models/treatment.dart';
+import 'package:kheti_sahayak_app/models/treatment_model.dart';
 import 'dart:io';
 
 class DiagnosticService {
@@ -166,6 +167,17 @@ class DiagnosticService {
     try {
       final response = await ApiService.get('diagnostics/$diagnosticId/treatments');
       return TreatmentResponse.fromJson(response);
+    } catch (e) {
+      print('Error in getTreatmentRecommendations: $e');
+      rethrow;
+    }
+  }
+
+  // Get detailed treatment recommendations with disease info (New MVP endpoint)
+  Future<TreatmentRecommendationsResponse> getTreatmentRecommendations(int diagnosticId) async {
+    try {
+      final response = await ApiService.get('diagnostics/$diagnosticId/treatments');
+      return TreatmentRecommendationsResponse.fromJson(response);
     } catch (e) {
       print('Error in getTreatmentRecommendations: $e');
       rethrow;

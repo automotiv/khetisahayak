@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "google_auth": false,
+  "disabled_hooks": [],
+  "disabled_agents": [],
+  "sisyphus_agent": {
+    "disabled": false,
+    "default_builder_enabled": false,
+    "planner_enabled": true
+  },
+  "agents": {
+    "Sisyphus": {
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.3,
+      "prompt_append": "You are the lead orchestrator for Kheti Sahayak, an agricultural assistance platform. You have access to a team of 27 specialized agents. Leverage them effectively for complex tasks. Use parallel execution when possible."
+    }
+  }
+}
