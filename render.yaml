@@ -1,24 +1,67 @@
+# Kheti Sahayak - Render Blueprint Configuration
+# Deploy via: https://dashboard.render.com > New > Blueprint > Connect GitHub repo
+
 services:
+  # Backend API Service
   - type: web
     name: kheti-sahayak-backend
-    env: node
+    runtime: node
     plan: free
+    region: singapore  # Closer to India for better latency
     rootDir: kheti_sahayak_backend
-    buildCommand: npm install
+    buildCommand: npm install && npm run migrate:up
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
-      # You will need to add DATABASE_URL and REDIS_URL manually in the dashboard
-      # or uncomment below if creating new resources via Blueprint
-      # - key: DATABASE_URL
-      #   fromDatabase:
-      #     name: khetisahayak-db
-      #     property: connectionString
+      - key: PORT
+        value: 10000
+      # Database connection from Render PostgreSQL
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: connectionString
+      # Individual DB vars for compatibility
+      - key: DB_HOST
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: kheti-sahayak-db
+          property: password
+      # JWT Secret - auto-generated secure value
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Redis disabled for free tier (backend has mock fallback)
+      - key: REDIS_HOST
+        value: ""
+      - key: REDIS_PORT
+        value: ""
+      # Logging
+      - key: LOG_LEVEL
+        value: info
 
-# Uncomment to create a new free database via Blueprint
-# databases:
-#   - name: khetisahayak-db
-#     databaseName: khetisahayak
-#     user: khetisahayak
-#     plan: free
+# PostgreSQL Database
+databases:
+  - name: kheti-sahayak-db
+    plan: free
+    region: singapore
+    databaseName: kheti_sahayak
+    user: kheti_admin
+    postgresMajorVersion: "14"
