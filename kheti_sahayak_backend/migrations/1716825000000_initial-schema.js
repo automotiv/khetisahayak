@@ -5,10 +5,9 @@ const path = require('path');
 
 exports.shorthands = undefined;
 
-// Read the initial schema from the SQL file
 let initialSchemaSql;
 try {
-  initialSchemaSql = fs.readFileSync(path.join(__dirname, '../init_db.sql'), 'utf8');
+  initialSchemaSql = fs.readFileSync(path.join(__dirname, '001_initial_schema.sql'), 'utf8');
 } catch (error) {
   // If init_db.sql doesn't exist, use hardcoded schema
   initialSchemaSql = `
