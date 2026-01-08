@@ -129,16 +129,16 @@ const runStartupTasks = async () => {
         }
         
         try {
-            const result = await db.query('SELECT COUNT(*) FROM users');
-            const userCount = parseInt(result.rows[0].count);
+            const result = await db.query("SELECT COUNT(*) FROM users WHERE email = 'admin@khetisahayak.com'");
+            const adminExists = parseInt(result.rows[0].count) > 0;
             
-            if (userCount === 0) {
-                logger.info('Database empty, running seed data...');
+            if (!adminExists) {
+                logger.info('Admin user not found, running seed data...');
                 const seedData = require('./seedData');
                 await seedData();
                 logger.info('Seed data completed successfully');
             } else {
-                logger.info(`Database already has ${userCount} users, skipping seed`);
+                logger.info('Database already seeded (admin user exists), skipping seed');
             }
         } catch (err) {
             logger.error(`Seed check/run failed: ${err.message}`);
