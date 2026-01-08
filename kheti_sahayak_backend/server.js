@@ -9,7 +9,7 @@ const logger = require('./utils/logger');
 // const swaggerSpecs = require('./swagger');
 
 const app = express();
-const port = 5002; // process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -107,7 +107,34 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () => {
-    logger.info(`Server running on port ${port}`);
-    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+// Run migrations on startup in production
+const runMigrations = async () => {
+    if (process.env.NODE_ENV === 'production') {
+        try {
+            const { exec } = require('child_process');
+            logger.info('Running database migrations...');
+            await new Promise((resolve, reject) => {
+                exec('npm run migrate:up', { cwd: __dirname }, (error, stdout, stderr) => {
+                    if (error) {
+                        logger.error(`Migration error: ${error.message}`);
+                        // Don't reject - server should still start even if migrations fail
+                        resolve();
+                    } else {
+                        logger.info(`Migrations completed: ${stdout}`);
+                        resolve();
+                    }
+                });
+            });
+        } catch (err) {
+            logger.error(`Migration failed: ${err.message}`);
+        }
+    }
+};
+
+// Start server with migrations
+runMigrations().then(() => {
+    app.listen(port, () => {
+        logger.info(`Server running on port ${port}`);
+        logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
 });
