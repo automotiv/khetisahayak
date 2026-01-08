@@ -107,32 +107,46 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// Run migrations on startup in production
-const runMigrations = async () => {
+const runStartupTasks = async () => {
     if (process.env.NODE_ENV === 'production') {
+        const { exec } = require('child_process');
+        const db = require('./db');
+        
         try {
-            const { exec } = require('child_process');
             logger.info('Running database migrations...');
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 exec('npm run migrate:up', { cwd: __dirname }, (error, stdout, stderr) => {
                     if (error) {
                         logger.error(`Migration error: ${error.message}`);
-                        // Don't reject - server should still start even if migrations fail
-                        resolve();
                     } else {
                         logger.info(`Migrations completed: ${stdout}`);
-                        resolve();
                     }
+                    resolve();
                 });
             });
         } catch (err) {
             logger.error(`Migration failed: ${err.message}`);
         }
+        
+        try {
+            const result = await db.query('SELECT COUNT(*) FROM users');
+            const userCount = parseInt(result.rows[0].count);
+            
+            if (userCount === 0) {
+                logger.info('Database empty, running seed data...');
+                const seedData = require('./seedData');
+                await seedData();
+                logger.info('Seed data completed successfully');
+            } else {
+                logger.info(`Database already has ${userCount} users, skipping seed`);
+            }
+        } catch (err) {
+            logger.error(`Seed check/run failed: ${err.message}`);
+        }
     }
 };
 
-// Start server with migrations
-runMigrations().then(() => {
+runStartupTasks().then(() => {
     app.listen(port, () => {
         logger.info(`Server running on port ${port}`);
         logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
