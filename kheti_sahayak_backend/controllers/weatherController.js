@@ -4,6 +4,16 @@ const {
   getDailyTips,
   getOptimalTimeWindows,
 } = require('../services/weatherRecommendationService');
+const {
+  checkForAlerts,
+  getSeasonInfo,
+  generateAgricultureAdvisory,
+  evaluateHourlySuitability,
+  subscribeToAlerts: subscribeToAlertsService,
+  unsubscribeFromAlerts: unsubscribeFromAlertsService,
+  getUserSubscriptions,
+} = require('../services/weatherAlertService');
+const redisClient = require('../redisClient');
 
 // @desc    Get weather forecast for a given location
 // @route   GET /api/weather
@@ -250,8 +260,362 @@ function getMockForecast() {
   return { city: 'Your Location', forecasts };
 }
 
+const CACHE_TTL_30_MINUTES = 1800;
+const CACHE_TTL_15_MINUTES = 900;
+
+const getHourlyForecast = async (req, res) => {
+  const { lat, lon } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'Latitude and longitude query parameters are required' });
+  }
+
+  try {
+    const cacheKey = `hourly:${lat},${lon}`;
+
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (redisError) {
+      console.warn('Redis error:', redisError.message);
+    }
+
+    const apiKey = process.env.WEATHER_API_KEY;
+
+    if (apiKey) {
+      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&cnt=24`;
+      const response = await axios.get(url);
+
+      const hourlyData = response.data.list.map((item) => {
+        const hourData = {
+          datetime: item.dt_txt,
+          timestamp: item.dt,
+          temp: item.main.temp,
+          feels_like: item.main.feels_like,
+          humidity: item.main.humidity,
+          wind_speed: item.wind.speed * 3.6, // m/s to km/h
+          wind_direction: item.wind.deg,
+          precipitation_probability: (item.pop || 0) * 100,
+          rain_amount: item.rain?.['3h'] || 0,
+          weather_condition: item.weather[0]?.main || 'Clear',
+          weather_description: item.weather[0]?.description || '',
+          icon: item.weather[0]?.icon,
+        };
+
+        hourData.agricultural_suitability = evaluateHourlySuitability({
+          temp: hourData.temp,
+          humidity: hourData.humidity,
+          wind_speed: hourData.wind_speed,
+          rain_probability: hourData.precipitation_probability,
+        });
+
+        return hourData;
+      });
+
+      const responseData = {
+        success: true,
+        data: {
+          location: {
+            name: response.data.city.name,
+            country: response.data.city.country,
+            lat: response.data.city.coord.lat,
+            lon: response.data.city.coord.lon,
+          },
+          hourly_forecast: hourlyData,
+          generated_at: new Date().toISOString(),
+        },
+      };
+
+      try {
+        await redisClient.setex(cacheKey, CACHE_TTL_30_MINUTES, JSON.stringify(responseData));
+      } catch (redisError) {
+        console.warn('Redis cache set error:', redisError.message);
+      }
+
+      return res.json(responseData);
+    }
+
+    const mockHourly = generateMockHourlyForecast();
+    res.json({
+      success: true,
+      data: {
+        location: { name: 'Mock Location', country: 'IN', lat: parseFloat(lat), lon: parseFloat(lon) },
+        hourly_forecast: mockHourly,
+        generated_at: new Date().toISOString(),
+      },
+      is_mock: true,
+    });
+  } catch (err) {
+    console.error('Error fetching hourly forecast:', err.message);
+    const mockHourly = generateMockHourlyForecast();
+    res.json({
+      success: true,
+      data: {
+        location: { name: 'Mock Location', country: 'IN', lat: parseFloat(lat), lon: parseFloat(lon) },
+        hourly_forecast: mockHourly,
+        generated_at: new Date().toISOString(),
+      },
+      is_mock: true,
+    });
+  }
+};
+
+function generateMockHourlyForecast() {
+  const hourly = [];
+  const now = new Date();
+
+  for (let i = 0; i < 24; i++) {
+    const time = new Date(now.getTime() + i * 60 * 60 * 1000);
+    const hour = time.getHours();
+    const isDay = hour >= 6 && hour <= 18;
+
+    const temp = isDay ? 25 + Math.random() * 10 : 18 + Math.random() * 5;
+    const humidity = 50 + Math.random() * 30;
+    const wind_speed = 5 + Math.random() * 15;
+    const rain_probability = Math.random() * 40;
+
+    hourly.push({
+      datetime: time.toISOString().replace('T', ' ').slice(0, 19),
+      timestamp: Math.floor(time.getTime() / 1000),
+      temp: parseFloat(temp.toFixed(1)),
+      feels_like: parseFloat((temp - 2 + Math.random() * 4).toFixed(1)),
+      humidity: Math.round(humidity),
+      wind_speed: parseFloat(wind_speed.toFixed(1)),
+      wind_direction: Math.floor(Math.random() * 360),
+      precipitation_probability: Math.round(rain_probability),
+      rain_amount: rain_probability > 50 ? parseFloat((Math.random() * 5).toFixed(1)) : 0,
+      weather_condition: rain_probability > 60 ? 'Rain' : isDay ? 'Clear' : 'Clouds',
+      weather_description: rain_probability > 60 ? 'light rain' : isDay ? 'clear sky' : 'few clouds',
+      icon: rain_probability > 60 ? '10d' : isDay ? '01d' : '02n',
+      agricultural_suitability: evaluateHourlySuitability({
+        temp,
+        humidity,
+        wind_speed,
+        rain_probability,
+      }),
+    });
+  }
+
+  return hourly;
+}
+
+const getWeatherAlerts = async (req, res) => {
+  const { lat, lon } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'Latitude and longitude query parameters are required' });
+  }
+
+  try {
+    const cacheKey = `alerts:${lat},${lon}`;
+
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (redisError) {
+      console.warn('Redis error:', redisError.message);
+    }
+
+    const alerts = await checkForAlerts(parseFloat(lat), parseFloat(lon));
+
+    const responseData = {
+      success: true,
+      data: {
+        location: { lat: parseFloat(lat), lon: parseFloat(lon) },
+        alerts,
+        alert_count: alerts.length,
+        has_severe_alerts: alerts.some((a) => a.severity === 'severe' || a.severity === 'high'),
+        checked_at: new Date().toISOString(),
+      },
+    };
+
+    try {
+      await redisClient.setex(cacheKey, CACHE_TTL_15_MINUTES, JSON.stringify(responseData));
+    } catch (redisError) {
+      console.warn('Redis cache set error:', redisError.message);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    console.error('Error fetching weather alerts:', err.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch weather alerts',
+    });
+  }
+};
+
+const getSeasonalAdvisory = async (req, res) => {
+  const { lat, lon, crop } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'Latitude and longitude query parameters are required' });
+  }
+
+  try {
+    const cacheKey = `seasonal:${lat},${lon}:${crop || 'general'}`;
+
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        return res.json(JSON.parse(cachedData));
+      }
+    } catch (redisError) {
+      console.warn('Redis error:', redisError.message);
+    }
+
+    const apiKey = process.env.WEATHER_API_KEY;
+    let weatherData = { temp: 28, humidity: 65, wind_speed: 12, rain_chance: 30 };
+
+    if (apiKey) {
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+        const response = await axios.get(url);
+        weatherData = {
+          temp: response.data.main.temp,
+          humidity: response.data.main.humidity,
+          wind_speed: response.data.wind.speed * 3.6,
+          rain_chance: response.data.clouds?.all || 0,
+        };
+      } catch (apiError) {
+        console.warn('Weather API error, using defaults:', apiError.message);
+      }
+    }
+
+    const seasonInfo = getSeasonInfo();
+    const advisory = generateAgricultureAdvisory(weatherData, crop);
+
+    const responseData = {
+      success: true,
+      data: {
+        location: { lat: parseFloat(lat), lon: parseFloat(lon) },
+        current_weather: weatherData,
+        season: seasonInfo,
+        advisory: advisory,
+        recommended_crops: seasonInfo.crops,
+        generated_at: new Date().toISOString(),
+      },
+    };
+
+    try {
+      await redisClient.setex(cacheKey, CACHE_TTL_30_MINUTES, JSON.stringify(responseData));
+    } catch (redisError) {
+      console.warn('Redis cache set error:', redisError.message);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    console.error('Error getting seasonal advisory:', err.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get seasonal advisory',
+    });
+  }
+};
+
+const subscribeToAlerts = async (req, res) => {
+  const { lat, lon, alert_types } = req.body;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'Latitude and longitude are required in request body' });
+  }
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const subscription = subscribeToAlertsService(
+      req.user.id,
+      parseFloat(lat),
+      parseFloat(lon),
+      alert_types
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Successfully subscribed to weather alerts',
+      data: subscription,
+    });
+  } catch (err) {
+    console.error('Error subscribing to alerts:', err.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to subscribe to alerts',
+    });
+  }
+};
+
+const unsubscribeFromAlerts = async (req, res) => {
+  const { lat, lon } = req.body;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const success = unsubscribeFromAlertsService(
+      req.user.id,
+      lat ? parseFloat(lat) : null,
+      lon ? parseFloat(lon) : null
+    );
+
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Successfully unsubscribed from weather alerts',
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'No subscription found for the given location',
+      });
+    }
+  } catch (err) {
+    console.error('Error unsubscribing from alerts:', err.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to unsubscribe from alerts',
+    });
+  }
+};
+
+const getMyAlertSubscriptions = async (req, res) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const subscriptions = getUserSubscriptions(req.user.id);
+
+    res.json({
+      success: true,
+      data: {
+        subscriptions,
+        count: subscriptions.length,
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching subscriptions:', err.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch subscriptions',
+    });
+  }
+};
+
 module.exports = {
   getWeather,
   getRecommendations,
   getForecast,
+  getHourlyForecast,
+  getWeatherAlerts,
+  getSeasonalAdvisory,
+  subscribeToAlerts,
+  unsubscribeFromAlerts,
+  getMyAlertSubscriptions,
 };

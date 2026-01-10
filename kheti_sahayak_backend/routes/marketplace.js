@@ -1,6 +1,7 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const multer = require('multer');
+const { validatePagination, validateIdParam, handleValidationErrors } = require('../middleware/validationMiddleware');
 const {
   getAllProducts,
   getProductById,
@@ -112,7 +113,17 @@ const productValidationRules = [
  *                     pages:
  *                       type: integer
  */
-router.get('/', getAllProducts);
+const productsQueryValidation = [
+  query('category').optional().trim().escape().isLength({ max: 100 }),
+  query('minPrice').optional().isFloat({ min: 0 }).withMessage('Minimum price must be positive').toFloat(),
+  query('maxPrice').optional().isFloat({ min: 0 }).withMessage('Maximum price must be positive').toFloat(),
+  query('organic').optional().isBoolean().toBoolean(),
+  query('search').optional().trim().escape().isLength({ max: 200 }),
+  ...validatePagination,
+  handleValidationErrors
+];
+
+router.get('/', productsQueryValidation, getAllProducts);
 
 /**
  * @swagger
@@ -165,7 +176,7 @@ router.get('/categories', getProductCategories);
  *       404:
  *         description: Product not found
  */
-router.get('/:id', getProductById);
+router.get('/:id', validateIdParam, getProductById);
 
 /**
  * @swagger
@@ -263,7 +274,7 @@ router.post('/', protect, productValidationRules, addProduct);
  *       404:
  *         description: Product not found
  */
-router.put('/:id', protect, productValidationRules, updateProduct);
+router.put('/:id', protect, [param('id').isUUID().withMessage('Invalid product ID'), ...productValidationRules], updateProduct);
 
 /**
  * @swagger
@@ -288,7 +299,7 @@ router.put('/:id', protect, productValidationRules, updateProduct);
  *       404:
  *         description: Product not found
  */
-router.delete('/:id', protect, deleteProduct);
+router.delete('/:id', protect, validateIdParam, deleteProduct);
 
 /**
  * @swagger
@@ -323,7 +334,7 @@ router.delete('/:id', protect, deleteProduct);
  *       401:
  *         description: Not authorized
  */
-router.post('/:id/images', protect, upload.array('images', 5), uploadProductImages);
+router.post('/:id/images', protect, validateIdParam, upload.array('images', 5), uploadProductImages);
 
 /**
  * @swagger

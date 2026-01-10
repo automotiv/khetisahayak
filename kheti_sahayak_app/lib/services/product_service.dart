@@ -28,10 +28,8 @@ class ProductService {
         queryParams: queryParams,
       );
 
-      // Handle both array response and object with products key
-      if (response is List) {
-        return response.map((json) => Product.fromJson(json)).toList();
-      } else if (response['products'] != null) {
+      // Handle response formats - ApiService.get always returns Map<String, dynamic>
+      if (response['products'] != null) {
         return (response['products'] as List)
             .map((json) => Product.fromJson(json))
             .toList();
@@ -89,8 +87,8 @@ class ProductService {
 
       if (response['categories'] != null) {
         return List<String>.from(response['categories']);
-      } else if (response is List) {
-        return List<String>.from(response);
+      } else if (response['data'] != null) {
+        return List<String>.from(response['data']);
       }
 
       return [];

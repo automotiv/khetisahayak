@@ -7,6 +7,7 @@ import 'package:kheti_sahayak_app/widgets/primary_button.dart';
 import 'package:kheti_sahayak_app/widgets/loading_indicator.dart';
 import 'package:kheti_sahayak_app/widgets/error_dialog.dart';
 import 'package:kheti_sahayak_app/screens/checkout/order_confirmation_screen.dart';
+import 'package:kheti_sahayak_app/services/payment_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({Key? key}) : super(key: key);
@@ -29,6 +30,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isPlacingOrder = false;
   int _selectedAddressIndex = 0;
   int _selectedPaymentMethod = 0; // 0: UPI, 1: Card, 2: Net Banking, 3: COD
+  
+  // Payment service instance
+  final PaymentService _paymentService = PaymentService.instance;
+  String? _currentOrderId; // Track current order for payment
   
   // Saved addresses
   final List<Map<String, dynamic>> _savedAddresses = [
@@ -63,6 +68,92 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
     // Load cart data
     _loadCartData();
+    // Initialize payment service
+    _initPaymentService();
+  }
+  
+  /// Initialize payment service with callbacks
+  Future<void> _initPaymentService() async {
+    await _paymentService.init(
+      onSuccess: _handlePaymentSuccess,
+      onError: _handlePaymentError,
+      onWalletSelected: _handleWalletSelected,
+    );
+  }
+  
+  /// Handle successful payment from Razorpay
+  void _handlePaymentSuccess(Map<String, dynamic> response) async {
+    debugPrint('Payment Success: $response');
+    
+    // Verify payment on backend
+    final verifyResult = await _paymentService.verifyPayment(
+      razorpayOrderId: response['razorpay_order_id'] ?? '',
+      razorpayPaymentId: response['razorpay_payment_id'] ?? '',
+      razorpaySignature: response['razorpay_signature'] ?? '',
+    );
+    
+    if (verifyResult.success && mounted) {
+      // Clear cart after successful payment
+      final cartProvider = context.read<CartProvider>();
+      cartProvider.clearAfterOrder();
+      
+      // Navigate to order confirmation
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OrderConfirmationScreen(
+            orderId: _currentOrderId ?? verifyResult.orderId ?? '',
+          ),
+        ),
+      );
+    } else if (mounted) {
+      // Show verification error
+      showDialog(
+        context: context,
+        builder: (ctx) => ErrorDialog(
+          title: 'Payment Verification Failed',
+          content: verifyResult.error ?? 'Could not verify payment. Please contact support.',
+        ),
+      );
+    }
+    
+    setState(() => _isPlacingOrder = false);
+  }
+  
+  /// Handle payment error from Razorpay
+  void _handlePaymentError(Map<String, dynamic> response) {
+    debugPrint('Payment Error: $response');
+    
+    if (mounted) {
+      setState(() => _isPlacingOrder = false);
+      
+      showDialog(
+        context: context,
+        builder: (ctx) => ErrorDialog(
+          title: 'Payment Failed',
+          content: response['message'] ?? 'Payment could not be completed. Please try again.',
+        ),
+      );
+    }
+  }
+  
+  /// Handle external wallet selection
+  void _handleWalletSelected() {
+    debugPrint('External wallet selected');
+    // External wallet flow is handled by Razorpay SDK
+  }
+  
+  @override
+  void dispose() {
+    _paymentService.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _pincodeController.dispose();
+    _addressController.dispose();
+    _landmarkController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    super.dispose();
   }
   
   Future<void> _loadCartData() async {
@@ -123,32 +214,40 @@ Phone: ${_phoneController.text}
       // Get payment method
       final paymentMethods = ['UPI', 'Credit/Debit Card', 'Net Banking', 'Cash on Delivery'];
       final paymentMethod = paymentMethods[_selectedPaymentMethod];
+      final isCOD = _selectedPaymentMethod == 3; // Cash on Delivery
       
-      // Place order
+      // Place order first (with pending payment status for online payments)
       final order = await orderProvider.placeOrder(
         items: cartProvider.items,
         shippingAddress: shippingAddress,
         paymentMethod: paymentMethod,
-        paymentStatus: 'Paid',
+        paymentStatus: isCOD ? 'COD' : 'Pending',
         discount: cartProvider.couponDiscount,
       );
       
       if (order != null) {
-        // Clear cart after successful order
-        cartProvider.clearAfterOrder();
+        _currentOrderId = order.id;
         
-        // Navigate to order confirmation screen
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderConfirmationScreen(orderId: order.id),
-            ),
-          );
+        if (isCOD) {
+          // For COD, directly go to confirmation
+          cartProvider.clearAfterOrder();
+          
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OrderConfirmationScreen(orderId: order.id),
+              ),
+            );
+          }
+        } else {
+          // For online payments, initiate Razorpay payment
+          await _initiateRazorpayPayment(order.id, cartProvider.total);
         }
       } else {
         // Show error if order placement failed
         if (mounted) {
+          setState(() => _isPlacingOrder = false);
           showDialog(
             context: context,
             builder: (ctx) => ErrorDialog(
@@ -161,6 +260,7 @@ Phone: ${_phoneController.text}
     } catch (e) {
       debugPrint('Error placing order: $e');
       if (mounted) {
+        setState(() => _isPlacingOrder = false);
         showDialog(
           context: context,
           builder: (ctx) => const ErrorDialog(
@@ -169,11 +269,63 @@ Phone: ${_phoneController.text}
           ),
         );
       }
-    } finally {
+    }
+  }
+  
+  /// Initiate Razorpay payment for the order
+  Future<void> _initiateRazorpayPayment(String orderId, double amount) async {
+    try {
+      // Initialize payment on backend to get Razorpay order ID
+      final initResult = await _paymentService.initiatePayment(orderId);
+      
+      if (initResult.success) {
+        // Open Razorpay checkout
+        await _paymentService.openCheckout(
+          razorpayOrderId: initResult.razorpayOrderId!,
+          amount: initResult.amount!, // Amount in paise from backend
+          key: initResult.key!,
+          name: 'Kheti Sahayak',
+          description: 'Order #${orderId.substring(0, 8)}',
+          email: _getEmail(),
+          contact: _phoneController.text,
+          currency: initResult.currency ?? 'INR',
+          notes: {
+            'order_id': orderId,
+            'customer_name': _nameController.text,
+          },
+        );
+      } else {
+        // Payment initiation failed
+        if (mounted) {
+          setState(() => _isPlacingOrder = false);
+          showDialog(
+            context: context,
+            builder: (ctx) => ErrorDialog(
+              title: 'Payment Initiation Failed',
+              content: initResult.error ?? 'Could not initiate payment. Please try again.',
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error initiating Razorpay payment: $e');
       if (mounted) {
         setState(() => _isPlacingOrder = false);
+        showDialog(
+          context: context,
+          builder: (ctx) => const ErrorDialog(
+            title: 'Payment Error',
+            content: 'Could not start payment process. Please try again.',
+          ),
+        );
       }
     }
+  }
+  
+  /// Get user email (placeholder - should come from user profile)
+  String _getEmail() {
+    // TODO: Get from user profile/auth service
+    return '';
   }
   
   void _addNewAddress() {

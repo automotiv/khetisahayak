@@ -1,6 +1,8 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const multer = require('multer');
+const { validatePagination, validateIdParam, handleValidationErrors, sanitizeString } = require('../middleware/validationMiddleware');
+const { uploadRateLimiter } = require('../middleware/securityMiddleware');
 const {
   uploadForDiagnosis,
   getDiagnosticHistory,
@@ -93,7 +95,15 @@ const expertReviewValidationRules = [
  *                   items:
  *                     type: object
  */
-router.get('/recommendations', getCropRecommendations);
+const recommendationsQueryValidation = [
+  query('season').optional().trim().escape().isLength({ max: 50 }),
+  query('soil_type').optional().trim().escape().isLength({ max: 50 }),
+  query('climate_zone').optional().trim().escape().isLength({ max: 50 }),
+  query('water_availability').optional().trim().escape().isLength({ max: 50 }),
+  handleValidationErrors
+];
+
+router.get('/recommendations', recommendationsQueryValidation, getCropRecommendations);
 
 /**
  * @swagger
@@ -170,7 +180,7 @@ router.get('/stats', protect, getDiagnosticStats);
  *       401:
  *         description: Not authorized
  */
-router.post('/upload', protect, upload.single('image'), diagnosticUploadValidationRules, uploadForDiagnosis);
+router.post('/upload', protect, uploadRateLimiter, upload.single('image'), diagnosticUploadValidationRules, uploadForDiagnosis);
 
 /**
  * @swagger
@@ -197,7 +207,7 @@ router.post('/upload', protect, upload.single('image'), diagnosticUploadValidati
  *       401:
  *         description: Not authorized
  */
-router.get('/', protect, getDiagnosticHistory);
+router.get('/', protect, [...validatePagination, handleValidationErrors], getDiagnosticHistory);
 
 /**
  * @swagger
@@ -231,7 +241,7 @@ router.get('/', protect, getDiagnosticHistory);
  *       404:
  *         description: Diagnostic not found
  */
-router.get('/:id', protect, getDiagnosticById);
+router.get('/:id', protect, validateIdParam, getDiagnosticById);
 
 /**
  * @swagger
@@ -254,7 +264,7 @@ router.get('/:id', protect, getDiagnosticById);
  *       404:
  *         description: Diagnostic not found
  */
-router.get('/:id/treatments', protect, getTreatmentRecommendations);
+router.get('/:id/treatments', protect, validateIdParam, getTreatmentRecommendations);
 
 /**
  * @swagger
@@ -277,7 +287,7 @@ router.get('/:id/treatments', protect, getTreatmentRecommendations);
  *       401:
  *         description: Not authorized
  */
-router.post('/:id/expert-review', protect, requestExpertReview);
+router.post('/:id/expert-review', protect, validateIdParam, requestExpertReview);
 
 /**
  * @swagger
@@ -319,7 +329,7 @@ router.post('/:id/expert-review', protect, requestExpertReview);
  *       403:
  *         description: Access denied - Expert role required
  */
-router.put('/:id/expert-review', protect, authorize('expert'), expertReviewValidationRules, submitExpertReview);
+router.put('/:id/expert-review', protect, authorize('expert'), [param('id').isUUID().withMessage('Invalid diagnostic ID'), ...expertReviewValidationRules], submitExpertReview);
 
 /**
  * @swagger

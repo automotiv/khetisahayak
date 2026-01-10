@@ -47,3 +47,8 @@ android/key.properties
 android/app/upload-keystore.jks
 *.jks
 *.keystore
+
+# Play Store deployment secrets - NEVER commit these!
+android/fastlane/secrets/
+**/play-store-service-account.json
+**/google-play-credentials.json

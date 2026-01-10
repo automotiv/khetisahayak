@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:io';
+import 'dart:convert';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -20,7 +21,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 17,
+      version: 18,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -326,9 +327,140 @@ class DatabaseHelper {
       ''');
       
       await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_synced ON activity_records(synced)');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_synced ON activity_records(synced)');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_timestamp ON activity_records(timestamp DESC)');
-    }
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_synced ON activity_records(synced)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_timestamp ON activity_records(timestamp DESC)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_records_dirty ON activity_records(dirty)');
+
+    // ================== COMPREHENSIVE OFFLINE CACHING TABLES (V18) ==================
+
+    // Enhanced cached_weather table with lat/lon based lookup
+    await db.execute('''
+      CREATE TABLE cached_weather_v2 (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        location_name TEXT,
+        data TEXT NOT NULL,
+        cached_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        UNIQUE(latitude, longitude)
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_cached_weather_v2_coords ON cached_weather_v2(latitude, longitude)');
+    await db.execute('CREATE INDEX idx_cached_weather_v2_expires ON cached_weather_v2(expires_at)');
+
+    // Cached educational content table
+    await db.execute('''
+      CREATE TABLE cached_educational_content (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        summary TEXT,
+        category TEXT NOT NULL,
+        subcategory TEXT,
+        difficulty_level TEXT,
+        author_id TEXT,
+        author_name TEXT,
+        image_url TEXT,
+        video_url TEXT,
+        tags TEXT,
+        view_count INTEGER DEFAULT 0,
+        data TEXT NOT NULL,
+        cached_at TEXT NOT NULL,
+        priority INTEGER DEFAULT 1
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_cached_educational_category ON cached_educational_content(category)');
+    await db.execute('CREATE INDEX idx_cached_educational_priority ON cached_educational_content(priority)');
+
+    // Cached experts table
+    await db.execute('''
+      CREATE TABLE cached_experts (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        specialization TEXT,
+        qualification TEXT,
+        experience_years INTEGER,
+        rating REAL,
+        image_url TEXT,
+        is_online INTEGER DEFAULT 0,
+        data TEXT NOT NULL,
+        cached_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_cached_experts_specialization ON cached_experts(specialization)');
+
+    // Cached user profile table
+    await db.execute('''
+      CREATE TABLE cached_user_profile (
+        user_id TEXT PRIMARY KEY,
+        username TEXT,
+        email TEXT,
+        full_name TEXT,
+        phone_number TEXT,
+        address TEXT,
+        profile_image_url TEXT,
+        role TEXT,
+        farm_size REAL,
+        soil_type TEXT,
+        irrigation_type TEXT,
+        primary_crops TEXT,
+        data TEXT NOT NULL,
+        cached_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+      )
+    ''');
+
+    // Sync queue table for offline operations
+    await db.execute('''
+      CREATE TABLE sync_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        table_name TEXT NOT NULL,
+        operation TEXT NOT NULL,
+        entity_id TEXT,
+        data TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        retry_count INTEGER DEFAULT 0,
+        max_retries INTEGER DEFAULT 3,
+        last_attempt TEXT,
+        error_message TEXT,
+        priority INTEGER DEFAULT 1
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_sync_queue_status ON sync_queue(status)');
+    await db.execute('CREATE INDEX idx_sync_queue_priority ON sync_queue(priority DESC, created_at ASC)');
+
+    // Offline diagnostics table
+    await db.execute('''
+      CREATE TABLE offline_diagnostics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image_path TEXT NOT NULL,
+        crop_type TEXT NOT NULL,
+        issue_description TEXT,
+        result TEXT,
+        confidence_score REAL,
+        created_at TEXT NOT NULL,
+        synced INTEGER DEFAULT 0,
+        backend_id TEXT,
+        sync_attempts INTEGER DEFAULT 0,
+        last_sync_attempt TEXT,
+        error_message TEXT
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_offline_diagnostics_synced ON offline_diagnostics(synced)');
+
+    // Cache metadata table (for tracking cache sizes and TTLs)
+    await db.execute('''
+      CREATE TABLE cache_metadata (
+        cache_type TEXT PRIMARY KEY,
+        last_sync TEXT,
+        record_count INTEGER DEFAULT 0,
+        size_bytes INTEGER DEFAULT 0,
+        ttl_hours INTEGER DEFAULT 24
+      )
+    ''');
+  }
 
     if (oldVersion < 5) {
       // Add timezone_offset column to activity_records for version 5
@@ -470,6 +602,8 @@ class DatabaseHelper {
       
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_name ON cached_schemes(name)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_schemes_last_accessed ON cached_schemes(last_accessed DESC)');
+    }
+
     if (oldVersion < 12) {
       // Add cached_orders table for version 12
       await db.execute('''
@@ -710,15 +844,147 @@ class DatabaseHelper {
       await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id)');
     }
+
+    if (oldVersion < 18) {
+      // Add comprehensive offline caching tables for version 18
+      
+      // Enhanced cached_weather table with lat/lon based lookup
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_weather_v2 (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          latitude REAL NOT NULL,
+          longitude REAL NOT NULL,
+          location_name TEXT,
+          data TEXT NOT NULL,
+          cached_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          UNIQUE(latitude, longitude)
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_weather_v2_coords ON cached_weather_v2(latitude, longitude)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_weather_v2_expires ON cached_weather_v2(expires_at)');
+
+      // Cached educational content table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_educational_content (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          summary TEXT,
+          category TEXT NOT NULL,
+          subcategory TEXT,
+          difficulty_level TEXT,
+          author_id TEXT,
+          author_name TEXT,
+          image_url TEXT,
+          video_url TEXT,
+          tags TEXT,
+          view_count INTEGER DEFAULT 0,
+          data TEXT NOT NULL,
+          cached_at TEXT NOT NULL,
+          priority INTEGER DEFAULT 1
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_educational_category ON cached_educational_content(category)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_educational_priority ON cached_educational_content(priority)');
+
+      // Cached experts table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_experts (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          specialization TEXT,
+          qualification TEXT,
+          experience_years INTEGER,
+          rating REAL,
+          image_url TEXT,
+          is_online INTEGER DEFAULT 0,
+          data TEXT NOT NULL,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_cached_experts_specialization ON cached_experts(specialization)');
+
+      // Cached user profile table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cached_user_profile (
+          user_id TEXT PRIMARY KEY,
+          username TEXT,
+          email TEXT,
+          full_name TEXT,
+          phone_number TEXT,
+          address TEXT,
+          profile_image_url TEXT,
+          role TEXT,
+          farm_size REAL,
+          soil_type TEXT,
+          irrigation_type TEXT,
+          primary_crops TEXT,
+          data TEXT NOT NULL,
+          cached_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL
+        )
+      ''');
+
+      // Sync queue table for offline operations
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sync_queue (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          table_name TEXT NOT NULL,
+          operation TEXT NOT NULL,
+          entity_id TEXT,
+          data TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          status TEXT DEFAULT 'pending',
+          retry_count INTEGER DEFAULT 0,
+          max_retries INTEGER DEFAULT 3,
+          last_attempt TEXT,
+          error_message TEXT,
+          priority INTEGER DEFAULT 1
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_priority ON sync_queue(priority DESC, created_at ASC)');
+
+      // Offline diagnostics table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS offline_diagnostics (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          image_path TEXT NOT NULL,
+          crop_type TEXT NOT NULL,
+          issue_description TEXT,
+          result TEXT,
+          confidence_score REAL,
+          created_at TEXT NOT NULL,
+          synced INTEGER DEFAULT 0,
+          backend_id TEXT,
+          sync_attempts INTEGER DEFAULT 0,
+          last_sync_attempt TEXT,
+          error_message TEXT
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_offline_diagnostics_synced ON offline_diagnostics(synced)');
+
+      // Cache metadata table (for tracking cache sizes and TTLs)
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS cache_metadata (
+          cache_type TEXT PRIMARY KEY,
+          last_sync TEXT,
+          record_count INTEGER DEFAULT 0,
+          size_bytes INTEGER DEFAULT 0,
+          ttl_hours INTEGER DEFAULT 24
+        )
+      ''');
+    }
   }
 
   // ================== MARKETPLACE OPERATIONS ==================
 
-  /// Cache products and sellers
-  Future<void> cacheProducts(List<Map<String, dynamic>> products) async {
+  /// Cache marketplace products (v17 products table)
+  Future<void> cacheMarketplaceProducts(List<Map<String, dynamic>> products) async {
     final db = await database;
     final batch = db.batch();
-    
+
     for (var prod in products) {
       batch.insert(
         'products',
@@ -739,8 +1005,8 @@ class DatabaseHelper {
     await batch.commit(noResult: true);
   }
 
-  /// Get cached products
-  Future<List<Map<String, dynamic>>> getCachedProducts({String? category}) async {
+  /// Get marketplace products (v17 products table)
+  Future<List<Map<String, dynamic>>> getMarketplaceProducts({String? category}) async {
     final db = await database;
     if (category != null) {
       return await db.query('products', where: 'category = ?', whereArgs: [category]);
@@ -764,8 +1030,8 @@ class DatabaseHelper {
     return await db.query('cart_items');
   }
 
-  /// Update cart item quantity
-  Future<void> updateCartItemQuantity(String id, int quantity, double totalPrice) async {
+  /// Update marketplace cart item quantity (v17 cart_items table)
+  Future<void> updateMarketplaceCartItemQuantity(String id, int quantity, double totalPrice) async {
     final db = await database;
     if (quantity <= 0) {
       await db.delete('cart_items', where: 'id = ?', whereArgs: [id]);
@@ -2025,7 +2291,6 @@ class DatabaseHelper {
     };
   }
 
-<<<<<<< HEAD
 
   // ================== LOGBOOK SYNC OPERATIONS ==================
 
@@ -2078,7 +2343,9 @@ class DatabaseHelper {
       {
         'activity_type': data['activity_type'],
         'timestamp': data['date'], // Map date to timestamp
-        'metadata': jsonEncode({'description': data['description']}), // Map description to metadata for now
+        'metadata': data['description'] != null
+            ? '{"description": "${data['description']}"}'
+            : null,
         'cost': data['cost'],
         'version': data['version'],
         'deleted': data['deleted'] == true ? 1 : 0,
@@ -2099,7 +2366,9 @@ class DatabaseHelper {
         'backend_id': data['id'],
         'activity_type': data['activity_type'],
         'timestamp': data['date'],
-        'metadata': jsonEncode({'description': data['description']}),
+        'metadata': data['description'] != null
+            ? '{"description": "${data['description']}"}'
+            : null,
         'cost': data['cost'],
         'version': data['version'],
         'deleted': data['deleted'] == true ? 1 : 0,
@@ -2127,56 +2396,6 @@ class DatabaseHelper {
       whereArgs: [fieldId],
       orderBy: 'test_date DESC',
     );
-  }
-=======
-  // ================== FIELD & YIELD OPERATIONS ==================
-
-  /// Insert a field
-  Future<int> insertField(Map<String, dynamic> field) async {
-    final db = await database;
-    return await db.insert('fields', field);
-  }
-
-  /// Get all fields
-  Future<List<Map<String, dynamic>>> getFields() async {
-    final db = await database;
-    return await db.query('fields');
-  }
-
-  /// Insert a yield record
-  Future<int> insertYieldRecord(Map<String, dynamic> record) async {
-    final db = await database;
-    return await db.insert('yield_records', record);
-  }
-
-  /// Get yield records for a field
-  Future<List<Map<String, dynamic>>> getYieldRecords({required int fieldId}) async {
-    final db = await database;
-    return await db.query(
-      'yield_records',
-      where: 'field_id = ?',
-      whereArgs: [fieldId],
-      orderBy: 'harvest_date DESC',
-    );
-  }
-
-  /// Get yield aggregates grouped by year
-  Future<List<Map<String, dynamic>>> getYieldAggregates({required int fieldId}) async {
-    final db = await database;
-    
-    // SQLite query to sum yield by year
-    // Assumes harvest_date is in ISO-8601 format (YYYY-MM-DD...)
-    final result = await db.rawQuery('''
-      SELECT 
-        strftime('%Y', harvest_date) as year,
-        SUM(yield_amount) as total_yield
-      FROM yield_records
-      WHERE field_id = ?
-      GROUP BY year
-      ORDER BY year DESC
-    ''', [fieldId]);
-    
-    return result;
   }
 
   // ================== ORDER OPERATIONS ==================
@@ -2217,7 +2436,7 @@ class DatabaseHelper {
   /// Get specific cached order with items
   Future<Map<String, dynamic>?> getCachedOrder(String orderId) async {
     final db = await database;
-    
+
     final orders = await db.query(
       'cached_orders',
       where: 'id = ?',
@@ -2227,7 +2446,7 @@ class DatabaseHelper {
     if (orders.isEmpty) return null;
 
     final order = Map<String, dynamic>.from(orders.first);
-    
+
     final items = await db.query(
       'cached_order_items',
       where: 'order_id = ?',
@@ -2238,79 +2457,634 @@ class DatabaseHelper {
     return order;
   }
 
-  // ================== CART OPERATIONS ==================
+  // ================== ENHANCED WEATHER CACHE OPERATIONS (V2) ==================
 
-  /// Cache cart locally
-  Future<void> cacheCart(Map<String, dynamic> cartData) async {
+  /// Cache weather data by coordinates with 24-hour TTL
+  Future<int> cacheWeatherByCoords({
+    required double latitude,
+    required double longitude,
+    String? locationName,
+    required Map<String, dynamic> data,
+    Duration ttl = const Duration(hours: 24),
+  }) async {
     final db = await database;
-    await db.transaction((txn) async {
-      // Clear existing cart cache for this user (assuming single user for now or handled by logic)
-      await txn.delete('cached_cart'); 
-      await txn.delete('cached_cart_items');
+    final now = DateTime.now();
+    
+    // Round coordinates to 2 decimal places for better cache hits
+    final lat = (latitude * 100).round() / 100;
+    final lon = (longitude * 100).round() / 100;
+    
+    return await db.insert(
+      'cached_weather_v2',
+      {
+        'latitude': lat,
+        'longitude': lon,
+        'location_name': locationName,
+        'data': jsonEncode(data),
+        'cached_at': now.toIso8601String(),
+        'expires_at': now.add(ttl).toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
-      // Insert Cart Summary/Metadata
-      await txn.insert(
-        'cached_cart',
+  /// Get cached weather by coordinates
+  Future<Map<String, dynamic>?> getCachedWeatherByCoords(double latitude, double longitude) async {
+    final db = await database;
+    
+    // Round coordinates to 2 decimal places
+    final lat = (latitude * 100).round() / 100;
+    final lon = (longitude * 100).round() / 100;
+    
+    final results = await db.query(
+      'cached_weather_v2',
+      where: 'latitude = ? AND longitude = ? AND expires_at > ?',
+      whereArgs: [lat, lon, DateTime.now().toIso8601String()],
+    );
+    
+    if (results.isEmpty) return null;
+    
+    final result = results.first;
+    return {
+      ...result,
+      'data': jsonDecode(result['data'] as String),
+    };
+  }
+
+  /// Check if weather cache is valid
+  Future<bool> isWeatherCacheValid(double latitude, double longitude) async {
+    final db = await database;
+    
+    final lat = (latitude * 100).round() / 100;
+    final lon = (longitude * 100).round() / 100;
+    
+    final results = await db.query(
+      'cached_weather_v2',
+      columns: ['expires_at'],
+      where: 'latitude = ? AND longitude = ?',
+      whereArgs: [lat, lon],
+    );
+    
+    if (results.isEmpty) return false;
+    
+    final expiresAt = DateTime.parse(results.first['expires_at'] as String);
+    return expiresAt.isAfter(DateTime.now());
+  }
+
+  /// Clear expired weather cache
+  Future<int> clearExpiredWeatherCacheV2() async {
+    final db = await database;
+    return await db.delete(
+      'cached_weather_v2',
+      where: 'expires_at < ?',
+      whereArgs: [DateTime.now().toIso8601String()],
+    );
+  }
+
+  // ================== EDUCATIONAL CONTENT CACHE OPERATIONS ==================
+
+  /// Cache educational content
+  Future<void> cacheEducationalContent(List<Map<String, dynamic>> contents, {int priority = 1}) async {
+    final db = await database;
+    final batch = db.batch();
+    final now = DateTime.now().toIso8601String();
+    
+    for (final content in contents) {
+      batch.insert(
+        'cached_educational_content',
         {
-          'id': cartData['id'], // Cart ID
-          'user_id': cartData['user_id'] ?? 1,
-          'subtotal': cartData['subtotal'],
-          'delivery_charge': cartData['delivery_charge'],
-          'discount': cartData['discount'],
-          'total': cartData['total'],
-          'updated_at': DateTime.now().toIso8601String(),
+          'id': content['id'],
+          'title': content['title'],
+          'content': content['content'],
+          'summary': content['summary'],
+          'category': content['category'],
+          'subcategory': content['subcategory'],
+          'difficulty_level': content['difficulty_level'],
+          'author_id': content['author_id'],
+          'author_name': content['author_first_name'] != null 
+              ? '${content['author_first_name']} ${content['author_last_name'] ?? ''}'.trim()
+              : content['author_username'],
+          'image_url': content['image_url'],
+          'video_url': content['video_url'],
+          'tags': content['tags'] is List ? jsonEncode(content['tags']) : content['tags'],
+          'view_count': content['view_count'] ?? 0,
+          'data': jsonEncode(content),
+          'cached_at': now,
+          'priority': priority,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+    }
+    
+    await batch.commit(noResult: true);
+    await _updateCacheMetadata('educational_content', contents.length);
+  }
 
-      // Insert Items
-      if (cartData['items'] != null) {
-        for (final item in cartData['items']) {
-          // Convert item to map if it's not
-          final itemMap = item is Map<String, dynamic> ? item : (item as dynamic).toMap(); 
-          // Note: CartItem.toMap might be needed if inputs are objects
-          
-          await txn.insert(
-            'cached_cart_items',
-            {
-               'id': itemMap['id'],
-               'cart_id': cartData['id'],
-               'product_id': itemMap['product_id'],
-               'quantity': itemMap['quantity'],
-               'unit_price': itemMap['unit_price'],
-               'total_price': itemMap['total_price'],
-               'product_name': itemMap['product_name'],
-               'product_image': itemMap['product_image'],
-               'created_at': itemMap['created_at'] ?? DateTime.now().toIso8601String(),
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
+  /// Get cached educational content
+  Future<List<Map<String, dynamic>>> getCachedEducationalContent({
+    String? category,
+    String? searchQuery,
+    int? limit,
+  }) async {
+    final db = await database;
+    String? where;
+    List<dynamic>? whereArgs;
+    
+    if (category != null || searchQuery != null) {
+      final conditions = <String>[];
+      whereArgs = [];
+      
+      if (category != null) {
+        conditions.add('category = ?');
+        whereArgs.add(category);
       }
-    });
+      
+      if (searchQuery != null) {
+        conditions.add('(title LIKE ? OR content LIKE ? OR summary LIKE ?)');
+        whereArgs.add('%$searchQuery%');
+        whereArgs.add('%$searchQuery%');
+        whereArgs.add('%$searchQuery%');
+      }
+      
+      where = conditions.join(' AND ');
+    }
+    
+    final results = await db.query(
+      'cached_educational_content',
+      where: where,
+      whereArgs: whereArgs,
+      orderBy: 'priority DESC, cached_at DESC',
+      limit: limit,
+    );
+    
+    return results.map((r) {
+      final data = jsonDecode(r['data'] as String) as Map<String, dynamic>;
+      return data;
+    }).toList();
   }
 
-  /// Get cached cart
-  Future<Map<String, dynamic>?> getCachedCart() async {
+  /// Clear educational content cache
+  Future<int> clearEducationalContentCache() async {
+    final db = await database;
+    return await db.delete('cached_educational_content');
+  }
+
+  // ================== EXPERTS CACHE OPERATIONS ==================
+
+  /// Cache experts
+  Future<void> cacheExperts(List<Map<String, dynamic>> experts) async {
+    final db = await database;
+    final batch = db.batch();
+    final now = DateTime.now().toIso8601String();
+    
+    for (final expert in experts) {
+      batch.insert(
+        'cached_experts',
+        {
+          'id': expert['id'],
+          'name': expert['name'],
+          'specialization': expert['specialization'],
+          'qualification': expert['qualification'],
+          'experience_years': expert['experience_years'],
+          'rating': expert['rating'],
+          'image_url': expert['image_url'],
+          'is_online': (expert['is_online'] == true) ? 1 : 0,
+          'data': jsonEncode(expert),
+          'cached_at': now,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    
+    await batch.commit(noResult: true);
+    await _updateCacheMetadata('experts', experts.length);
+  }
+
+  /// Get cached experts
+  Future<List<Map<String, dynamic>>> getCachedExperts({String? specialization}) async {
     final db = await database;
     
-    final carts = await db.query('cached_cart');
-    if (carts.isEmpty) return null;
-
-    final cart = Map<String, dynamic>.from(carts.first);
+    final results = await db.query(
+      'cached_experts',
+      where: specialization != null ? 'specialization = ?' : null,
+      whereArgs: specialization != null ? [specialization] : null,
+      orderBy: 'rating DESC',
+    );
     
-    final items = await db.query('cached_cart_items'); // Get all items (assuming 1 cart)
-    
-    cart['items'] = items;
-    return cart;
+    return results.map((r) {
+      return jsonDecode(r['data'] as String) as Map<String, dynamic>;
+    }).toList();
   }
 
-  /// Clear cached cart
-  Future<void> clearCachedCart() async {
+  /// Clear experts cache
+  Future<int> clearExpertsCache() async {
     final db = await database;
-    await db.delete('cached_cart');
-    await db.delete('cached_cart_items');
+    return await db.delete('cached_experts');
   }
->>>>>>> 34a8a7ab (Implement Offline Order Flow and Fix Android Build Config)
+
+  // ================== USER PROFILE CACHE OPERATIONS ==================
+
+  /// Cache user profile with 7-day TTL
+  Future<int> cacheUserProfile(Map<String, dynamic> user, {Duration ttl = const Duration(days: 7)}) async {
+    final db = await database;
+    final now = DateTime.now();
+    
+    return await db.insert(
+      'cached_user_profile',
+      {
+        'user_id': user['id'],
+        'username': user['username'],
+        'email': user['email'],
+        'full_name': user['full_name'],
+        'phone_number': user['phone_number'],
+        'address': user['address'],
+        'profile_image_url': user['profile_image_url'],
+        'role': user['role'],
+        'farm_size': user['farm_size'],
+        'soil_type': user['soil_type'],
+        'irrigation_type': user['irrigation_type'],
+        'primary_crops': user['primary_crops'] is List 
+            ? jsonEncode(user['primary_crops']) 
+            : user['primary_crops'],
+        'data': jsonEncode(user),
+        'cached_at': now.toIso8601String(),
+        'expires_at': now.add(ttl).toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get cached user profile
+  Future<Map<String, dynamic>?> getCachedUserProfile(String userId) async {
+    final db = await database;
+    
+    final results = await db.query(
+      'cached_user_profile',
+      where: 'user_id = ? AND expires_at > ?',
+      whereArgs: [userId, DateTime.now().toIso8601String()],
+    );
+    
+    if (results.isEmpty) return null;
+    
+    return jsonDecode(results.first['data'] as String) as Map<String, dynamic>;
+  }
+
+  /// Get any cached user profile (for offline mode)
+  Future<Map<String, dynamic>?> getAnyCachedUserProfile() async {
+    final db = await database;
+    
+    final results = await db.query(
+      'cached_user_profile',
+      orderBy: 'cached_at DESC',
+      limit: 1,
+    );
+    
+    if (results.isEmpty) return null;
+    
+    return jsonDecode(results.first['data'] as String) as Map<String, dynamic>;
+  }
+
+  /// Clear user profile cache
+  Future<int> clearUserProfileCache() async {
+    final db = await database;
+    return await db.delete('cached_user_profile');
+  }
+
+  // ================== SYNC QUEUE OPERATIONS ==================
+
+  /// Add operation to sync queue
+  Future<int> enqueueSyncOperation({
+    required String tableName,
+    required String operation,
+    String? entityId,
+    required Map<String, dynamic> data,
+    int priority = 1,
+    int maxRetries = 3,
+  }) async {
+    final db = await database;
+    return await db.insert(
+      'sync_queue',
+      {
+        'table_name': tableName,
+        'operation': operation,
+        'entity_id': entityId,
+        'data': jsonEncode(data),
+        'created_at': DateTime.now().toIso8601String(),
+        'status': 'pending',
+        'retry_count': 0,
+        'max_retries': maxRetries,
+        'priority': priority,
+      },
+    );
+  }
+
+  /// Get pending sync operations
+  Future<List<Map<String, dynamic>>> getPendingSyncOperations({int? limit}) async {
+    final db = await database;
+    
+    final results = await db.query(
+      'sync_queue',
+      where: 'status = ? AND retry_count < max_retries',
+      whereArgs: ['pending'],
+      orderBy: 'priority DESC, created_at ASC',
+      limit: limit,
+    );
+    
+    return results.map((r) {
+      return {
+        ...r,
+        'data': jsonDecode(r['data'] as String),
+      };
+    }).toList();
+  }
+
+  /// Get pending sync operations count
+  Future<int> getPendingSyncCount() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT COUNT(*) as count FROM sync_queue WHERE status = 'pending' AND retry_count < max_retries",
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  /// Update sync operation status
+  Future<int> updateSyncOperationStatus(
+    int id, {
+    required String status,
+    String? errorMessage,
+  }) async {
+    final db = await database;
+    
+    final current = await db.query('sync_queue', where: 'id = ?', whereArgs: [id]);
+    if (current.isEmpty) return 0;
+    
+    final retryCount = (current.first['retry_count'] as int?) ?? 0;
+    
+    return await db.update(
+      'sync_queue',
+      {
+        'status': status,
+        'retry_count': status == 'failed' ? retryCount + 1 : retryCount,
+        'last_attempt': DateTime.now().toIso8601String(),
+        'error_message': errorMessage,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Mark sync operation as completed
+  Future<int> completeSyncOperation(int id) async {
+    return await updateSyncOperationStatus(id, status: 'completed');
+  }
+
+  /// Mark sync operation as failed
+  Future<int> failSyncOperation(int id, String errorMessage) async {
+    return await updateSyncOperationStatus(id, status: 'failed', errorMessage: errorMessage);
+  }
+
+  /// Reset failed sync operations for retry
+  Future<int> resetFailedSyncOperations() async {
+    final db = await database;
+    return await db.update(
+      'sync_queue',
+      {
+        'status': 'pending',
+      },
+      where: "status = 'failed' AND retry_count < max_retries",
+    );
+  }
+
+  /// Clear completed sync operations
+  Future<int> clearCompletedSyncOperations() async {
+    final db = await database;
+    return await db.delete(
+      'sync_queue',
+      where: "status = 'completed'",
+    );
+  }
+
+  /// Clear all sync operations
+  Future<int> clearAllSyncOperations() async {
+    final db = await database;
+    return await db.delete('sync_queue');
+  }
+
+  // ================== OFFLINE DIAGNOSTICS OPERATIONS ==================
+
+  /// Save offline diagnostic
+  Future<int> saveOfflineDiagnostic({
+    required String imagePath,
+    required String cropType,
+    String? issueDescription,
+    String? result,
+    double? confidenceScore,
+  }) async {
+    final db = await database;
+    return await db.insert(
+      'offline_diagnostics',
+      {
+        'image_path': imagePath,
+        'crop_type': cropType,
+        'issue_description': issueDescription,
+        'result': result,
+        'confidence_score': confidenceScore,
+        'created_at': DateTime.now().toIso8601String(),
+        'synced': 0,
+      },
+    );
+  }
+
+  /// Get unsynced offline diagnostics
+  Future<List<Map<String, dynamic>>> getUnsyncedOfflineDiagnostics() async {
+    final db = await database;
+    return await db.query(
+      'offline_diagnostics',
+      where: 'synced = 0',
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  /// Mark offline diagnostic as synced
+  Future<int> markOfflineDiagnosticSynced(int id, String backendId) async {
+    final db = await database;
+    return await db.update(
+      'offline_diagnostics',
+      {
+        'synced': 1,
+        'backend_id': backendId,
+        'last_sync_attempt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Update offline diagnostic sync attempt
+  Future<int> updateOfflineDiagnosticSyncAttempt(int id, String? errorMessage) async {
+    final db = await database;
+    
+    final current = await db.query('offline_diagnostics', where: 'id = ?', whereArgs: [id]);
+    if (current.isEmpty) return 0;
+    
+    final attempts = (current.first['sync_attempts'] as int?) ?? 0;
+    
+    return await db.update(
+      'offline_diagnostics',
+      {
+        'sync_attempts': attempts + 1,
+        'last_sync_attempt': DateTime.now().toIso8601String(),
+        'error_message': errorMessage,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Get all offline diagnostics
+  Future<List<Map<String, dynamic>>> getAllOfflineDiagnostics() async {
+    final db = await database;
+    return await db.query(
+      'offline_diagnostics',
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  /// Delete offline diagnostic
+  Future<int> deleteOfflineDiagnostic(int id) async {
+    final db = await database;
+    return await db.delete(
+      'offline_diagnostics',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // ================== CACHE METADATA OPERATIONS ==================
+
+  /// Update cache metadata
+  Future<void> _updateCacheMetadata(String cacheType, int recordCount) async {
+    final db = await database;
+    await db.insert(
+      'cache_metadata',
+      {
+        'cache_type': cacheType,
+        'last_sync': DateTime.now().toIso8601String(),
+        'record_count': recordCount,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get cache metadata
+  Future<Map<String, dynamic>?> getCacheMetadata(String cacheType) async {
+    final db = await database;
+    final results = await db.query(
+      'cache_metadata',
+      where: 'cache_type = ?',
+      whereArgs: [cacheType],
+    );
+    return results.isNotEmpty ? results.first : null;
+  }
+
+  /// Get all cache metadata
+  Future<List<Map<String, dynamic>>> getAllCacheMetadata() async {
+    final db = await database;
+    return await db.query('cache_metadata');
+  }
+
+  /// Update cache size
+  Future<void> updateCacheSizeMetadata(String cacheType, int sizeBytes) async {
+    final db = await database;
+    await db.update(
+      'cache_metadata',
+      {'size_bytes': sizeBytes},
+      where: 'cache_type = ?',
+      whereArgs: [cacheType],
+    );
+  }
+
+  // ================== COMPREHENSIVE CACHE MANAGEMENT ==================
+
+  /// Get total cache size in bytes
+  Future<int> getTotalCacheSizeBytes() async {
+    final dbSize = await getDatabaseSize();
+    return dbSize;
+  }
+
+  /// Clear all expired caches
+  Future<Map<String, int>> clearAllExpiredCaches() async {
+    final results = <String, int>{};
+    
+    results['weather'] = await clearExpiredWeatherCacheV2();
+    results['weather_legacy'] = await clearExpiredWeatherCache();
+    
+    // Clear user profiles that have expired
+    final db = await database;
+    results['user_profiles'] = await db.delete(
+      'cached_user_profile',
+      where: 'expires_at < ?',
+      whereArgs: [DateTime.now().toIso8601String()],
+    );
+    
+    return results;
+  }
+
+  /// Clear all caches (comprehensive)
+  Future<void> clearAllCaches() async {
+    final db = await database;
+    
+    // Clear all cache tables
+    await db.delete('cached_weather_v2');
+    await db.delete('cached_weather');
+    await db.delete('cached_educational_content');
+    await db.delete('cached_experts');
+    await db.delete('cached_user_profile');
+    await db.delete('cached_products');
+    await db.delete('cached_schemes');
+    await db.delete('cached_diagnostics');
+    await db.delete('cache_metadata');
+    
+    // Note: We don't clear sync_queue as those are pending operations
+  }
+
+  /// Get comprehensive database statistics
+  Future<Map<String, dynamic>> getComprehensiveStats() async {
+    final db = await database;
+    final stats = <String, dynamic>{};
+    
+    // Get counts for all major tables
+    final tables = [
+      'cached_weather_v2',
+      'cached_educational_content',
+      'cached_experts',
+      'cached_user_profile',
+      'cached_products',
+      'sync_queue',
+      'offline_diagnostics',
+      'pending_diagnostics',
+      'activity_records',
+    ];
+    
+    for (final table in tables) {
+      try {
+        final result = await db.rawQuery('SELECT COUNT(*) as count FROM $table');
+        stats[table] = Sqflite.firstIntValue(result) ?? 0;
+      } catch (e) {
+        stats[table] = 0;
+      }
+    }
+    
+    // Get pending sync count
+    stats['pending_sync_count'] = await getPendingSyncCount();
+    
+    // Get database size
+    stats['database_size_bytes'] = await getDatabaseSize();
+    
+    // Get cache metadata
+    stats['cache_metadata'] = await getAllCacheMetadata();
+    
+    return stats;
+  }
 }
 

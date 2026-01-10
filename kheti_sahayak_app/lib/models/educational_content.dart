@@ -17,6 +17,11 @@ class EducationalContent {
   final int viewCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  // User-specific properties (client-side state)
+  final bool? isBookmarked;
+  final int? userRating;
+  final double? averageRating;
+  final int? totalRatings;
 
   EducationalContent({
     required this.id,
@@ -37,6 +42,10 @@ class EducationalContent {
     required this.viewCount,
     required this.createdAt,
     required this.updatedAt,
+    this.isBookmarked,
+    this.userRating,
+    this.averageRating,
+    this.totalRatings,
   });
 
   factory EducationalContent.fromJson(Map<String, dynamic> json) {
@@ -59,6 +68,10 @@ class EducationalContent {
       viewCount: json['view_count'] ?? 0,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
+      isBookmarked: json['is_bookmarked'],
+      userRating: json['user_rating'],
+      averageRating: json['average_rating']?.toDouble(),
+      totalRatings: json['total_ratings'],
     );
   }
 
@@ -82,7 +95,44 @@ class EducationalContent {
       'view_count': viewCount,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'is_bookmarked': isBookmarked,
+      'user_rating': userRating,
+      'average_rating': averageRating,
+      'total_ratings': totalRatings,
     };
+  }
+
+  /// Create a copy with updated bookmark/rating state
+  EducationalContent copyWith({
+    bool? isBookmarked,
+    int? userRating,
+    double? averageRating,
+    int? totalRatings,
+  }) {
+    return EducationalContent(
+      id: id,
+      title: title,
+      content: content,
+      summary: summary,
+      category: category,
+      subcategory: subcategory,
+      difficultyLevel: difficultyLevel,
+      authorId: authorId,
+      authorFirstName: authorFirstName,
+      authorLastName: authorLastName,
+      authorUsername: authorUsername,
+      imageUrl: imageUrl,
+      videoUrl: videoUrl,
+      tags: tags,
+      isPublished: isPublished,
+      viewCount: viewCount,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+      userRating: userRating ?? this.userRating,
+      averageRating: averageRating ?? this.averageRating,
+      totalRatings: totalRatings ?? this.totalRatings,
+    );
   }
 
   // Helper methods

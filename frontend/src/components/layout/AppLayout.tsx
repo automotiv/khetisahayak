@@ -30,7 +30,11 @@ import {
   Book,
   AccountBalance,
   Lightbulb,
-  Share
+  Share,
+  Store,
+  ShoppingBag,
+  Assessment,
+  Inventory2,
 } from '@mui/icons-material';
 import NotificationCenter from '../common/NotificationCenter';
 
@@ -187,6 +191,38 @@ const AppLayout: React.FC<AppLayoutProps> = ({
               <ListItemButton onClick={() => handleSideMenuItemClick(12)}>
                 <ListItemIcon><AccountCircle /></ListItemIcon>
                 <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
+
+            <Divider sx={{ my: 1 }} />
+
+            <ListItem>
+              <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Seller Portal
+              </Typography>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(13)}>
+                <ListItemIcon><Store sx={{ color: '#2E7D32' }} /></ListItemIcon>
+                <ListItemText primary="Seller Dashboard" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(14)}>
+                <ListItemIcon><ShoppingBag sx={{ color: '#FF9800' }} /></ListItemIcon>
+                <ListItemText primary="Orders" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(15)}>
+                <ListItemIcon><Assessment sx={{ color: '#2196F3' }} /></ListItemIcon>
+                <ListItemText primary="Analytics" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleSideMenuItemClick(16)}>
+                <ListItemIcon><Inventory2 sx={{ color: '#9C27B0' }} /></ListItemIcon>
+                <ListItemText primary="Inventory" />
               </ListItemButton>
             </ListItem>
 

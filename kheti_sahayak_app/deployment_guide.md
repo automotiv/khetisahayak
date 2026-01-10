@@ -1,67 +1,155 @@
-# Android Deployment Guide
+# Kheti Sahayak Deployment Guide
 
-To enable automated builds on GitHub, you need to generate a digital signature (Keystore), encode it, and save it as Secrets in your GitHub repository.
+This guide covers both manual build/deployment processes and the automated GitHub Actions workflow.
 
-## 1. Generate Upload Keystore
-Run the following command in your terminal (if you have Java installed) or use Android Studio.
+---
 
-**Terminal Command:**
+## 🏗️ Manual Build & Deployment
+
+Since you might need to build the app manually in your local environment, follow these steps.
+
+### Step 1: Clean and Prepare Build Environment
+
+Open your terminal and navigate to the project directory:
+
+```bash
+cd /Users/ponali.prakash/Documents/practice/khetisahayak/kheti_sahayak_app
+```
+
+Run the following commands to ensure a clean slate:
+
+```bash
+# Clean previous builds
+flutter clean
+
+# Get dependencies
+flutter pub get
+
+# Verify Flutter environment (optional but recommended)
+flutter doctor
+```
+
+### Step 2: Build Release App Bundle (AAB) - For Play Store
+
+The Android App Bundle (AAB) is the required format for Google Play Store verification and uploading.
+
+```bash
+# Build the App Bundle with release configuration
+flutter build appbundle --release
+```
+
+*   **Significance:** This compiles Dart to native code, applies ProGuard minification, signs it with your upload keystore, and creates an optimized AAB.
+*   **Output Location:** `build/app/outputs/bundle/release/app-release.aab`
+*   **Expected Size:** ~20-40 MB (with minification)
+
+### Step 3: Build Release APK - For Testing
+
+If you want to test the release build on a device before uploading:
+
+```bash
+# Build APK for testing on your device
+flutter build apk --release
+```
+
+*   **Output Location:** `build/app/outputs/flutter-apk/app-release.apk`
+
+### Step 4: Install and Test on Physical Device
+
+Connect your Android device via USB (ensure USB Debugging is ON).
+
+```bash
+# Install the release build directly
+flutter install --release
+```
+
+OR manually via ADB:
+
+```bash
+adb install build/app/outputs/flutter-apk/app-release.apk
+```
+
+---
+
+## 🎮 Google Play Console Setup
+
+Once your build is ready, follow these steps to set up the store listing.
+
+### 1. Create App
+1.  Go to [Play Console](https://play.google.com/console).
+2.  Click **Create app**.
+3.  **Name:** `Kheti Sahayak`
+4.  **Language:** English (United States) or Hindi.
+5.  **Type:** App (Free).
+6.  Accept policies.
+
+### 2. Store Listing
+*   **Short Description:** AI-powered farming assistant for crop health, weather, and market insights.
+*   **Full Description:**
+    > Kheti Sahayak (खेती सहायक) - Your Intelligent Farming Companion
+    >
+    > Empower your farming with cutting-edge AI technology and comprehensive agricultural resources. Kheti Sahayak is designed specifically for Indian farmers to make informed decisions and improve crop yields.
+    >
+    > 🌱 **KEY FEATURES:**
+    > *   **AI-Powered Crop Disease Detection:** Instant diagnosis, treatment recommendations.
+    > *   **Real-Time Weather:** Hyperlocal forecasts, rainfall alerts.
+    > *   **Digital Marketplace:** Buy seeds/fertilizers, sell produce.
+    > *   **Expert Consultation:** Ask questions, get advice.
+    > *   **Smart Farm Management:** Expense tracking, crop rotation.
+    > *   **Offline Mode:** Access data without internet.
+    >
+    > 🌍 **MULTI-LANGUAGE:** English, Hindi, Marathi, Tamil, Kannada, Telugu, Gujarati.
+    >
+    > \#SmartFarming #Agriculture #CropHealth #IndianFarmers #AIFarming
+
+*   **Graphics:**
+    *   **Icon:** 512x512 PNG
+    *   **Feature Graphic:** 1024x500 PNG
+    *   **Screenshots:** 2-8 images (1080x1920 recommended)
+
+### 3. Content Rating & Privacy
+*   **Category:** Productivity or Education.
+*   **Questionnaire:** Answer specific questions (Violence: NO, etc.).
+*   **Privacy Policy:** Add your hosted privacy policy URL.
+*   **Data Safety:**
+    *   **Location:** Yes (Weather/Features).
+    *   **Personal Info:** Yes (Name/Email).
+    *   **Photos:** Yes (Disease Detection).
+    *   **Device ID:** Yes (Analytics).
+
+### 4. Upload & Release regarding
+1.  **Internal Testing:** Create a new release, upload `app-release.aab`, add testers.
+2.  **Production:** detailed notes in "Release Notes" section (Draft provided in user request).
+
+---
+
+## 🤖 Automated Deployment (GitHub Actions)
+
+If you prefer to let GitHub build your app automatically when you push to the `main` branch.
+
+### 1. Generate Upload Keystore
+Run this locally to generate the signing key:
 ```bash
 keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 ```
-*   Set a password when prompted (e.g., `MyStrongPassword123`).
-*   Remember the **Alias** (`upload`) and **Password**.
-*   This creates a file named `upload-keystore.jks`.
+*   Keep the **password** and **alias** safe.
 
-## 2. Encode Keystore to Base64
-GitHub Secrets cannot store files directly, so we convert the file to a text string.
+### 2. Configure GitHub Secrets
+Go to **Settings** -> **Secrets and variables** -> **Actions** in your repo and add:
 
-**Mac/Linux:**
-```bash
-base64 -i upload-keystore.jks -o keystore_base64.txt
-```
-Copy the contents of `keystore_base64.txt`.
+| Name | Description |
+|------|-------------|
+| `ANDROID_KEYSTORE_BASE64` | Base64 encoded string of your `.jks` file (`base64 -i upload-keystore.jks`). |
+| `KEY_STORE_PASSWORD` | Password from Step 1. |
+| `KEY_PASSWORD` | Password from Step 1. |
+| `KEY_ALIAS` | `upload`. |
 
-## 3. Configure GitHub Secrets
-Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**.
+### 3. Trigger Build
+Push to `main`. The "Android Release Build" workflow will run. Download the artifact from the **Actions** tab.
 
-Add the following 4 secrets:
+---
 
-| Name | Value |
-|------|-------|
-| `ANDROID_KEYSTORE_BASE64` | The long text string you copied in Step 2. |
-| `KEY_STORE_PASSWORD` | The password you set in Step 1. |
-| `KEY_PASSWORD` | The password you set in Step 1 (usually same as store password). |
-| `KEY_ALIAS` | `upload` (or whatever alias you used). |
+## 🎯 Post-Submission Monitoring
 
-## 4. Trigger Build
-1.  Push your code to `main`.
-2.  Go to the **Actions** tab on your GitHub repository.
-3.  You will see "Android Release Build" running.
-4.  Once completed, click on the run and download the `app-release-bundle` artifact.
-5.  Upload this `.aab` file to the [Google Play Console](https://play.google.com/console).
-
-## 5. Automated Publishing Setup (Opt-in)
-To have GitHub automatically upload the `.aab` to the Play Store Internal Track:
-
-### A. Create Service Account
-1.  Go to **Google Cloud Console** > **IAM & Admin** > **Service Accounts**.
-2.  Click **Create Service Account**.
-3.  Name it (e.g., `github-actions-deploy`).
-4.  Grant Role: **Service Account User**.
-5.  Click **Done**.
-6.  Click on the newly created email > **Keys** > **Add Key** > **Create new key** > **JSON**.
-7.  Save the `.json` file to your computer.
-
-### B. Grant Play Console Access
-1.  Go to **Google Play Console** > **Users and permissions** > **Invite new users**.
-2.  Enter the service account email (from step A).
-3.  Grant permissions: **Admin (all permissions)** or specifically **Releases > Release to production, exclude devices, and use Play App Signing**.
-4.  Click **Invite User**.
-
-### C. Add Secret to GitHub
-1.  Open the `.json` key file you downloaded in a text editor.
-2.  Copy the entire content.
-3.  Go to GitHub Secrets.
-4.  Create new secret: `PLAY_SERVICE_ACCOUNT_JSON` with the content.
-
+*   **Review Time:** 1-3 days (up to 7 days).
+*   **Common Rejections:** Incomplete privacy policy, unjustified permissions.
+*   **After Live:** Verify link, monitor Android Vitals for crashes.

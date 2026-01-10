@@ -564,7 +564,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         color: Colors.grey[600],
                       ),
                 ),
-                _buildPaymentStatusChip(_order!.paymentStatus),
+                _buildPaymentStatusChip(_order!.paymentStatus ?? 'pending'),
               ],
             ),
           ],

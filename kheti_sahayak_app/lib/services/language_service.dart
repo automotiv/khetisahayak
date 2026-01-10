@@ -224,6 +224,11 @@ class AppLocalizations {
   String get marketPrices => translate('market_prices');
   String get pestDiseaseInfo => translate('pest_disease_info');
   String get quickAccess => translate('quick_access');
+  
+  // Scheme comparison strings
+  String get compare => translate('compare');
+  String get clear => translate('clear');
+  String get apply => translate('apply');
 }
 
 class _AppLocalizationsDelegate
@@ -350,6 +355,11 @@ const Map<String, String> _englishStrings = {
   'market_prices': 'Market Prices',
   'pest_disease_info': 'Pest & Disease Info',
   'quick_access': 'Quick Access',
+  
+  // Scheme comparison
+  'compare': 'Compare',
+  'clear': 'Clear',
+  'apply': 'Apply',
 };
 
 // Hindi strings
@@ -458,6 +468,11 @@ const Map<String, String> _hindiStrings = {
   'market_prices': 'बाजार भाव',
   'pest_disease_info': 'कीट और रोग जानकारी',
   'quick_access': 'त्वरित पहुंच',
+  
+  // Scheme comparison
+  'compare': 'तुलना करें',
+  'clear': 'साफ़ करें',
+  'apply': 'लागू करें',
 };
 
 // Marathi strings
@@ -566,6 +581,11 @@ const Map<String, String> _marathiStrings = {
   'market_prices': 'बाजार भाव',
   'pest_disease_info': 'कीड आणि रोग माहिती',
   'quick_access': 'जलद प्रवेश',
+  
+  // Scheme comparison
+  'compare': 'तुलना करा',
+  'clear': 'साफ करा',
+  'apply': 'लागू करा',
 };
 
 // Tamil strings
@@ -674,6 +694,11 @@ const Map<String, String> _tamilStrings = {
   'market_prices': 'சந்தை விலைகள்',
   'pest_disease_info': 'பூச்சி & நோய் தகவல்',
   'quick_access': 'விரைவு அணுகல்',
+  
+  // Scheme comparison
+  'compare': 'ஒப்பிடு',
+  'clear': 'அழி',
+  'apply': 'பயன்படுத்து',
 };
 
 // Kannada strings
@@ -782,6 +807,11 @@ const Map<String, String> _kannadaStrings = {
   'market_prices': 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು',
   'pest_disease_info': 'ಕೀಟ ಮತ್ತು ರೋಗ ಮಾಹಿತಿ',
   'quick_access': 'ತ್ವರಿತ ಪ್ರವೇಶ',
+  
+  // Scheme comparison
+  'compare': 'ಹೋಲಿಸಿ',
+  'clear': 'ತೆರವು',
+  'apply': 'ಅನ್ವಯಿಸು',
 };
 
 // Telugu strings
@@ -890,6 +920,11 @@ const Map<String, String> _teluguStrings = {
   'market_prices': 'మార్కెట్ ధరలు',
   'pest_disease_info': 'తెగులు & వ్యాధి సమాచారం',
   'quick_access': 'త్వరిత ప్రాప్యత',
+  
+  // Scheme comparison
+  'compare': 'పోల్చండి',
+  'clear': 'క్లియర్',
+  'apply': 'వర్తించు',
 };
 
 // Gujarati strings
@@ -998,4 +1033,9 @@ const Map<String, String> _gujaratiStrings = {
   'market_prices': 'બજાર ભાવ',
   'pest_disease_info': 'જીવાત અને રોગ માહિતી',
   'quick_access': 'ઝડપી accessક્સેસ',
+  
+  // Scheme comparison
+  'compare': 'સરખામણી',
+  'clear': 'સાફ કરો',
+  'apply': 'લાગુ કરો',
 };

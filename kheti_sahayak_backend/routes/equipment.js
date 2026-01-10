@@ -7,6 +7,19 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { 
+  equipmentListingValidation, 
+  equipmentBookingValidation, 
+  validatePagination, 
+  validateIdParam,
+  validateUUID,
+  validateEnum,
+  validateRating,
+  sanitizeString,
+  sanitizeText,
+  handleValidationErrors 
+} = require('../middleware/validationMiddleware');
+const { body, query } = require('express-validator');
 const {
   getCategories,
   createCategory,
@@ -239,7 +252,19 @@ router.post('/categories', protect, authorize('admin'), createCategory);
  *                 pagination:
  *                   type: object
  */
-router.get('/listings', getListings);
+const listingsQueryValidation = [
+  query('category_id').optional().isUUID().withMessage('Invalid category ID'),
+  validateEnum('availability_status', ['available', 'rented', 'maintenance', 'unavailable'], { required: false, location: 'query' }),
+  query('min_daily_rate').optional().isFloat({ min: 0 }).withMessage('Minimum rate must be positive').toFloat(),
+  query('max_daily_rate').optional().isFloat({ min: 0 }).withMessage('Maximum rate must be positive').toFloat(),
+  query('lat').optional().isFloat({ min: -90, max: 90 }).withMessage('Invalid latitude').toFloat(),
+  query('lng').optional().isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude').toFloat(),
+  query('radius_km').optional().isInt({ min: 1, max: 500 }).withMessage('Radius must be 1-500 km').toInt(),
+  ...validatePagination,
+  handleValidationErrors
+];
+
+router.get('/listings', listingsQueryValidation, getListings);
 
 /**
  * @swagger
@@ -260,7 +285,7 @@ router.get('/listings', getListings);
  *       404:
  *         description: Listing not found
  */
-router.get('/listings/:id', getListingById);
+router.get('/listings/:id', validateIdParam, getListingById);
 
 /**
  * @swagger
@@ -331,7 +356,7 @@ router.get('/listings/:id', getListingById);
  *       201:
  *         description: Listing created
  */
-router.post('/listings', protect, createListing);
+router.post('/listings', protect, equipmentListingValidation, createListing);
 
 /**
  * @swagger
@@ -361,7 +386,7 @@ router.post('/listings', protect, createListing);
  *       404:
  *         description: Listing not found
  */
-router.put('/listings/:id', protect, updateListing);
+router.put('/listings/:id', protect, validateIdParam, updateListing);
 
 /**
  * @swagger
@@ -386,7 +411,7 @@ router.put('/listings/:id', protect, updateListing);
  *       404:
  *         description: Listing not found
  */
-router.delete('/listings/:id', protect, deleteListing);
+router.delete('/listings/:id', protect, validateIdParam, deleteListing);
 
 /**
  * @swagger
@@ -455,7 +480,7 @@ router.get('/my-listings', protect, getMyListings);
  *       400:
  *         description: Equipment not available for selected dates
  */
-router.post('/bookings', protect, createBooking);
+router.post('/bookings', protect, equipmentBookingValidation, createBooking);
 
 /**
  * @swagger
@@ -532,7 +557,14 @@ router.get('/bookings/owner', protect, getOwnerBookings);
  *       403:
  *         description: Not authorized
  */
-router.patch('/bookings/:id/status', protect, updateBookingStatus);
+const bookingStatusValidation = [
+  validateUUID('id', 'param'),
+  validateEnum('status', ['confirmed', 'in_progress', 'completed', 'cancelled']),
+  sanitizeString('cancellation_reason', { required: false, maxLength: 500 }),
+  handleValidationErrors
+];
+
+router.patch('/bookings/:id/status', protect, bookingStatusValidation, updateBookingStatus);
 
 /**
  * @swagger
@@ -579,7 +611,17 @@ router.patch('/bookings/:id/status', protect, updateBookingStatus);
  *       400:
  *         description: Can only review completed bookings
  */
-router.post('/reviews', protect, addReview);
+const equipmentReviewValidation = [
+  validateUUID('booking_id', 'body'),
+  validateRating('rating'),
+  sanitizeText('review_text', { required: false, maxLength: 2000 }),
+  body('condition_rating').optional().isInt({ min: 1, max: 5 }).withMessage('Condition rating must be 1-5').toInt(),
+  body('owner_rating').optional().isInt({ min: 1, max: 5 }).withMessage('Owner rating must be 1-5').toInt(),
+  body('value_rating').optional().isInt({ min: 1, max: 5 }).withMessage('Value rating must be 1-5').toInt(),
+  handleValidationErrors
+];
+
+router.post('/reviews', protect, equipmentReviewValidation, addReview);
 
 /**
  * @swagger

@@ -33,6 +33,9 @@ class CartItem {
     this.brand,
   });
 
+  // Computed getter for single product image
+  String? get productImage => (productImages != null && productImages!.isNotEmpty) ? productImages!.first : null;
+
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
       id: json['id'],

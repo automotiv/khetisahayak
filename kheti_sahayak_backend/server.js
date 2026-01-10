@@ -4,9 +4,16 @@ dotenv.config();
 
 const express = require('express');
 const cors = require('cors');
-// const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
-// const swaggerSpecs = require('./swagger');
+const { 
+  securityHeaders, 
+  createCorsConfig, 
+  generalRateLimiter, 
+  authRateLimiter,
+  requestIdMiddleware,
+  securityLogging 
+} = require('./middleware/securityMiddleware');
+const { createSanitizationMiddleware } = require('./utils/sanitizer');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,23 +35,27 @@ const equipmentRoutes = require('./routes/equipment');
 const technologyRoutes = require('./routes/technology');
 const appConfigRoutes = require('./routes/app_config');
 const expertRoutes = require('./routes/experts');
+const consultationRoutes = require('./routes/consultations');
 const communityRoutes = require('./routes/community');
 const schemeRoutes = require('./routes/schemes');
 const logbookRoutes = require('./routes/logbook');
 const externalApiRoutes = require('./routes/external_apis');
 const newsRoutes = require('./routes/news'); // Added news routes
-const marketPriceRoutes = require('./routes/market_prices'); // Added market prices
+const marketPriceRoutes = require('./routes/market_prices');
+const sellerRoutes = require('./routes/sellers');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-// Middleware
-app.use(cors());
+app.use(requestIdMiddleware);
+app.use(securityHeaders);
+app.use(cors(createCorsConfig()));
+app.use(generalRateLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(createSanitizationMiddleware({ sanitizeBody: true, sanitizeQuery: true }));
+app.use(securityLogging);
 
-// HTTP request logger middleware
 app.use((req, res, next) => {
-    // Log an http message for each incoming request
-    logger.http(`${req.method} ${req.url}`);
+    logger.http(`${req.method} ${req.url} [${req.requestId || 'no-id'}]`);
     next();
 });
 
@@ -71,11 +82,13 @@ app.use('/api/equipment', equipmentRoutes);
 app.use('/api/technology', technologyRoutes);
 app.use('/api/app-config', appConfigRoutes);
 app.use('/api/experts', expertRoutes);
+app.use('/api/consultations', consultationRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/logbook', logbookRoutes);
 app.use('/api/news', newsRoutes); // Added news endpoint
-app.use('/api/market-prices', marketPriceRoutes); // Added market prices endpoint
+app.use('/api/market-prices', marketPriceRoutes);
+app.use('/api/sellers', sellerRoutes);
 app.use('/api/external', externalApiRoutes);
 
 app.get('/', (req, res) => {
@@ -98,6 +111,8 @@ app.get('/', (req, res) => {
             payments: '/api/payments',
             equipment: '/api/equipment',
             technology: '/api/technology',
+            sellers: '/api/sellers',
+            consultations: '/api/consultations',
             external: '/api/external (agro-weather, soil-data, market-prices, news, crop-calendar, pest-alerts)'
         }
     });

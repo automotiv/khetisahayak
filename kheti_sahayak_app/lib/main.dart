@@ -5,13 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:kheti_sahayak_app/providers/user_provider.dart';
 import 'package:kheti_sahayak_app/providers/cart_provider.dart';
 import 'package:kheti_sahayak_app/providers/order_provider.dart';
+import 'package:kheti_sahayak_app/providers/offline_provider.dart';
 import 'package:kheti_sahayak_app/routes/routes.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/utils/logger.dart';
 import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 import 'package:kheti_sahayak_app/services/language_service.dart';
 import 'package:kheti_sahayak_app/services/notification_preferences_service.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:kheti_sahayak_app/services/connectivity_service.dart';
 import 'services/task/upload_queue.dart';
 import 'package:kheti_sahayak_app/services/local_notification_service.dart';
 import 'package:kheti_sahayak_app/services/sync_service.dart';
@@ -29,12 +30,16 @@ Future<void> main() async {
   // Initialize local notifications
   await LocalNotificationService().initialize();
 
+  // Initialize connectivity service
+  await ConnectivityService.initialize();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => OfflineProvider()),
         ChangeNotifierProvider.value(value: LanguageService.instance),
         ChangeNotifierProvider(create: (_) => NotificationPreferencesService()),
       ],
@@ -62,12 +67,16 @@ class _MyAppState extends State<MyApp> {
     // Initialize auto-sync for activity records
     SyncService.instance.startAutoSync();
     
+    // Initialize offline provider
+    final offlineProvider = Provider.of<OfflineProvider>(context, listen: false);
+    offlineProvider.initialize();
+    
     // Try processing queued uploads at startup
     UploadQueue.processQueue();
 
-    // Listen for connectivity changes and retry
-    Connectivity().onConnectivityChanged.listen((results) {
-      if (!results.contains(ConnectivityResult.none)) {
+    // Listen for connectivity changes and retry (handled by OfflineProvider now)
+    ConnectivityService.onConnectivityChanged.listen((isOnline) {
+      if (isOnline) {
         UploadQueue.processQueue();
       }
     });

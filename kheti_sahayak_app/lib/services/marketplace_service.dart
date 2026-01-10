@@ -86,7 +86,7 @@ class MarketplaceService {
       // Update existing
       final newQuantity = existingItem.quantity + quantity;
       final newTotal = newQuantity * existingItem.unitPrice;
-      await _dbHelper.updateCartItemQuantity(existingItem.id, newQuantity, newTotal);
+      await _dbHelper.updateMarketplaceCartItemQuantity(existingItem.id, newQuantity, newTotal);
     } else {
       // Add new
       final newItem = CartItem(
@@ -109,7 +109,7 @@ class MarketplaceService {
 
   /// Update cart quantity
   static Future<void> updateCartQuantity(String itemId, int quantity, double unitPrice) async {
-    await _dbHelper.updateCartItemQuantity(itemId, quantity, quantity * unitPrice);
+    await _dbHelper.updateMarketplaceCartItemQuantity(itemId, quantity, quantity * unitPrice);
   }
 
   /// Place order

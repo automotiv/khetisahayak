@@ -12,6 +12,14 @@ const {
   flagReview,
 } = require('../controllers/reviewsController');
 const { protect } = require('../middleware/authMiddleware');
+const { 
+  reviewValidation, 
+  validateUUID, 
+  validatePagination,
+  sanitizeString,
+  handleValidationErrors 
+} = require('../middleware/validationMiddleware');
+const { query } = require('express-validator');
 
 // Configure multer for file uploads (review images)
 const storage = multer.memoryStorage();
@@ -105,7 +113,7 @@ const upload = multer({
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-router.get('/my-reviews', protect, getMyReviews);
+router.get('/my-reviews', protect, [...validatePagination, handleValidationErrors], getMyReviews);
 
 /**
  * @swagger
@@ -147,7 +155,15 @@ router.get('/my-reviews', protect, getMyReviews);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/:productId', getProductReviews);
+const productReviewsQueryValidation = [
+  validateUUID('productId', 'param'),
+  ...validatePagination,
+  query('rating').optional().isInt({ min: 1, max: 5 }).withMessage('Rating filter must be 1-5').toInt(),
+  query('sort').optional().isIn(['recent', 'oldest', 'highest', 'lowest', 'helpful']).withMessage('Invalid sort option'),
+  handleValidationErrors
+];
+
+router.get('/:productId', productReviewsQueryValidation, getProductReviews);
 
 /**
  * @swagger
@@ -195,7 +211,7 @@ router.get('/:productId', getProductReviews);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.post('/:productId', protect, upload.array('images', 5), createReview);
+router.post('/:productId', protect, [validateUUID('productId', 'param'), handleValidationErrors], upload.array('images', 5), reviewValidation, createReview);
 
 /**
  * @swagger
@@ -215,7 +231,9 @@ router.post('/:productId', protect, upload.array('images', 5), createReview);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/review/:reviewId', getReviewById);
+const reviewIdValidation = [validateUUID('reviewId', 'param'), handleValidationErrors];
+
+router.get('/review/:reviewId', reviewIdValidation, getReviewById);
 
 /**
  * @swagger
@@ -260,7 +278,7 @@ router.get('/review/:reviewId', getReviewById);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.put('/review/:reviewId', protect, upload.array('images', 5), updateReview);
+router.put('/review/:reviewId', protect, reviewIdValidation, upload.array('images', 5), updateReview);
 
 /**
  * @swagger
@@ -286,7 +304,7 @@ router.put('/review/:reviewId', protect, upload.array('images', 5), updateReview
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.delete('/review/:reviewId', protect, deleteReview);
+router.delete('/review/:reviewId', protect, reviewIdValidation, deleteReview);
 
 /**
  * @swagger
@@ -310,7 +328,7 @@ router.delete('/review/:reviewId', protect, deleteReview);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.post('/review/:reviewId/helpful', protect, markReviewHelpful);
+router.post('/review/:reviewId/helpful', protect, reviewIdValidation, markReviewHelpful);
 
 /**
  * @swagger
@@ -348,6 +366,12 @@ router.post('/review/:reviewId/helpful', protect, markReviewHelpful);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.post('/review/:reviewId/flag', protect, flagReview);
+const flagReviewValidation = [
+  validateUUID('reviewId', 'param'),
+  sanitizeString('reason', { maxLength: 500 }),
+  handleValidationErrors
+];
+
+router.post('/review/:reviewId/flag', protect, flagReviewValidation, flagReview);
 
 module.exports = router;

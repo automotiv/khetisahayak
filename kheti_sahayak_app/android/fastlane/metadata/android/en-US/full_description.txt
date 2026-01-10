@@ -1,0 +1,43 @@
+Kheti Sahayak (Farm Helper) is a comprehensive agricultural assistance app designed specifically for Indian farmers.
+
+KEY FEATURES:
+
+AI-Powered Crop Disease Detection
+- Take a photo of your crop and get instant disease diagnosis
+- 95%+ accuracy for common Indian crop diseases
+- Treatment recommendations in Hindi, Marathi, and English
+
+Hyperlocal Weather Intelligence
+- Village-level weather forecasts
+- Real-time alerts for weather events
+- Seasonal farming advisories
+
+Expert Network
+- Connect with agricultural experts
+- Get personalized advice for your crops
+- Community Q&A forum
+
+Educational Content
+- Video tutorials in local languages
+- Best farming practices
+- Government scheme information
+
+Digital Marketplace
+- Buy quality seeds, fertilizers, and equipment
+- Sell your produce directly
+- Transparent pricing
+
+Smart Farm Tools
+- Digital farm logbook
+- Crop planning assistant
+- Expense tracking
+
+Kheti Sahayak is free to use and works offline for key features. Join over 100,000 farmers already using the app to improve their yields and income.
+
+Download now and transform your farming!
+
+Supported Languages: English, Hindi, Marathi
+Supported Crops: Rice, Wheat, Cotton, Sugarcane, Vegetables, and more
+
+Contact: support@khetisahayak.com
+Website: www.khetisahayak.com

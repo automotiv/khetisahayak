@@ -11,17 +11,58 @@ class CartService {
       final response = await ApiService.get('api/cart');
 
       if (response['success'] == true && response['data'] != null) {
-        // Cache the cart
-        await _dbHelper.cacheCart(response['data']);
+        // Cache the cart (store as list of items)
+        final cartData = response['data'];
+        if (cartData is Map<String, dynamic> && cartData['items'] != null) {
+          await _dbHelper.clearCachedCart();
+          for (var item in cartData['items']) {
+            await _dbHelper.upsertCartItem(
+              productId: int.tryParse(item['product_id']?.toString() ?? '0') ?? 0,
+              productName: item['product_name'] ?? '',
+              productImage: item['product_image'],
+              quantity: item['quantity'] ?? 1,
+              price: (item['unit_price'] as num?)?.toDouble() ?? 0.0,
+            );
+          }
+        }
         return Cart.fromJson(response['data']);
       } else {
         throw Exception(response['error'] ?? 'Failed to get cart');
       }
     } catch (e) {
-      // Try to load from cache
-      final cachedCart = await _dbHelper.getCachedCart();
-      if (cachedCart != null) {
-        return Cart.fromJson(cachedCart);
+      // Try to load from cache - getCachedCart returns List<Map<String, dynamic>>
+      final cachedCartItems = await _dbHelper.getCachedCart();
+      if (cachedCartItems.isNotEmpty) {
+        // Convert cached cart items back to Cart format
+        final items = cachedCartItems.map((item) {
+          final quantity = item['quantity'] ?? 1;
+          final price = (item['price'] as num?)?.toDouble() ?? 0.0;
+          return CartItem(
+            id: item['id']?.toString() ?? '',
+            productId: item['product_id']?.toString() ?? '',
+            quantity: quantity,
+            unitPrice: price,
+            totalPrice: price * quantity,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.tryParse(item['updated_at'] ?? '') ?? DateTime.now(),
+            productName: item['product_name'] ?? '',
+            productImages: item['product_image'] != null ? [item['product_image']] : null,
+            isAvailable: true,
+          );
+        }).toList();
+        
+        // Calculate summary
+        final subtotal = items.fold(0.0, (sum, item) => sum + item.totalPrice);
+        final totalItems = items.fold(0, (sum, item) => sum + item.quantity);
+        
+        return Cart(
+          items: items,
+          summary: CartSummary(
+            subtotal: subtotal,
+            totalItems: totalItems,
+            itemCount: items.length,
+          ),
+        );
       }
       // If no cache, rethrow error
       throw Exception('Failed to get cart: ${e.toString()}');

@@ -417,56 +417,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
     );
   }
-
-  // Update _buildOrderTimeline to handle offline status
-  Widget _buildOrderTimeline(BuildContext context) {
-    // ... existing initialization ...
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    final allStatuses = [
-      'placed',
-      'confirmed',
-      'processing',
-      'shipped',
-      'out_for_delivery',
-      'delivered'
-    ];
-
-    var currentStatus = _order!.status.toString().toLowerCase();
-    
-    // Map offline status to 'placed' for timeline visualization
-    if (currentStatus == 'pending_sync' || currentStatus == 'pending (offline)') {
-        currentStatus = 'placed';
-    }
-
-    final currentStatusIndex = allStatuses.indexOf(currentStatus);
-    
-    // ... rest of the timeline logic ...
-    // Note: Since I can't easily replicate just the map part, I'm returning the original function body with the status mapping logic added at the start.
-    // For brevity in ReplacementContent, I will just provide the full method rewrite if needed, or careful splicing.
-    
-    // Actually, I'm replacing lines 137 to 620. This includes build method and creates duplicates if I'm not careful.
-    // I should provide the full build method and new _buildOrderTimeline or just be careful.
-    // The ReplacementContent above is targeting lines 137-620 which is the Scaffold part.
-    // I'll assume _buildOrderTimeline is outside this range?
-    // Wait, _buildOrderTimeline is at 607.
-    
-    // Let's refine the replacement to cover build method AND handle the `isOffline` logic properly.
-    // And I'll need to update `_buildOrderTimeline` separately or include it.
-    
-    // The previous `replace_file_content` I proposed covered `build` method.
-    // But `_buildOrderTimeline` (line 607) needs update too.
-    
-    // I will simplify: I'll update `build` first to handle the messages.
-    // Then I'll update `_buildOrderTimeline` in a separate call or chunk.
-    
-    // The provided replacement covers the whole `build` method.
-    // I'll proceed with that.
-
-  }
-  
   Widget _buildSectionHeader(BuildContext context, {required String title}) {
     return Text(
       title,

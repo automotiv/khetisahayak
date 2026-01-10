@@ -4,7 +4,7 @@ import 'package:kheti_sahayak_app/services/app_config_service.dart';
 import 'package:kheti_sahayak_app/screens/common/coming_soon_screen.dart';
 import 'package:kheti_sahayak_app/screens/weather/weather_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/dashboard_screen.dart';
-import 'package:kheti_sahayak_app/screens/marketplace/marketplace_screen_new.dart';
+import 'package:kheti_sahayak_app/screens/marketplace/marketplace_screen_new.dart' as marketplace;
 import 'package:kheti_sahayak_app/screens/main_sections/diagnostics_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/educational_content_screen.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/profile_screen.dart';
@@ -128,7 +128,7 @@ class _HomePageState extends State<HomePage> {
       case 'fields':
         return const FieldListScreen();
       case 'marketplace':
-        return const MarketplaceScreenNew();
+        return const marketplace.MarketplaceScreen();
       case 'education':
         return const EducationalContentScreen();
       case 'expert_connect':

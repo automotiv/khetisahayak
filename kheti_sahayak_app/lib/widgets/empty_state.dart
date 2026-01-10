@@ -250,6 +250,30 @@ class EmptyStateWidget extends StatelessWidget {
           subtitle: 'Unable to fetch weather data. Please check your location settings and try again.',
           iconColor: Colors.cyan,
         );
+
+      case EmptyStateType.noExperts:
+        return _EmptyStateConfig(
+          icon: Icons.person_search_rounded,
+          title: 'No Experts Available',
+          subtitle: 'We couldn\'t find any experts matching your criteria. Try adjusting your filters.',
+          iconColor: Colors.teal,
+        );
+
+      case EmptyStateType.noConsultations:
+        return _EmptyStateConfig(
+          icon: Icons.calendar_today_outlined,
+          title: 'No Consultations Yet',
+          subtitle: 'You haven\'t booked any consultations. Connect with an expert to get personalized farming advice!',
+          iconColor: const Color(0xFF2E7D32),
+        );
+
+      case EmptyStateType.noUpcomingConsultations:
+        return _EmptyStateConfig(
+          icon: Icons.event_available_outlined,
+          title: 'No Upcoming Consultations',
+          subtitle: 'You don\'t have any scheduled consultations. Book one to get expert farming advice!',
+          iconColor: Colors.blue,
+        );
     }
   }
 }
@@ -271,6 +295,10 @@ enum EmptyStateType {
   sellProducts,
   noHistory,
   noWeatherData,
+  // Expert Consultation States
+  noExperts,
+  noConsultations,
+  noUpcomingConsultations,
 }
 
 /// Configuration for empty state
@@ -354,5 +382,25 @@ class EmptyStates {
         type: EmptyStateType.noFavorites,
         buttonText: 'Browse Products',
         onButtonPressed: onBrowse,
+      );
+
+  static Widget noExperts({VoidCallback? onRetry}) => EmptyStateWidget(
+        type: EmptyStateType.noExperts,
+        buttonText: onRetry != null ? 'Clear Filters' : null,
+        onButtonPressed: onRetry,
+      );
+
+  static Widget noConsultations({required VoidCallback onBook}) =>
+      EmptyStateWidget(
+        type: EmptyStateType.noConsultations,
+        buttonText: 'Find an Expert',
+        onButtonPressed: onBook,
+      );
+
+  static Widget noUpcomingConsultations({required VoidCallback onBook}) =>
+      EmptyStateWidget(
+        type: EmptyStateType.noUpcomingConsultations,
+        buttonText: 'Book Consultation',
+        onButtonPressed: onBook,
       );
 }

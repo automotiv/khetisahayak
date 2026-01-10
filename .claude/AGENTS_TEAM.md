@@ -341,8 +341,61 @@ Each agent has a unique color for easy identification:
    @database-specialist Optimize our farmer data queries
    ```
 
+## 🚀 Deployment Team (6 Additional Agents)
+
+In addition to the 27 development agents, we have a specialized **Deployment Team** for managing releases across all platforms:
+
+### Deployment Agents
+
+28. **@devops-release-manager** - DevOps Release Manager
+    - Orchestrates multi-platform releases
+    - Model: Claude Opus 4.5
+    - Use for: Coordinating releases, CI/CD management, rollback procedures
+
+29. **@play-store-deployment-specialist** - Play Store Deployment Specialist
+    - Android app deployment to Google Play Store
+    - Model: Claude Sonnet 4.5
+    - Use for: Play Store uploads, AAB builds, staged rollouts
+
+30. **@app-store-deployment-specialist** - App Store Deployment Specialist
+    - iOS app deployment to Apple App Store
+    - Model: Claude Sonnet 4.5
+    - Use for: App Store uploads, IPA builds, TestFlight management
+
+31. **@render-deployment-specialist** - Render Deployment Specialist
+    - Backend and database deployment to Render
+    - Model: Claude Sonnet 4.5
+    - Use for: API deployment, PostgreSQL management, service configuration
+
+32. **@vercel-deployment-specialist** - Vercel Deployment Specialist
+    - Frontend deployment to Vercel
+    - Model: Claude Sonnet 4.5
+    - Use for: Next.js deployment, serverless functions, edge optimization
+
+33. **@mobile-build-engineer** - Mobile Build Engineer
+    - Mobile app builds and optimization
+    - Model: Claude Sonnet 4.5
+    - Use for: Flutter builds, signing configuration, size optimization
+
+**📖 Detailed Deployment Guide:** See [DEPLOYMENT_TEAM.md](.claude/DEPLOYMENT_TEAM.md)
+
+### Example Deployment Workflow
+
+```
+User: Deploy version 1.2.0 to production
+
+@devops-release-manager orchestrate deployment:
+1. @mobile-build-engineer build Android and iOS
+2. @play-store-deployment-specialist upload to Play Store
+3. @app-store-deployment-specialist upload to App Store
+4. @render-deployment-specialist deploy backend
+5. @vercel-deployment-specialist deploy frontend
+```
+
+---
+
 ## 🎉 Your Team is Ready!
 
-You now have a complete AI development team of 27 specialized agents ready to build Kheti Sahayak. Each agent brings unique expertise and works with appropriate Claude models (Opus 4.5 for leadership, Sonnet 4.5 for most development, Haiku 4.5 for junior roles).
+You now have a complete AI development team of **33 specialized agents** (27 development + 6 deployment) ready to build and deploy Kheti Sahayak. Each agent brings unique expertise and works with appropriate Claude models (Opus 4.5 for leadership, Sonnet 4.5 for most development, Haiku 4.5 for junior roles).
 
 Start building amazing features for Indian farmers! 🌾✨

@@ -1,5 +1,6 @@
 const db = require('../db');
 const asyncHandler = require('express-async-handler');
+const emailService = require('../services/emailService');
 
 // @desc    Create a new order
 // @route   POST /api/orders
@@ -110,9 +111,16 @@ const createOrder = asyncHandler(async (req, res) => {
       [order.id]
     );
 
+    const orderData = completeOrderResult.rows[0];
+    
+    const userResult = await db.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (userResult.rows.length > 0 && userResult.rows[0].email) {
+      emailService.sendOrderConfirmation(orderData, userResult.rows[0]).catch(console.error);
+    }
+    
     res.status(201).json({
       message: 'Order created successfully',
-      order: completeOrderResult.rows[0]
+      order: orderData
     });
 
   } catch (error) {
@@ -263,9 +271,16 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     [status, id]
   );
 
+  const order = result.rows[0];
+  
+  const orderUserResult = await db.query('SELECT * FROM users WHERE id = $1', [order.user_id]);
+  if (orderUserResult.rows.length > 0 && orderUserResult.rows[0].email) {
+    emailService.sendOrderStatusUpdate(order, orderUserResult.rows[0], status).catch(console.error);
+  }
+
   res.json({
     message: 'Order status updated successfully',
-    order: result.rows[0]
+    order: order
   });
 });
 
@@ -493,10 +508,17 @@ const createOrderFromCart = asyncHandler(async (req, res) => {
       [order.id]
     );
 
+    const orderData = completeOrderResult.rows[0];
+    
+    const userResult = await db.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (userResult.rows.length > 0 && userResult.rows[0].email) {
+      emailService.sendOrderConfirmation(orderData, userResult.rows[0]).catch(console.error);
+    }
+    
     res.status(201).json({
       success: true,
       message: 'Order created successfully from cart',
-      data: completeOrderResult.rows[0]
+      data: orderData
     });
 
   } catch (error) {

@@ -5,9 +5,9 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4CAF50', // Fresh green for agriculture
-      light: '#81C784',
-      dark: '#388E3C',
+      main: '#2E7D32',
+      light: '#4CAF50',
+      dark: '#1B5E20',
       contrastText: '#FFFFFF'
     },
     secondary: {
@@ -41,7 +41,7 @@ const theme = createTheme({
       contrastText: '#FFFFFF'
     },
     background: {
-      default: '#F8F9FA',
+      default: '#F8FAF9',
       paper: '#FFFFFF'
     },
     text: {
@@ -115,7 +115,34 @@ const theme = createTheme({
     }
   },
   shape: {
-    borderRadius: 12
+    borderRadius: 20
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          textTransform: 'none',
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          fontWeight: 600,
+        },
+      },
+    },
   },
   shadows: [
     'none',

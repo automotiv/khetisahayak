@@ -1,0 +1,3290 @@
+{
+  "@@locale": "hi",
+  "@@last_modified": "2026-01-10T10:00:00+05:30",
+  "@@author": "Kheti Sahayak Team",
+  "@@context": "Hindi translations for Kheti Sahayak agricultural assistance app",
+
+  "app_name": "खेती सहायक",
+  "@app_name": {
+    "description": "Application name displayed throughout the app"
+  },
+
+  "welcome": "स्वागत है",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+
+  "welcome_back": "वापस स्वागत है",
+  "@welcome_back": {
+    "description": "Welcome back message for returning users"
+  },
+
+  "welcome_user": "स्वागत है, {name}",
+  "@welcome_user": {
+    "description": "Personalized welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "राहुल"
+      }
+    }
+  },
+
+  "hello": "नमस्ते",
+  "@hello": {
+    "description": "Hello greeting"
+  },
+
+  "goodbye": "अलविदा",
+  "@goodbye": {
+    "description": "Goodbye message"
+  },
+
+  "yes": "हां",
+  "@yes": {
+    "description": "Affirmative response"
+  },
+
+  "no": "नहीं",
+  "@no": {
+    "description": "Negative response"
+  },
+
+  "cancel": "रद्द करें",
+  "@cancel": {
+    "description": "Cancel action"
+  },
+
+  "ok": "ठीक है",
+  "@ok": {
+    "description": "OK confirmation"
+  },
+
+  "save": "सेव करें",
+  "@save": {
+    "description": "Save action"
+  },
+
+  "delete": "हटाएं",
+  "@delete": {
+    "description": "Delete action"
+  },
+
+  "edit": "संपादित करें",
+  "@edit": {
+    "description": "Edit action"
+  },
+
+  "update": "अपडेट करें",
+  "@update": {
+    "description": "Update action"
+  },
+
+  "add": "जोड़ें",
+  "@add": {
+    "description": "Add action"
+  },
+
+  "remove": "निकालें",
+  "@remove": {
+    "description": "Remove action"
+  },
+
+  "loading": "लोड हो रहा है...",
+  "@loading": {
+    "description": "Loading indicator text"
+  },
+
+  "error": "त्रुटि",
+  "@error": {
+    "description": "Error label"
+  },
+
+  "success": "सफल",
+  "@success": {
+    "description": "Success message"
+  },
+
+  "warning": "चेतावनी",
+  "@warning": {
+    "description": "Warning message"
+  },
+
+  "info": "जानकारी",
+  "@info": {
+    "description": "Information label"
+  },
+
+  "search": "खोजें",
+  "@search": {
+    "description": "Search action"
+  },
+
+  "filter": "फ़िल्टर",
+  "@filter": {
+    "description": "Filter action"
+  },
+
+  "sort": "क्रमबद्ध करें",
+  "@sort": {
+    "description": "Sort action"
+  },
+
+  "refresh": "रिफ्रेश करें",
+  "@refresh": {
+    "description": "Refresh action"
+  },
+
+  "back": "पीछे",
+  "@back": {
+    "description": "Back navigation"
+  },
+
+  "next": "अगला",
+  "@next": {
+    "description": "Next navigation"
+  },
+
+  "previous": "पिछला",
+  "@previous": {
+    "description": "Previous navigation"
+  },
+
+  "done": "हो गया",
+  "@done": {
+    "description": "Done action"
+  },
+
+  "skip": "छोड़ें",
+  "@skip": {
+    "description": "Skip action"
+  },
+
+  "continue_action": "जारी रखें",
+  "@continue_action": {
+    "description": "Continue action"
+  },
+
+  "retry": "पुनः प्रयास करें",
+  "@retry": {
+    "description": "Retry action"
+  },
+
+  "submit": "जमा करें",
+  "@submit": {
+    "description": "Submit action"
+  },
+
+  "confirm": "पुष्टि करें",
+  "@confirm": {
+    "description": "Confirm action"
+  },
+
+  "close": "बंद करें",
+  "@close": {
+    "description": "Close action"
+  },
+
+  "view_all": "सभी देखें",
+  "@view_all": {
+    "description": "View all items"
+  },
+
+  "view_details": "विवरण देखें",
+  "@view_details": {
+    "description": "View details"
+  },
+
+  "share": "साझा करें",
+  "@share": {
+    "description": "Share action"
+  },
+
+  "download": "डाउनलोड करें",
+  "@download": {
+    "description": "Download action"
+  },
+
+  "upload": "अपलोड करें",
+  "@upload": {
+    "description": "Upload action"
+  },
+
+  "select": "चुनें",
+  "@select": {
+    "description": "Select action"
+  },
+
+  "select_all": "सभी चुनें",
+  "@select_all": {
+    "description": "Select all items"
+  },
+
+  "clear": "साफ़ करें",
+  "@clear": {
+    "description": "Clear action"
+  },
+
+  "clear_all": "सभी साफ़ करें",
+  "@clear_all": {
+    "description": "Clear all items"
+  },
+
+  "apply": "लागू करें",
+  "@apply": {
+    "description": "Apply action"
+  },
+
+  "reset": "रीसेट करें",
+  "@reset": {
+    "description": "Reset action"
+  },
+
+  "login": "लॉगिन",
+  "@login": {
+    "description": "Login action"
+  },
+
+  "logout": "लॉगआउट",
+  "@logout": {
+    "description": "Logout action"
+  },
+
+  "register": "रजिस्टर करें",
+  "@register": {
+    "description": "Register action"
+  },
+
+  "sign_up": "साइन अप करें",
+  "@sign_up": {
+    "description": "Sign up action"
+  },
+
+  "sign_in": "साइन इन करें",
+  "@sign_in": {
+    "description": "Sign in action"
+  },
+
+  "email": "ईमेल",
+  "@email": {
+    "description": "Email field label"
+  },
+
+  "email_address": "ईमेल पता",
+  "@email_address": {
+    "description": "Email address field"
+  },
+
+  "password": "पासवर्ड",
+  "@password": {
+    "description": "Password field label"
+  },
+
+  "confirm_password": "पासवर्ड की पुष्टि करें",
+  "@confirm_password": {
+    "description": "Confirm password field"
+  },
+
+  "current_password": "वर्तमान पासवर्ड",
+  "@current_password": {
+    "description": "Current password field"
+  },
+
+  "new_password": "नया पासवर्ड",
+  "@new_password": {
+    "description": "New password field"
+  },
+
+  "forgot_password": "पासवर्ड भूल गए?",
+  "@forgot_password": {
+    "description": "Forgot password link"
+  },
+
+  "reset_password": "पासवर्ड रीसेट करें",
+  "@reset_password": {
+    "description": "Reset password action"
+  },
+
+  "change_password": "पासवर्ड बदलें",
+  "@change_password": {
+    "description": "Change password action"
+  },
+
+  "phone_number": "फ़ोन नंबर",
+  "@phone_number": {
+    "description": "Phone number field"
+  },
+
+  "mobile_number": "मोबाइल नंबर",
+  "@mobile_number": {
+    "description": "Mobile number field"
+  },
+
+  "otp_verification": "OTP सत्यापन",
+  "@otp_verification": {
+    "description": "OTP verification screen title"
+  },
+
+  "enter_otp": "OTP दर्ज करें",
+  "@enter_otp": {
+    "description": "Enter OTP prompt"
+  },
+
+  "resend_otp": "OTP पुनः भेजें",
+  "@resend_otp": {
+    "description": "Resend OTP action"
+  },
+
+  "otp_sent": "OTP भेजा गया",
+  "@otp_sent": {
+    "description": "OTP sent confirmation"
+  },
+
+  "verify": "सत्यापित करें",
+  "@verify": {
+    "description": "Verify action"
+  },
+
+  "create_account": "खाता बनाएं",
+  "@create_account": {
+    "description": "Create account action"
+  },
+
+  "already_have_account": "पहले से खाता है?",
+  "@already_have_account": {
+    "description": "Already have account prompt"
+  },
+
+  "dont_have_account": "खाता नहीं है?",
+  "@dont_have_account": {
+    "description": "Don't have account prompt"
+  },
+
+  "username": "यूज़रनेम",
+  "@username": {
+    "description": "Username field"
+  },
+
+  "full_name": "पूरा नाम",
+  "@full_name": {
+    "description": "Full name field"
+  },
+
+  "first_name": "पहला नाम",
+  "@first_name": {
+    "description": "First name field"
+  },
+
+  "last_name": "अंतिम नाम",
+  "@last_name": {
+    "description": "Last name field"
+  },
+
+  "farmer": "किसान",
+  "@farmer": {
+    "description": "Farmer user type"
+  },
+
+  "expert": "विशेषज्ञ",
+  "@expert": {
+    "description": "Expert user type"
+  },
+
+  "agriculture_expert": "कृषि विशेषज्ञ",
+  "@agriculture_expert": {
+    "description": "Agriculture expert user type"
+  },
+
+  "buyer": "खरीदार",
+  "@buyer": {
+    "description": "Buyer user type"
+  },
+
+  "wholesaler": "थोक व्यापारी",
+  "@wholesaler": {
+    "description": "Wholesaler user type"
+  },
+
+  "seller": "विक्रेता",
+  "@seller": {
+    "description": "Seller user type"
+  },
+
+  "dashboard": "डैशबोर्ड",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+
+  "home": "होम",
+  "@home": {
+    "description": "Home screen title"
+  },
+
+  "overview": "अवलोकन",
+  "@overview": {
+    "description": "Overview section"
+  },
+
+  "good_morning": "सुप्रभात",
+  "@good_morning": {
+    "description": "Good morning greeting"
+  },
+
+  "good_afternoon": "नमस्कार",
+  "@good_afternoon": {
+    "description": "Good afternoon greeting"
+  },
+
+  "good_evening": "शुभ संध्या",
+  "@good_evening": {
+    "description": "Good evening greeting"
+  },
+
+  "good_night": "शुभ रात्रि",
+  "@good_night": {
+    "description": "Good night greeting"
+  },
+
+  "greeting_with_name": "{greeting}, {name}!",
+  "@greeting_with_name": {
+    "description": "Time-based greeting with user name",
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "weather_today": "आज का मौसम",
+  "@weather_today": {
+    "description": "Today's weather label"
+  },
+
+  "your_farm": "आपका खेत",
+  "@your_farm": {
+    "description": "Your farm section"
+  },
+
+  "quick_actions": "त्वरित कार्रवाई",
+  "@quick_actions": {
+    "description": "Quick actions section"
+  },
+
+  "quick_access": "त्वरित पहुंच",
+  "@quick_access": {
+    "description": "Quick access section"
+  },
+
+  "recent_activity": "हाल की गतिविधि",
+  "@recent_activity": {
+    "description": "Recent activity section"
+  },
+
+  "pending_tasks": "बाकी कार्य",
+  "@pending_tasks": {
+    "description": "Pending tasks section"
+  },
+
+  "today_tasks": "आज के कार्य",
+  "@today_tasks": {
+    "description": "Today's tasks"
+  },
+
+  "upcoming_tasks": "आगामी कार्य",
+  "@upcoming_tasks": {
+    "description": "Upcoming tasks"
+  },
+
+  "weather": "मौसम",
+  "@weather": {
+    "description": "Weather section title"
+  },
+
+  "temperature": "तापमान",
+  "@temperature": {
+    "description": "Temperature label"
+  },
+
+  "humidity": "आर्द्रता",
+  "@humidity": {
+    "description": "Humidity label"
+  },
+
+  "wind_speed": "हवा की गति",
+  "@wind_speed": {
+    "description": "Wind speed label"
+  },
+
+  "rainfall": "वर्षा",
+  "@rainfall": {
+    "description": "Rainfall label"
+  },
+
+  "precipitation": "वर्षण",
+  "@precipitation": {
+    "description": "Precipitation label"
+  },
+
+  "pressure": "दबाव",
+  "@pressure": {
+    "description": "Atmospheric pressure"
+  },
+
+  "visibility": "दृश्यता",
+  "@visibility": {
+    "description": "Visibility"
+  },
+
+  "uv_index": "यूवी इंडेक्स",
+  "@uv_index": {
+    "description": "UV index"
+  },
+
+  "feels_like": "महसूस होता है",
+  "@feels_like": {
+    "description": "Feels like temperature"
+  },
+
+  "sunny": "धूप",
+  "@sunny": {
+    "description": "Sunny weather"
+  },
+
+  "cloudy": "बादल",
+  "@cloudy": {
+    "description": "Cloudy weather"
+  },
+
+  "partly_cloudy": "आंशिक बादल",
+  "@partly_cloudy": {
+    "description": "Partly cloudy weather"
+  },
+
+  "rainy": "बारिश",
+  "@rainy": {
+    "description": "Rainy weather"
+  },
+
+  "stormy": "तूफानी",
+  "@stormy": {
+    "description": "Stormy weather"
+  },
+
+  "thunderstorm": "आंधी-तूफान",
+  "@thunderstorm": {
+    "description": "Thunderstorm"
+  },
+
+  "foggy": "धुंध",
+  "@foggy": {
+    "description": "Foggy weather"
+  },
+
+  "hazy": "धुंधला",
+  "@hazy": {
+    "description": "Hazy weather"
+  },
+
+  "windy": "तेज़ हवा",
+  "@windy": {
+    "description": "Windy weather"
+  },
+
+  "hot": "गर्म",
+  "@hot": {
+    "description": "Hot weather"
+  },
+
+  "cold": "ठंडा",
+  "@cold": {
+    "description": "Cold weather"
+  },
+
+  "forecast": "पूर्वानुमान",
+  "@forecast": {
+    "description": "Weather forecast"
+  },
+
+  "weather_forecast": "मौसम पूर्वानुमान",
+  "@weather_forecast": {
+    "description": "Weather forecast section"
+  },
+
+  "today": "आज",
+  "@today": {
+    "description": "Today label"
+  },
+
+  "tomorrow": "कल",
+  "@tomorrow": {
+    "description": "Tomorrow label"
+  },
+
+  "this_week": "इस सप्ताह",
+  "@this_week": {
+    "description": "This week label"
+  },
+
+  "next_week": "अगले सप्ताह",
+  "@next_week": {
+    "description": "Next week label"
+  },
+
+  "five_day_forecast": "5-दिन का पूर्वानुमान",
+  "@five_day_forecast": {
+    "description": "5-day forecast"
+  },
+
+  "seven_day_forecast": "7-दिन का पूर्वानुमान",
+  "@seven_day_forecast": {
+    "description": "7-day forecast"
+  },
+
+  "weather_alert": "मौसम चेतावनी",
+  "@weather_alert": {
+    "description": "Weather alert"
+  },
+
+  "weather_advisory": "मौसम सलाह",
+  "@weather_advisory": {
+    "description": "Weather advisory"
+  },
+
+  "farming_advisory": "खेती सलाह",
+  "@farming_advisory": {
+    "description": "Farming advisory based on weather"
+  },
+
+  "current_weather": "वर्तमान मौसम",
+  "@current_weather": {
+    "description": "Current weather"
+  },
+
+  "rain_chance": "बारिश की संभावना",
+  "@rain_chance": {
+    "description": "Chance of rain"
+  },
+
+  "scan_crop": "फसल स्कैन करें",
+  "@scan_crop": {
+    "description": "Scan crop for diagnosis"
+  },
+
+  "take_photo": "फोटो लें",
+  "@take_photo": {
+    "description": "Take photo action"
+  },
+
+  "select_from_gallery": "गैलरी से चुनें",
+  "@select_from_gallery": {
+    "description": "Select from gallery"
+  },
+
+  "choose_from_gallery": "गैलरी से चुनें",
+  "@choose_from_gallery": {
+    "description": "Choose from gallery"
+  },
+
+  "analyzing": "विश्लेषण हो रहा है...",
+  "@analyzing": {
+    "description": "Analyzing indicator"
+  },
+
+  "diagnosis_result": "निदान परिणाम",
+  "@diagnosis_result": {
+    "description": "Diagnosis result"
+  },
+
+  "diagnosis": "निदान",
+  "@diagnosis": {
+    "description": "Diagnosis label"
+  },
+
+  "disease_detected": "रोग का पता चला",
+  "@disease_detected": {
+    "description": "Disease detected message"
+  },
+
+  "healthy_crop": "स्वस्थ फसल",
+  "@healthy_crop": {
+    "description": "Healthy crop message"
+  },
+
+  "healthy": "स्वस्थ",
+  "@healthy": {
+    "description": "Healthy status"
+  },
+
+  "confidence_level": "विश्वसनीयता स्तर",
+  "@confidence_level": {
+    "description": "Confidence level of diagnosis"
+  },
+
+  "confidence": "विश्वसनीयता",
+  "@confidence": {
+    "description": "Confidence"
+  },
+
+  "treatment_recommended": "अनुशंसित उपचार",
+  "@treatment_recommended": {
+    "description": "Recommended treatment"
+  },
+
+  "treatment": "उपचार",
+  "@treatment": {
+    "description": "Treatment"
+  },
+
+  "treatment_recommendations": "उपचार सिफारिशें",
+  "@treatment_recommendations": {
+    "description": "Treatment recommendations"
+  },
+
+  "view_treatment": "उपचार देखें",
+  "@view_treatment": {
+    "description": "View treatment details"
+  },
+
+  "view_treatment_details": "उपचार विवरण देखें",
+  "@view_treatment_details": {
+    "description": "View treatment details button"
+  },
+
+  "ask_expert": "विशेषज्ञ से पूछें",
+  "@ask_expert": {
+    "description": "Ask expert action"
+  },
+
+  "buy_treatment": "उपचार खरीदें",
+  "@buy_treatment": {
+    "description": "Buy treatment action"
+  },
+
+  "crop_doctor": "फसल डॉक्टर",
+  "@crop_doctor": {
+    "description": "Crop doctor feature"
+  },
+
+  "diagnostics": "फसल डॉक्टर",
+  "@diagnostics": {
+    "description": "Diagnostics section"
+  },
+
+  "diagnostic_history": "निदान इतिहास",
+  "@diagnostic_history": {
+    "description": "Diagnostic history"
+  },
+
+  "recent_analyses": "हाल के विश्लेषण",
+  "@recent_analyses": {
+    "description": "Recent analyses"
+  },
+
+  "no_diagnostics": "कोई निदान नहीं",
+  "@no_diagnostics": {
+    "description": "No diagnostics message"
+  },
+
+  "pest_disease_info": "कीट और रोग जानकारी",
+  "@pest_disease_info": {
+    "description": "Pest and disease information"
+  },
+
+  "crop_recommendations": "फसल सिफारिशें",
+  "@crop_recommendations": {
+    "description": "Crop recommendations"
+  },
+
+  "crop_advisory": "फसल सलाह",
+  "@crop_advisory": {
+    "description": "Crop advisory"
+  },
+
+  "issue_description": "समस्या विवरण",
+  "@issue_description": {
+    "description": "Issue description field"
+  },
+
+  "crop_type": "फसल का प्रकार",
+  "@crop_type": {
+    "description": "Crop type field"
+  },
+
+  "marketplace": "बाज़ार",
+  "@marketplace": {
+    "description": "Marketplace section"
+  },
+
+  "products": "उत्पाद",
+  "@products": {
+    "description": "Products"
+  },
+
+  "categories": "श्रेणियाँ",
+  "@categories": {
+    "description": "Categories"
+  },
+
+  "all_categories": "सभी श्रेणियाँ",
+  "@all_categories": {
+    "description": "All categories"
+  },
+
+  "add_to_cart": "कार्ट में जोड़ें",
+  "@add_to_cart": {
+    "description": "Add to cart action"
+  },
+
+  "remove_from_cart": "कार्ट से हटाएं",
+  "@remove_from_cart": {
+    "description": "Remove from cart action"
+  },
+
+  "buy_now": "अभी खरीदें",
+  "@buy_now": {
+    "description": "Buy now action"
+  },
+
+  "checkout": "चेकआउट",
+  "@checkout": {
+    "description": "Checkout action"
+  },
+
+  "proceed_to_checkout": "चेकआउट के लिए आगे बढ़ें",
+  "@proceed_to_checkout": {
+    "description": "Proceed to checkout"
+  },
+
+  "price": "कीमत",
+  "@price": {
+    "description": "Price label"
+  },
+
+  "quantity": "मात्रा",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+
+  "total": "कुल",
+  "@total": {
+    "description": "Total label"
+  },
+
+  "subtotal": "उप-कुल",
+  "@subtotal": {
+    "description": "Subtotal label"
+  },
+
+  "discount": "छूट",
+  "@discount": {
+    "description": "Discount label"
+  },
+
+  "shipping": "शिपिंग",
+  "@shipping": {
+    "description": "Shipping label"
+  },
+
+  "shipping_charges": "शिपिंग शुल्क",
+  "@shipping_charges": {
+    "description": "Shipping charges"
+  },
+
+  "free_shipping": "मुफ्त शिपिंग",
+  "@free_shipping": {
+    "description": "Free shipping"
+  },
+
+  "tax": "कर",
+  "@tax": {
+    "description": "Tax label"
+  },
+
+  "grand_total": "कुल योग",
+  "@grand_total": {
+    "description": "Grand total"
+  },
+
+  "cart": "कार्ट",
+  "@cart": {
+    "description": "Cart"
+  },
+
+  "shopping_cart": "शॉपिंग कार्ट",
+  "@shopping_cart": {
+    "description": "Shopping cart"
+  },
+
+  "cart_empty": "आपका कार्ट खाली है",
+  "@cart_empty": {
+    "description": "Cart empty message"
+  },
+
+  "cart_items": "{count} आइटम",
+  "@cart_items": {
+    "description": "Number of cart items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "clear_cart": "कार्ट खाली करें",
+  "@clear_cart": {
+    "description": "Clear cart action"
+  },
+
+  "continue_shopping": "खरीदारी जारी रखें",
+  "@continue_shopping": {
+    "description": "Continue shopping action"
+  },
+
+  "in_stock": "स्टॉक में",
+  "@in_stock": {
+    "description": "In stock status"
+  },
+
+  "out_of_stock": "स्टॉक में नहीं",
+  "@out_of_stock": {
+    "description": "Out of stock status"
+  },
+
+  "low_stock": "कम स्टॉक",
+  "@low_stock": {
+    "description": "Low stock warning"
+  },
+
+  "items_left": "{count} बचे हैं",
+  "@items_left": {
+    "description": "Items left in stock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "reviews": "समीक्षाएं",
+  "@reviews": {
+    "description": "Reviews"
+  },
+
+  "add_review": "समीक्षा जोड़ें",
+  "@add_review": {
+    "description": "Add review action"
+  },
+
+  "write_review": "समीक्षा लिखें",
+  "@write_review": {
+    "description": "Write review"
+  },
+
+  "rating": "रेटिंग",
+  "@rating": {
+    "description": "Rating"
+  },
+
+  "ratings": "रेटिंग्स",
+  "@ratings": {
+    "description": "Ratings"
+  },
+
+  "verified_seller": "सत्यापित विक्रेता",
+  "@verified_seller": {
+    "description": "Verified seller badge"
+  },
+
+  "verified_buyer": "सत्यापित खरीदार",
+  "@verified_buyer": {
+    "description": "Verified buyer"
+  },
+
+  "product_details": "उत्पाद विवरण",
+  "@product_details": {
+    "description": "Product details"
+  },
+
+  "description": "विवरण",
+  "@description": {
+    "description": "Description"
+  },
+
+  "specifications": "विनिर्देश",
+  "@specifications": {
+    "description": "Specifications"
+  },
+
+  "similar_products": "समान उत्पाद",
+  "@similar_products": {
+    "description": "Similar products"
+  },
+
+  "related_products": "संबंधित उत्पाद",
+  "@related_products": {
+    "description": "Related products"
+  },
+
+  "orders": "ऑर्डर",
+  "@orders": {
+    "description": "Orders"
+  },
+
+  "my_orders": "मेरे ऑर्डर",
+  "@my_orders": {
+    "description": "My orders"
+  },
+
+  "order_history": "ऑर्डर इतिहास",
+  "@order_history": {
+    "description": "Order history"
+  },
+
+  "order_details": "ऑर्डर विवरण",
+  "@order_details": {
+    "description": "Order details"
+  },
+
+  "order_id": "ऑर्डर आईडी",
+  "@order_id": {
+    "description": "Order ID"
+  },
+
+  "order_placed": "ऑर्डर दिया गया",
+  "@order_placed": {
+    "description": "Order placed message"
+  },
+
+  "order_confirmed": "ऑर्डर की पुष्टि",
+  "@order_confirmed": {
+    "description": "Order confirmed"
+  },
+
+  "order_shipped": "ऑर्डर भेजा गया",
+  "@order_shipped": {
+    "description": "Order shipped"
+  },
+
+  "order_delivered": "ऑर्डर डिलीवर",
+  "@order_delivered": {
+    "description": "Order delivered"
+  },
+
+  "order_cancelled": "ऑर्डर रद्द",
+  "@order_cancelled": {
+    "description": "Order cancelled"
+  },
+
+  "order_status": "ऑर्डर की स्थिति",
+  "@order_status": {
+    "description": "Order status"
+  },
+
+  "pending": "लंबित",
+  "@pending": {
+    "description": "Pending status"
+  },
+
+  "confirmed": "पुष्टि",
+  "@confirmed": {
+    "description": "Confirmed status"
+  },
+
+  "processing": "प्रोसेसिंग",
+  "@processing": {
+    "description": "Processing status"
+  },
+
+  "shipped": "भेजा गया",
+  "@shipped": {
+    "description": "Shipped status"
+  },
+
+  "out_for_delivery": "डिलीवरी के लिए निकला",
+  "@out_for_delivery": {
+    "description": "Out for delivery"
+  },
+
+  "delivered": "डिलीवर",
+  "@delivered": {
+    "description": "Delivered status"
+  },
+
+  "cancelled": "रद्द",
+  "@cancelled": {
+    "description": "Cancelled status"
+  },
+
+  "returned": "वापस किया",
+  "@returned": {
+    "description": "Returned status"
+  },
+
+  "refunded": "रिफंड",
+  "@refunded": {
+    "description": "Refunded status"
+  },
+
+  "track_order": "ऑर्डर ट्रैक करें",
+  "@track_order": {
+    "description": "Track order action"
+  },
+
+  "cancel_order": "ऑर्डर रद्द करें",
+  "@cancel_order": {
+    "description": "Cancel order action"
+  },
+
+  "return_order": "ऑर्डर वापस करें",
+  "@return_order": {
+    "description": "Return order action"
+  },
+
+  "reorder": "फिर से ऑर्डर करें",
+  "@reorder": {
+    "description": "Reorder action"
+  },
+
+  "place_order": "ऑर्डर दें",
+  "@place_order": {
+    "description": "Place order action"
+  },
+
+  "order_summary": "ऑर्डर सारांश",
+  "@order_summary": {
+    "description": "Order summary"
+  },
+
+  "delivery_address": "डिलीवरी पता",
+  "@delivery_address": {
+    "description": "Delivery address"
+  },
+
+  "shipping_address": "शिपिंग पता",
+  "@shipping_address": {
+    "description": "Shipping address"
+  },
+
+  "billing_address": "बिलिंग पता",
+  "@billing_address": {
+    "description": "Billing address"
+  },
+
+  "add_address": "पता जोड़ें",
+  "@add_address": {
+    "description": "Add address action"
+  },
+
+  "edit_address": "पता संपादित करें",
+  "@edit_address": {
+    "description": "Edit address action"
+  },
+
+  "select_address": "पता चुनें",
+  "@select_address": {
+    "description": "Select address"
+  },
+
+  "default_address": "डिफ़ॉल्ट पता",
+  "@default_address": {
+    "description": "Default address"
+  },
+
+  "make_default": "डिफ़ॉल्ट बनाएं",
+  "@make_default": {
+    "description": "Make default action"
+  },
+
+  "address": "पता",
+  "@address": {
+    "description": "Address"
+  },
+
+  "full_address": "पूरा पता",
+  "@full_address": {
+    "description": "Full address"
+  },
+
+  "house_no": "मकान नंबर",
+  "@house_no": {
+    "description": "House number"
+  },
+
+  "street": "सड़क",
+  "@street": {
+    "description": "Street"
+  },
+
+  "landmark": "लैंडमार्क",
+  "@landmark": {
+    "description": "Landmark"
+  },
+
+  "city": "शहर",
+  "@city": {
+    "description": "City"
+  },
+
+  "state": "राज्य",
+  "@state": {
+    "description": "State"
+  },
+
+  "pincode": "पिनकोड",
+  "@pincode": {
+    "description": "Pincode"
+  },
+
+  "country": "देश",
+  "@country": {
+    "description": "Country"
+  },
+
+  "payment_method": "भुगतान विधि",
+  "@payment_method": {
+    "description": "Payment method"
+  },
+
+  "payment_methods": "भुगतान विधियां",
+  "@payment_methods": {
+    "description": "Payment methods"
+  },
+
+  "select_payment_method": "भुगतान विधि चुनें",
+  "@select_payment_method": {
+    "description": "Select payment method"
+  },
+
+  "cash_on_delivery": "कैश ऑन डिलीवरी",
+  "@cash_on_delivery": {
+    "description": "Cash on delivery"
+  },
+
+  "upi": "UPI",
+  "@upi": {
+    "description": "UPI payment"
+  },
+
+  "upi_id": "UPI आईडी",
+  "@upi_id": {
+    "description": "UPI ID"
+  },
+
+  "credit_card": "क्रेडिट कार्ड",
+  "@credit_card": {
+    "description": "Credit card"
+  },
+
+  "debit_card": "डेबिट कार्ड",
+  "@debit_card": {
+    "description": "Debit card"
+  },
+
+  "net_banking": "नेट बैंकिंग",
+  "@net_banking": {
+    "description": "Net banking"
+  },
+
+  "wallet": "वॉलेट",
+  "@wallet": {
+    "description": "Wallet"
+  },
+
+  "payment_successful": "भुगतान सफल",
+  "@payment_successful": {
+    "description": "Payment successful"
+  },
+
+  "payment_failed": "भुगतान विफल",
+  "@payment_failed": {
+    "description": "Payment failed"
+  },
+
+  "payment_pending": "भुगतान लंबित",
+  "@payment_pending": {
+    "description": "Payment pending"
+  },
+
+  "order_confirmation": "ऑर्डर पुष्टि",
+  "@order_confirmation": {
+    "description": "Order confirmation"
+  },
+
+  "seller_dashboard": "विक्रेता डैशबोर्ड",
+  "@seller_dashboard": {
+    "description": "Seller dashboard"
+  },
+
+  "my_products": "मेरे उत्पाद",
+  "@my_products": {
+    "description": "My products"
+  },
+
+  "add_product": "उत्पाद जोड़ें",
+  "@add_product": {
+    "description": "Add product action"
+  },
+
+  "edit_product": "उत्पाद संपादित करें",
+  "@edit_product": {
+    "description": "Edit product"
+  },
+
+  "total_orders": "कुल ऑर्डर",
+  "@total_orders": {
+    "description": "Total orders"
+  },
+
+  "total_revenue": "कुल राजस्व",
+  "@total_revenue": {
+    "description": "Total revenue"
+  },
+
+  "inventory": "इन्वेंटरी",
+  "@inventory": {
+    "description": "Inventory"
+  },
+
+  "stock": "स्टॉक",
+  "@stock": {
+    "description": "Stock"
+  },
+
+  "update_stock": "स्टॉक अपडेट करें",
+  "@update_stock": {
+    "description": "Update stock"
+  },
+
+  "confirm_order": "ऑर्डर की पुष्टि करें",
+  "@confirm_order": {
+    "description": "Confirm order"
+  },
+
+  "ship_order": "ऑर्डर भेजें",
+  "@ship_order": {
+    "description": "Ship order"
+  },
+
+  "mark_delivered": "डिलीवर के रूप में चिह्नित करें",
+  "@mark_delivered": {
+    "description": "Mark as delivered"
+  },
+
+  "experts": "विशेषज्ञ",
+  "@experts": {
+    "description": "Experts"
+  },
+
+  "expert_connect": "विशेषज्ञ कनेक्ट",
+  "@expert_connect": {
+    "description": "Expert connect feature"
+  },
+
+  "book_consultation": "परामर्श बुक करें",
+  "@book_consultation": {
+    "description": "Book consultation"
+  },
+
+  "schedule_consultation": "परामर्श शेड्यूल करें",
+  "@schedule_consultation": {
+    "description": "Schedule consultation"
+  },
+
+  "available_slots": "उपलब्ध स्लॉट",
+  "@available_slots": {
+    "description": "Available slots"
+  },
+
+  "consultation_fee": "परामर्श शुल्क",
+  "@consultation_fee": {
+    "description": "Consultation fee"
+  },
+
+  "video_call": "वीडियो कॉल",
+  "@video_call": {
+    "description": "Video call"
+  },
+
+  "audio_call": "ऑडियो कॉल",
+  "@audio_call": {
+    "description": "Audio call"
+  },
+
+  "chat": "चैट",
+  "@chat": {
+    "description": "Chat"
+  },
+
+  "your_consultations": "आपकी परामर्श",
+  "@your_consultations": {
+    "description": "Your consultations"
+  },
+
+  "my_consultations": "मेरी परामर्श",
+  "@my_consultations": {
+    "description": "My consultations"
+  },
+
+  "upcoming": "आगामी",
+  "@upcoming": {
+    "description": "Upcoming"
+  },
+
+  "completed": "पूर्ण",
+  "@completed": {
+    "description": "Completed"
+  },
+
+  "in_progress": "प्रगति में",
+  "@in_progress": {
+    "description": "In progress"
+  },
+
+  "experience": "अनुभव",
+  "@experience": {
+    "description": "Experience"
+  },
+
+  "years_experience": "{years} वर्ष का अनुभव",
+  "@years_experience": {
+    "description": "Years of experience",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+
+  "specialization": "विशेषज्ञता",
+  "@specialization": {
+    "description": "Specialization"
+  },
+
+  "connect": "कनेक्ट करें",
+  "@connect": {
+    "description": "Connect action"
+  },
+
+  "connection_request_sent": "कनेक्शन अनुरोध भेजा गया!",
+  "@connection_request_sent": {
+    "description": "Connection request sent message"
+  },
+
+  "learn": "सीखें",
+  "@learn": {
+    "description": "Learn section"
+  },
+
+  "education": "शिक्षा",
+  "@education": {
+    "description": "Education section"
+  },
+
+  "educational_content": "शैक्षिक सामग्री",
+  "@educational_content": {
+    "description": "Educational content"
+  },
+
+  "courses": "कोर्स",
+  "@courses": {
+    "description": "Courses"
+  },
+
+  "videos": "वीडियो",
+  "@videos": {
+    "description": "Videos"
+  },
+
+  "articles": "लेख",
+  "@articles": {
+    "description": "Articles"
+  },
+
+  "guides": "गाइड",
+  "@guides": {
+    "description": "Guides"
+  },
+
+  "start_learning": "सीखना शुरू करें",
+  "@start_learning": {
+    "description": "Start learning"
+  },
+
+  "continue_learning": "सीखना जारी रखें",
+  "@continue_learning": {
+    "description": "Continue learning"
+  },
+
+  "progress": "प्रगति",
+  "@progress": {
+    "description": "Progress"
+  },
+
+  "certificate": "प्रमाणपत्र",
+  "@certificate": {
+    "description": "Certificate"
+  },
+
+  "download_certificate": "प्रमाणपत्र डाउनलोड करें",
+  "@download_certificate": {
+    "description": "Download certificate"
+  },
+
+  "lesson": "पाठ",
+  "@lesson": {
+    "description": "Lesson"
+  },
+
+  "lessons": "पाठ",
+  "@lessons": {
+    "description": "Lessons"
+  },
+
+  "module": "मॉड्यूल",
+  "@module": {
+    "description": "Module"
+  },
+
+  "modules": "मॉड्यूल्स",
+  "@modules": {
+    "description": "Modules"
+  },
+
+  "lesson_completed": "पाठ पूरा!",
+  "@lesson_completed": {
+    "description": "Lesson completed message"
+  },
+
+  "duration": "अवधि",
+  "@duration": {
+    "description": "Duration"
+  },
+
+  "minutes": "मिनट",
+  "@minutes": {
+    "description": "Minutes"
+  },
+
+  "hours": "घंटे",
+  "@hours": {
+    "description": "Hours"
+  },
+
+  "beginner": "शुरुआती",
+  "@beginner": {
+    "description": "Beginner level"
+  },
+
+  "intermediate": "मध्यम",
+  "@intermediate": {
+    "description": "Intermediate level"
+  },
+
+  "advanced": "उन्नत",
+  "@advanced": {
+    "description": "Advanced level"
+  },
+
+  "difficulty_level": "कठिनाई स्तर",
+  "@difficulty_level": {
+    "description": "Difficulty level"
+  },
+
+  "rate_this_video": "इस वीडियो को रेट करें:",
+  "@rate_this_video": {
+    "description": "Rate this video prompt"
+  },
+
+  "rate_this_guide": "इस गाइड को रेट करें:",
+  "@rate_this_guide": {
+    "description": "Rate this guide prompt"
+  },
+
+  "government_schemes": "सरकारी योजनाएं",
+  "@government_schemes": {
+    "description": "Government schemes"
+  },
+
+  "schemes": "योजनाएं",
+  "@schemes": {
+    "description": "Schemes"
+  },
+
+  "all_schemes": "सभी योजनाएं",
+  "@all_schemes": {
+    "description": "All schemes"
+  },
+
+  "eligibility": "पात्रता",
+  "@eligibility": {
+    "description": "Eligibility"
+  },
+
+  "eligibility_criteria": "पात्रता मानदंड",
+  "@eligibility_criteria": {
+    "description": "Eligibility criteria"
+  },
+
+  "check_eligibility": "पात्रता जांचें",
+  "@check_eligibility": {
+    "description": "Check eligibility"
+  },
+
+  "eligible": "पात्र",
+  "@eligible": {
+    "description": "Eligible status"
+  },
+
+  "not_eligible": "पात्र नहीं",
+  "@not_eligible": {
+    "description": "Not eligible status"
+  },
+
+  "apply_now": "अभी आवेदन करें",
+  "@apply_now": {
+    "description": "Apply now"
+  },
+
+  "apply": "आवेदन करें",
+  "@apply": {
+    "description": "Apply action"
+  },
+
+  "documents_required": "आवश्यक दस्तावेज़",
+  "@documents_required": {
+    "description": "Documents required"
+  },
+
+  "document_checklist": "दस्तावेज़ चेकलिस्ट",
+  "@document_checklist": {
+    "description": "Document checklist"
+  },
+
+  "application_status": "आवेदन की स्थिति",
+  "@application_status": {
+    "description": "Application status"
+  },
+
+  "my_applications": "मेरे आवेदन",
+  "@my_applications": {
+    "description": "My applications"
+  },
+
+  "application_details": "आवेदन विवरण",
+  "@application_details": {
+    "description": "Application details"
+  },
+
+  "subsidy": "सब्सिडी",
+  "@subsidy": {
+    "description": "Subsidy"
+  },
+
+  "loan": "ऋण",
+  "@loan": {
+    "description": "Loan"
+  },
+
+  "insurance": "बीमा",
+  "@insurance": {
+    "description": "Insurance"
+  },
+
+  "benefits": "लाभ",
+  "@benefits": {
+    "description": "Benefits"
+  },
+
+  "amount": "राशि",
+  "@amount": {
+    "description": "Amount"
+  },
+
+  "scheme_details": "योजना विवरण",
+  "@scheme_details": {
+    "description": "Scheme details"
+  },
+
+  "visit_website": "वेबसाइट पर जाएं",
+  "@visit_website": {
+    "description": "Visit website"
+  },
+
+  "compare": "तुलना करें",
+  "@compare": {
+    "description": "Compare action"
+  },
+
+  "compare_schemes": "योजनाओं की तुलना करें",
+  "@compare_schemes": {
+    "description": "Compare schemes"
+  },
+
+  "search_schemes": "योजनाएं खोजें...",
+  "@search_schemes": {
+    "description": "Search schemes placeholder"
+  },
+
+  "filter_schemes": "योजनाएं फ़िल्टर करें",
+  "@filter_schemes": {
+    "description": "Filter schemes"
+  },
+
+  "no_schemes_found": "कोई योजना नहीं मिली।",
+  "@no_schemes_found": {
+    "description": "No schemes found message"
+  },
+
+  "recently_viewed": "हाल ही में देखा गया",
+  "@recently_viewed": {
+    "description": "Recently viewed"
+  },
+
+  "generate_checklist": "चेकलिस्ट बनाएं",
+  "@generate_checklist": {
+    "description": "Generate checklist"
+  },
+
+  "missing_criteria": "अनुपस्थित मानदंड",
+  "@missing_criteria": {
+    "description": "Missing criteria"
+  },
+
+  "suggestions": "सुझाव",
+  "@suggestions": {
+    "description": "Suggestions"
+  },
+
+  "profile": "प्रोफ़ाइल",
+  "@profile": {
+    "description": "Profile"
+  },
+
+  "my_profile": "मेरी प्रोफ़ाइल",
+  "@my_profile": {
+    "description": "My profile"
+  },
+
+  "edit_profile": "प्रोफ़ाइल संपादित करें",
+  "@edit_profile": {
+    "description": "Edit profile"
+  },
+
+  "my_account": "मेरा खाता",
+  "@my_account": {
+    "description": "My account"
+  },
+
+  "account_settings": "खाता सेटिंग्स",
+  "@account_settings": {
+    "description": "Account settings"
+  },
+
+  "settings": "सेटिंग्स",
+  "@settings": {
+    "description": "Settings"
+  },
+
+  "language": "भाषा",
+  "@language": {
+    "description": "Language"
+  },
+
+  "select_language": "भाषा चुनें",
+  "@select_language": {
+    "description": "Select language"
+  },
+
+  "change_language": "भाषा बदलें",
+  "@change_language": {
+    "description": "Change language"
+  },
+
+  "notifications": "सूचनाएं",
+  "@notifications": {
+    "description": "Notifications"
+  },
+
+  "notification_settings": "सूचना सेटिंग्स",
+  "@notification_settings": {
+    "description": "Notification settings"
+  },
+
+  "push_notifications": "पुश सूचनाएं",
+  "@push_notifications": {
+    "description": "Push notifications"
+  },
+
+  "email_notifications": "ईमेल सूचनाएं",
+  "@email_notifications": {
+    "description": "Email notifications"
+  },
+
+  "sms_notifications": "SMS सूचनाएं",
+  "@sms_notifications": {
+    "description": "SMS notifications"
+  },
+
+  "weather_alerts": "मौसम चेतावनी",
+  "@weather_alerts": {
+    "description": "Weather alerts"
+  },
+
+  "scheme_updates": "योजना अपडेट",
+  "@scheme_updates": {
+    "description": "Scheme updates"
+  },
+
+  "marketplace_updates": "बाज़ार अपडेट",
+  "@marketplace_updates": {
+    "description": "Marketplace updates"
+  },
+
+  "expert_messages": "विशेषज्ञ संदेश",
+  "@expert_messages": {
+    "description": "Expert messages"
+  },
+
+  "forum_replies": "फोरम उत्तर",
+  "@forum_replies": {
+    "description": "Forum replies"
+  },
+
+  "logbook_reminders": "लॉगबुक रिमाइंडर",
+  "@logbook_reminders": {
+    "description": "Logbook reminders"
+  },
+
+  "privacy": "गोपनीयता",
+  "@privacy": {
+    "description": "Privacy"
+  },
+
+  "privacy_policy": "गोपनीयता नीति",
+  "@privacy_policy": {
+    "description": "Privacy policy"
+  },
+
+  "privacy_security": "गोपनीयता और सुरक्षा",
+  "@privacy_security": {
+    "description": "Privacy and security"
+  },
+
+  "terms_conditions": "नियम और शर्तें",
+  "@terms_conditions": {
+    "description": "Terms and conditions"
+  },
+
+  "help": "मदद",
+  "@help": {
+    "description": "Help"
+  },
+
+  "help_support": "मदद और सहायता",
+  "@help_support": {
+    "description": "Help and support"
+  },
+
+  "help_center": "मदद केंद्र",
+  "@help_center": {
+    "description": "Help center"
+  },
+
+  "contact_support": "सहायता से संपर्क करें",
+  "@contact_support": {
+    "description": "Contact support"
+  },
+
+  "faq": "अक्सर पूछे जाने वाले प्रश्न",
+  "@faq": {
+    "description": "FAQ"
+  },
+
+  "about": "के बारे में",
+  "@about": {
+    "description": "About"
+  },
+
+  "about_us": "हमारे बारे में",
+  "@about_us": {
+    "description": "About us"
+  },
+
+  "about_app": "ऐप के बारे में",
+  "@about_app": {
+    "description": "About app"
+  },
+
+  "version": "संस्करण",
+  "@version": {
+    "description": "Version"
+  },
+
+  "app_version": "ऐप संस्करण",
+  "@app_version": {
+    "description": "App version"
+  },
+
+  "rate_app": "ऐप को रेट करें",
+  "@rate_app": {
+    "description": "Rate app"
+  },
+
+  "share_app": "ऐप साझा करें",
+  "@share_app": {
+    "description": "Share app"
+  },
+
+  "feedback": "प्रतिक्रिया",
+  "@feedback": {
+    "description": "Feedback"
+  },
+
+  "send_feedback": "प्रतिक्रिया भेजें",
+  "@send_feedback": {
+    "description": "Send feedback"
+  },
+
+  "my_fields": "मेरे खेत",
+  "@my_fields": {
+    "description": "My fields"
+  },
+
+  "fields": "खेत",
+  "@fields": {
+    "description": "Fields"
+  },
+
+  "add_field": "खेत जोड़ें",
+  "@add_field": {
+    "description": "Add field"
+  },
+
+  "add_new_field": "नया खेत जोड़ें",
+  "@add_new_field": {
+    "description": "Add new field"
+  },
+
+  "edit_field": "खेत संपादित करें",
+  "@edit_field": {
+    "description": "Edit field"
+  },
+
+  "field_details": "खेत विवरण",
+  "@field_details": {
+    "description": "Field details"
+  },
+
+  "field_name": "खेत का नाम",
+  "@field_name": {
+    "description": "Field name"
+  },
+
+  "area": "क्षेत्रफल",
+  "@area": {
+    "description": "Area"
+  },
+
+  "location": "स्थान",
+  "@location": {
+    "description": "Location"
+  },
+
+  "village": "गांव",
+  "@village": {
+    "description": "Village"
+  },
+
+  "soil_type": "मिट्टी का प्रकार",
+  "@soil_type": {
+    "description": "Soil type"
+  },
+
+  "soil_health": "मिट्टी स्वास्थ्य",
+  "@soil_health": {
+    "description": "Soil health"
+  },
+
+  "soil_test": "मिट्टी परीक्षण",
+  "@soil_test": {
+    "description": "Soil test"
+  },
+
+  "soil_records": "मिट्टी रिकॉर्ड",
+  "@soil_records": {
+    "description": "Soil records"
+  },
+
+  "add_soil_test": "मिट्टी परीक्षण जोड़ें",
+  "@add_soil_test": {
+    "description": "Add soil test"
+  },
+
+  "ph_level": "pH स्तर",
+  "@ph_level": {
+    "description": "pH level"
+  },
+
+  "organic_carbon": "जैविक कार्बन",
+  "@organic_carbon": {
+    "description": "Organic carbon"
+  },
+
+  "nitrogen": "नाइट्रोजन",
+  "@nitrogen": {
+    "description": "Nitrogen"
+  },
+
+  "phosphorus": "फास्फोरस",
+  "@phosphorus": {
+    "description": "Phosphorus"
+  },
+
+  "potassium": "पोटेशियम",
+  "@potassium": {
+    "description": "Potassium"
+  },
+
+  "current_crop": "वर्तमान फसल",
+  "@current_crop": {
+    "description": "Current crop"
+  },
+
+  "crops": "फसलें",
+  "@crops": {
+    "description": "Crops"
+  },
+
+  "crop": "फसल",
+  "@crop": {
+    "description": "Crop"
+  },
+
+  "crop_name": "फसल का नाम",
+  "@crop_name": {
+    "description": "Crop name"
+  },
+
+  "crop_rotation": "फसल चक्र",
+  "@crop_rotation": {
+    "description": "Crop rotation"
+  },
+
+  "crop_plan": "फसल योजना",
+  "@crop_plan": {
+    "description": "Crop plan"
+  },
+
+  "add_crop_plan": "फसल योजना जोड़ें",
+  "@add_crop_plan": {
+    "description": "Add crop plan"
+  },
+
+  "plan_next_crop": "अगली फसल की योजना बनाएं",
+  "@plan_next_crop": {
+    "description": "Plan next crop"
+  },
+
+  "planting_date": "बुवाई तिथि",
+  "@planting_date": {
+    "description": "Planting date"
+  },
+
+  "sowing_date": "बुवाई तिथि",
+  "@sowing_date": {
+    "description": "Sowing date"
+  },
+
+  "harvest_date": "कटाई तिथि",
+  "@harvest_date": {
+    "description": "Harvest date"
+  },
+
+  "expected_harvest": "अपेक्षित कटाई",
+  "@expected_harvest": {
+    "description": "Expected harvest"
+  },
+
+  "season": "मौसम",
+  "@season": {
+    "description": "Season"
+  },
+
+  "kharif": "खरीफ",
+  "@kharif": {
+    "description": "Kharif season"
+  },
+
+  "rabi": "रबी",
+  "@rabi": {
+    "description": "Rabi season"
+  },
+
+  "zaid": "जायद",
+  "@zaid": {
+    "description": "Zaid season"
+  },
+
+  "year": "वर्ष",
+  "@year": {
+    "description": "Year"
+  },
+
+  "activities": "गतिविधियाँ",
+  "@activities": {
+    "description": "Activities"
+  },
+
+  "add_activity": "गतिविधि जोड़ें",
+  "@add_activity": {
+    "description": "Add activity"
+  },
+
+  "new_activity": "नई गतिविधि",
+  "@new_activity": {
+    "description": "New activity"
+  },
+
+  "activity_type": "गतिविधि प्रकार",
+  "@activity_type": {
+    "description": "Activity type"
+  },
+
+  "activity_record": "गतिविधि रिकॉर्ड",
+  "@activity_record": {
+    "description": "Activity record"
+  },
+
+  "plowing": "जुताई",
+  "@plowing": {
+    "description": "Plowing activity"
+  },
+
+  "sowing": "बुवाई",
+  "@sowing": {
+    "description": "Sowing activity"
+  },
+
+  "irrigation": "सिंचाई",
+  "@irrigation": {
+    "description": "Irrigation activity"
+  },
+
+  "fertilizing": "उर्वरक देना",
+  "@fertilizing": {
+    "description": "Fertilizing activity"
+  },
+
+  "weeding": "निराई",
+  "@weeding": {
+    "description": "Weeding activity"
+  },
+
+  "spraying": "छिड़काव",
+  "@spraying": {
+    "description": "Spraying activity"
+  },
+
+  "harvesting": "कटाई",
+  "@harvesting": {
+    "description": "Harvesting activity"
+  },
+
+  "other": "अन्य",
+  "@other": {
+    "description": "Other activity"
+  },
+
+  "logbook": "लॉगबुक",
+  "@logbook": {
+    "description": "Logbook"
+  },
+
+  "digital_logbook": "डिजिटल लॉगबुक",
+  "@digital_logbook": {
+    "description": "Digital logbook"
+  },
+
+  "add_entry": "एंट्री जोड़ें",
+  "@add_entry": {
+    "description": "Add entry"
+  },
+
+  "edit_activity": "गतिविधि संपादित करें",
+  "@edit_activity": {
+    "description": "Edit activity"
+  },
+
+  "expenses": "खर्चे",
+  "@expenses": {
+    "description": "Expenses"
+  },
+
+  "add_expense": "खर्च जोड़ें",
+  "@add_expense": {
+    "description": "Add expense"
+  },
+
+  "income": "आय",
+  "@income": {
+    "description": "Income"
+  },
+
+  "add_income": "आय जोड़ें",
+  "@add_income": {
+    "description": "Add income"
+  },
+
+  "cost": "लागत",
+  "@cost": {
+    "description": "Cost"
+  },
+
+  "notes": "नोट्स",
+  "@notes": {
+    "description": "Notes"
+  },
+
+  "add_notes": "नोट्स जोड़ें",
+  "@add_notes": {
+    "description": "Add notes"
+  },
+
+  "photos": "फोटो",
+  "@photos": {
+    "description": "Photos"
+  },
+
+  "add_photos": "फोटो जोड़ें",
+  "@add_photos": {
+    "description": "Add photos"
+  },
+
+  "task_images": "कार्य चित्र",
+  "@task_images": {
+    "description": "Task images"
+  },
+
+  "activity_photos": "गतिविधि फोटो",
+  "@activity_photos": {
+    "description": "Activity photos"
+  },
+
+  "yield": "उपज",
+  "@yield": {
+    "description": "Yield"
+  },
+
+  "yield_amount": "उपज मात्रा",
+  "@yield_amount": {
+    "description": "Yield amount"
+  },
+
+  "add_yield": "उपज जोड़ें",
+  "@add_yield": {
+    "description": "Add yield"
+  },
+
+  "yield_trends": "उपज के रुझान",
+  "@yield_trends": {
+    "description": "Yield trends"
+  },
+
+  "unit": "इकाई",
+  "@unit": {
+    "description": "Unit"
+  },
+
+  "market_price": "बाज़ार भाव",
+  "@market_price": {
+    "description": "Market price"
+  },
+
+  "market_prices": "बाज़ार भाव",
+  "@market_prices": {
+    "description": "Market prices"
+  },
+
+  "view_analytics": "एनालिटिक्स देखें",
+  "@view_analytics": {
+    "description": "View analytics"
+  },
+
+  "analytics": "एनालिटिक्स",
+  "@analytics": {
+    "description": "Analytics"
+  },
+
+  "performance_analytics": "प्रदर्शन एनालिटिक्स",
+  "@performance_analytics": {
+    "description": "Performance analytics"
+  },
+
+  "seasonal": "मौसमी",
+  "@seasonal": {
+    "description": "Seasonal"
+  },
+
+  "annual": "वार्षिक",
+  "@annual": {
+    "description": "Annual"
+  },
+
+  "no_data_available": "कोई डेटा उपलब्ध नहीं",
+  "@no_data_available": {
+    "description": "No data available message"
+  },
+
+  "no_data": "कोई डेटा नहीं",
+  "@no_data": {
+    "description": "No data"
+  },
+
+  "bulk_update": "बल्क अपडेट",
+  "@bulk_update": {
+    "description": "Bulk update"
+  },
+
+  "bulk_field_update": "बल्क खेत अपडेट",
+  "@bulk_field_update": {
+    "description": "Bulk field update"
+  },
+
+  "select_fields": "खेत चुनें",
+  "@select_fields": {
+    "description": "Select fields"
+  },
+
+  "selected": "चयनित",
+  "@selected": {
+    "description": "Selected"
+  },
+
+  "items_selected": "{count} चयनित",
+  "@items_selected": {
+    "description": "Items selected",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "my_farm": "मेरा खेत",
+  "@my_farm": {
+    "description": "My farm"
+  },
+
+  "farm_details": "खेत विवरण",
+  "@farm_details": {
+    "description": "Farm details"
+  },
+
+  "add_farm_details": "खेत विवरण जोड़ें",
+  "@add_farm_details": {
+    "description": "Add farm details"
+  },
+
+  "water_availability": "पानी की उपलब्धता",
+  "@water_availability": {
+    "description": "Water availability"
+  },
+
+  "water_requirement": "पानी की आवश्यकता",
+  "@water_requirement": {
+    "description": "Water requirement"
+  },
+
+  "farm_history": "खेत इतिहास",
+  "@farm_history": {
+    "description": "Farm history"
+  },
+
+  "mark_all_read": "सभी पढ़ा हुआ चिह्नित करें",
+  "@mark_all_read": {
+    "description": "Mark all as read"
+  },
+
+  "new_notification": "नई सूचना",
+  "@new_notification": {
+    "description": "New notification"
+  },
+
+  "no_notifications": "कोई सूचना नहीं",
+  "@no_notifications": {
+    "description": "No notifications"
+  },
+
+  "all_notifications": "सभी सूचनाएं",
+  "@all_notifications": {
+    "description": "All notifications"
+  },
+
+  "unread": "अपठित",
+  "@unread": {
+    "description": "Unread"
+  },
+
+  "read": "पढ़ा हुआ",
+  "@read": {
+    "description": "Read"
+  },
+
+  "required_field": "यह फ़ील्ड आवश्यक है",
+  "@required_field": {
+    "description": "Required field error"
+  },
+
+  "invalid_email": "अमान्य ईमेल पता",
+  "@invalid_email": {
+    "description": "Invalid email error"
+  },
+
+  "invalid_phone": "अमान्य फ़ोन नंबर",
+  "@invalid_phone": {
+    "description": "Invalid phone error"
+  },
+
+  "password_too_short": "पासवर्ड बहुत छोटा है",
+  "@password_too_short": {
+    "description": "Password too short error"
+  },
+
+  "password_min_length": "पासवर्ड कम से कम {length} अक्षर का होना चाहिए",
+  "@password_min_length": {
+    "description": "Password minimum length error",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+
+  "passwords_dont_match": "पासवर्ड मेल नहीं खाते",
+  "@passwords_dont_match": {
+    "description": "Passwords don't match error"
+  },
+
+  "invalid_otp": "अमान्य OTP",
+  "@invalid_otp": {
+    "description": "Invalid OTP error"
+  },
+
+  "invalid_pincode": "अमान्य पिनकोड",
+  "@invalid_pincode": {
+    "description": "Invalid pincode error"
+  },
+
+  "network_error": "नेटवर्क त्रुटि",
+  "@network_error": {
+    "description": "Network error"
+  },
+
+  "server_error": "सर्वर त्रुटि",
+  "@server_error": {
+    "description": "Server error"
+  },
+
+  "something_went_wrong": "कुछ गलत हो गया",
+  "@something_went_wrong": {
+    "description": "Something went wrong"
+  },
+
+  "try_again": "पुनः प्रयास करें",
+  "@try_again": {
+    "description": "Try again"
+  },
+
+  "try_again_later": "बाद में पुनः प्रयास करें",
+  "@try_again_later": {
+    "description": "Try again later"
+  },
+
+  "no_internet": "इंटरनेट कनेक्शन नहीं",
+  "@no_internet": {
+    "description": "No internet connection"
+  },
+
+  "no_internet_connection": "इंटरनेट कनेक्शन नहीं है",
+  "@no_internet_connection": {
+    "description": "No internet connection message"
+  },
+
+  "check_internet": "कृपया अपना इंटरनेट कनेक्शन जांचें",
+  "@check_internet": {
+    "description": "Check internet connection message"
+  },
+
+  "offline_mode": "ऑफ़लाइन मोड",
+  "@offline_mode": {
+    "description": "Offline mode"
+  },
+
+  "offline": "ऑफ़लाइन",
+  "@offline": {
+    "description": "Offline"
+  },
+
+  "online": "ऑनलाइन",
+  "@online": {
+    "description": "Online"
+  },
+
+  "sync": "सिंक करें",
+  "@sync": {
+    "description": "Sync action"
+  },
+
+  "syncing": "सिंक हो रहा है...",
+  "@syncing": {
+    "description": "Syncing indicator"
+  },
+
+  "sync_triggered": "सिंक शुरू",
+  "@sync_triggered": {
+    "description": "Sync triggered message"
+  },
+
+  "sync_complete": "सिंक पूर्ण",
+  "@sync_complete": {
+    "description": "Sync complete message"
+  },
+
+  "last_synced": "अंतिम सिंक",
+  "@last_synced": {
+    "description": "Last synced"
+  },
+
+  "pending_sync": "सिंक लंबित",
+  "@pending_sync": {
+    "description": "Pending sync"
+  },
+
+  "upload_failed": "अपलोड विफल",
+  "@upload_failed": {
+    "description": "Upload failed"
+  },
+
+  "download_failed": "डाउनलोड विफल",
+  "@download_failed": {
+    "description": "Download failed"
+  },
+
+  "login_failed": "लॉगिन विफल",
+  "@login_failed": {
+    "description": "Login failed"
+  },
+
+  "registration_failed": "पंजीकरण विफल",
+  "@registration_failed": {
+    "description": "Registration failed"
+  },
+
+  "registration_successful": "पंजीकरण सफल!",
+  "@registration_successful": {
+    "description": "Registration successful"
+  },
+
+  "profile_updated": "प्रोफ़ाइल अपडेट हो गई",
+  "@profile_updated": {
+    "description": "Profile updated message"
+  },
+
+  "password_changed": "पासवर्ड बदल गया",
+  "@password_changed": {
+    "description": "Password changed message"
+  },
+
+  "field_added": "खेत जोड़ा गया",
+  "@field_added": {
+    "description": "Field added message"
+  },
+
+  "fields_updated": "खेत अपडेट हो गए",
+  "@fields_updated": {
+    "description": "Fields updated message"
+  },
+
+  "activity_saved": "गतिविधि सेव हो गई",
+  "@activity_saved": {
+    "description": "Activity saved message"
+  },
+
+  "added_to_cart": "कार्ट में जोड़ा गया",
+  "@added_to_cart": {
+    "description": "Added to cart message"
+  },
+
+  "removed_from_cart": "कार्ट से हटाया गया",
+  "@removed_from_cart": {
+    "description": "Removed from cart message"
+  },
+
+  "cart_cleared": "कार्ट खाली हो गई",
+  "@cart_cleared": {
+    "description": "Cart cleared message"
+  },
+
+  "order_placed_successfully": "ऑर्डर सफलतापूर्वक दिया गया!",
+  "@order_placed_successfully": {
+    "description": "Order placed successfully"
+  },
+
+  "order_cancelled_successfully": "ऑर्डर सफलतापूर्वक रद्द हो गया",
+  "@order_cancelled_successfully": {
+    "description": "Order cancelled successfully"
+  },
+
+  "language_changed": "भाषा बदल गई",
+  "@language_changed": {
+    "description": "Language changed message"
+  },
+
+  "logout_confirmation": "क्या आप लॉगआउट करना चाहते हैं?",
+  "@logout_confirmation": {
+    "description": "Logout confirmation message"
+  },
+
+  "delete_confirmation": "क्या आप इसे हटाना चाहते हैं?",
+  "@delete_confirmation": {
+    "description": "Delete confirmation message"
+  },
+
+  "cancel_order_confirmation": "क्या आप इस ऑर्डर को रद्द करना चाहते हैं?",
+  "@cancel_order_confirmation": {
+    "description": "Cancel order confirmation"
+  },
+
+  "remove_item_confirmation": "क्या आप इस आइटम को हटाना चाहते हैं?",
+  "@remove_item_confirmation": {
+    "description": "Remove item confirmation"
+  },
+
+  "clear_cart_confirmation": "क्या आप कार्ट खाली करना चाहते हैं?",
+  "@clear_cart_confirmation": {
+    "description": "Clear cart confirmation"
+  },
+
+  "kg": "किलोग्राम",
+  "@kg": {
+    "description": "Kilogram unit"
+  },
+
+  "gram": "ग्राम",
+  "@gram": {
+    "description": "Gram unit"
+  },
+
+  "quintal": "क्विंटल",
+  "@quintal": {
+    "description": "Quintal unit"
+  },
+
+  "tonne": "टन",
+  "@tonne": {
+    "description": "Tonne unit"
+  },
+
+  "liter": "लीटर",
+  "@liter": {
+    "description": "Liter unit"
+  },
+
+  "ml": "मिलीलीटर",
+  "@ml": {
+    "description": "Milliliter unit"
+  },
+
+  "acre": "एकड़",
+  "@acre": {
+    "description": "Acre unit"
+  },
+
+  "hectare": "हेक्टेयर",
+  "@hectare": {
+    "description": "Hectare unit"
+  },
+
+  "bigha": "बीघा",
+  "@bigha": {
+    "description": "Bigha unit"
+  },
+
+  "square_feet": "वर्ग फुट",
+  "@square_feet": {
+    "description": "Square feet unit"
+  },
+
+  "square_meter": "वर्ग मीटर",
+  "@square_meter": {
+    "description": "Square meter unit"
+  },
+
+  "rupees": "रुपये",
+  "@rupees": {
+    "description": "Rupees currency"
+  },
+
+  "rupee_symbol": "₹",
+  "@rupee_symbol": {
+    "description": "Rupee symbol"
+  },
+
+  "per_kg": "प्रति किलो",
+  "@per_kg": {
+    "description": "Per kilogram"
+  },
+
+  "per_quintal": "प्रति क्विंटल",
+  "@per_quintal": {
+    "description": "Per quintal"
+  },
+
+  "per_unit": "प्रति इकाई",
+  "@per_unit": {
+    "description": "Per unit"
+  },
+
+  "per_acre": "प्रति एकड़",
+  "@per_acre": {
+    "description": "Per acre"
+  },
+
+  "per_hectare": "प्रति हेक्टेयर",
+  "@per_hectare": {
+    "description": "Per hectare"
+  },
+
+  "kg_per_acre": "किलो/एकड़",
+  "@kg_per_acre": {
+    "description": "Kilograms per acre"
+  },
+
+  "kg_per_hectare": "किलो/हेक्टेयर",
+  "@kg_per_hectare": {
+    "description": "Kilograms per hectare"
+  },
+
+  "community": "समुदाय",
+  "@community": {
+    "description": "Community"
+  },
+
+  "community_forum": "समुदाय फोरम",
+  "@community_forum": {
+    "description": "Community forum"
+  },
+
+  "create_post": "पोस्ट बनाएं",
+  "@create_post": {
+    "description": "Create post"
+  },
+
+  "share_thoughts": "अपने विचार साझा करें या प्रश्न पूछें...",
+  "@share_thoughts": {
+    "description": "Share thoughts placeholder"
+  },
+
+  "post_created": "पोस्ट बना दी गई",
+  "@post_created": {
+    "description": "Post created message"
+  },
+
+  "post_failed": "पोस्ट बनाने में विफल",
+  "@post_failed": {
+    "description": "Post creation failed"
+  },
+
+  "no_posts": "कोई पोस्ट नहीं। पहले साझा करें!",
+  "@no_posts": {
+    "description": "No posts message"
+  },
+
+  "likes": "पसंद",
+  "@likes": {
+    "description": "Likes"
+  },
+
+  "comments": "टिप्पणियां",
+  "@comments": {
+    "description": "Comments"
+  },
+
+  "reply": "उत्तर दें",
+  "@reply": {
+    "description": "Reply action"
+  },
+
+  "select_community": "समुदाय चुनें",
+  "@select_community": {
+    "description": "Select community"
+  },
+
+  "equipment_rental": "उपकरण किराया",
+  "@equipment_rental": {
+    "description": "Equipment rental"
+  },
+
+  "rent_now": "अभी किराए पर लें",
+  "@rent_now": {
+    "description": "Rent now action"
+  },
+
+  "no_equipment": "किराए के लिए कोई उपकरण उपलब्ध नहीं",
+  "@no_equipment": {
+    "description": "No equipment available"
+  },
+
+  "booking_coming_soon": "बुकिंग सुविधा जल्द आ रही है!",
+  "@booking_coming_soon": {
+    "description": "Booking coming soon message"
+  },
+
+  "input_advisor": "इनपुट सलाहकार",
+  "@input_advisor": {
+    "description": "Input advisor"
+  },
+
+  "get_recommendations": "सिफारिशें प्राप्त करें",
+  "@get_recommendations": {
+    "description": "Get recommendations"
+  },
+
+  "recommendations": "सिफारिशें",
+  "@recommendations": {
+    "description": "Recommendations"
+  },
+
+  "smart_recommendations": "स्मार्ट सिफारिशें",
+  "@smart_recommendations": {
+    "description": "Smart recommendations"
+  },
+
+  "customize_recommendations": "सिफारिशें अनुकूलित करें",
+  "@customize_recommendations": {
+    "description": "Customize recommendations"
+  },
+
+  "no_recommendations": "कोई सिफारिश उपलब्ध नहीं",
+  "@no_recommendations": {
+    "description": "No recommendations available"
+  },
+
+  "match_score": "मैच स्कोर",
+  "@match_score": {
+    "description": "Match score"
+  },
+
+  "ai_confidence": "AI विश्वसनीयता",
+  "@ai_confidence": {
+    "description": "AI confidence"
+  },
+
+  "task": "कार्य",
+  "@task": {
+    "description": "Task"
+  },
+
+  "tasks": "कार्य",
+  "@tasks": {
+    "description": "Tasks"
+  },
+
+  "create_task": "कार्य बनाएं",
+  "@create_task": {
+    "description": "Create task"
+  },
+
+  "create_new_task": "नया कार्य बनाएं",
+  "@create_new_task": {
+    "description": "Create new task"
+  },
+
+  "task_title": "कार्य शीर्षक",
+  "@task_title": {
+    "description": "Task title"
+  },
+
+  "task_description": "कार्य विवरण",
+  "@task_description": {
+    "description": "Task description"
+  },
+
+  "due_date": "नियत तारीख",
+  "@due_date": {
+    "description": "Due date"
+  },
+
+  "priority": "प्राथमिकता",
+  "@priority": {
+    "description": "Priority"
+  },
+
+  "high_priority": "उच्च प्राथमिकता",
+  "@high_priority": {
+    "description": "High priority"
+  },
+
+  "medium_priority": "मध्यम प्राथमिकता",
+  "@medium_priority": {
+    "description": "Medium priority"
+  },
+
+  "low_priority": "कम प्राथमिकता",
+  "@low_priority": {
+    "description": "Low priority"
+  },
+
+  "status": "स्थिति",
+  "@status": {
+    "description": "Status"
+  },
+
+  "recapture_location": "स्थान पुनः प्राप्त करें",
+  "@recapture_location": {
+    "description": "Recapture location"
+  },
+
+  "location_captured": "स्थान प्राप्त हो गया",
+  "@location_captured": {
+    "description": "Location captured"
+  },
+
+  "location_error": "स्थान त्रुटि",
+  "@location_error": {
+    "description": "Location error"
+  },
+
+  "enable_location": "कृपया स्थान सक्षम करें",
+  "@enable_location": {
+    "description": "Enable location"
+  },
+
+  "price_history": "मूल्य इतिहास",
+  "@price_history": {
+    "description": "Price history"
+  },
+
+  "last_7_days": "पिछले 7 दिन",
+  "@last_7_days": {
+    "description": "Last 7 days"
+  },
+
+  "last_30_days": "पिछले 30 दिन",
+  "@last_30_days": {
+    "description": "Last 30 days"
+  },
+
+  "search_commodities": "कमोडिटी खोजें",
+  "@search_commodities": {
+    "description": "Search commodities"
+  },
+
+  "coming_soon": "जल्द आ रहा है",
+  "@coming_soon": {
+    "description": "Coming soon"
+  },
+
+  "feature_coming_soon": "यह सुविधा जल्द आ रही है!",
+  "@feature_coming_soon": {
+    "description": "Feature coming soon message"
+  },
+
+  "please_login": "कृपया लॉगिन करें",
+  "@please_login": {
+    "description": "Please login message"
+  },
+
+  "login_to_continue": "जारी रखने के लिए लॉगिन करें",
+  "@login_to_continue": {
+    "description": "Login to continue"
+  },
+
+  "login_to_view": "देखने के लिए लॉगिन करें",
+  "@login_to_view": {
+    "description": "Login to view"
+  },
+
+  "call_us": "हमें कॉल करें",
+  "@call_us": {
+    "description": "Call us"
+  },
+
+  "email_us": "हमें ईमेल करें",
+  "@email_us": {
+    "description": "Email us"
+  },
+
+  "live_chat": "लाइव चैट",
+  "@live_chat": {
+    "description": "Live chat"
+  },
+
+  "speak_with_support": "हमारी सहायता टीम से बात करें",
+  "@speak_with_support": {
+    "description": "Speak with support team"
+  },
+
+  "response_within_24h": "24 घंटे के भीतर जवाब प्राप्त करें",
+  "@response_within_24h": {
+    "description": "Response within 24 hours"
+  },
+
+  "chat_in_realtime": "रियल-टाइम में हमसे चैट करें",
+  "@chat_in_realtime": {
+    "description": "Chat with us in real-time"
+  },
+
+  "view_faqs": "FAQs देखें",
+  "@view_faqs": {
+    "description": "View FAQs"
+  },
+
+  "find_answers": "सामान्य प्रश्नों के उत्तर खोजें",
+  "@find_answers": {
+    "description": "Find answers to common questions"
+  },
+
+  "rate_review": "रेट और समीक्षा करें",
+  "@rate_review": {
+    "description": "Rate and review"
+  },
+
+  "share_experience": "अपना अनुभव साझा करें",
+  "@share_experience": {
+    "description": "Share your experience"
+  },
+
+  "attribute": "गुण",
+  "@attribute": {
+    "description": "Attribute"
+  },
+
+  "application_id": "आवेदन आईडी",
+  "@application_id": {
+    "description": "Application ID"
+  },
+
+  "submitted": "जमा किया गया",
+  "@submitted": {
+    "description": "Submitted status"
+  },
+
+  "under_review": "समीक्षाधीन",
+  "@under_review": {
+    "description": "Under review status"
+  },
+
+  "approved": "स्वीकृत",
+  "@approved": {
+    "description": "Approved status"
+  },
+
+  "rejected": "अस्वीकृत",
+  "@rejected": {
+    "description": "Rejected status"
+  },
+
+  "timeline": "समयरेखा",
+  "@timeline": {
+    "description": "Timeline"
+  },
+
+  "submission_date": "जमा करने की तारीख",
+  "@submission_date": {
+    "description": "Submission date"
+  },
+
+  "filter_by_field": "खेत के अनुसार फ़िल्टर करें",
+  "@filter_by_field": {
+    "description": "Filter by field"
+  },
+
+  "all_fields": "सभी खेत",
+  "@all_fields": {
+    "description": "All fields"
+  },
+
+  "select_field": "खेत चुनें",
+  "@select_field": {
+    "description": "Select field"
+  },
+
+  "select_crop": "फसल चुनें",
+  "@select_crop": {
+    "description": "Select crop"
+  },
+
+  "select_date": "तारीख चुनें",
+  "@select_date": {
+    "description": "Select date"
+  },
+
+  "date": "तारीख",
+  "@date": {
+    "description": "Date"
+  },
+
+  "time": "समय",
+  "@time": {
+    "description": "Time"
+  },
+
+  "failed": "विफल",
+  "@failed": {
+    "description": "Failed status"
+  },
+
+  "error_loading": "लोड करने में त्रुटि",
+  "@error_loading": {
+    "description": "Error loading"
+  },
+
+  "error_saving": "सेव करने में त्रुटि",
+  "@error_saving": {
+    "description": "Error saving"
+  },
+
+  "error_deleting": "हटाने में त्रुटि",
+  "@error_deleting": {
+    "description": "Error deleting"
+  },
+
+  "error_picking_image": "इमेज चुनने में त्रुटि",
+  "@error_picking_image": {
+    "description": "Error picking image"
+  },
+
+  "max_images_reached": "अधिकतम इमेज सीमा पहुंच गई",
+  "@max_images_reached": {
+    "description": "Maximum images reached"
+  },
+
+  "image_too_large": "इमेज बहुत बड़ी है",
+  "@image_too_large": {
+    "description": "Image too large"
+  },
+
+  "select_image_smaller": "कृपया 10MB से छोटी इमेज चुनें",
+  "@select_image_smaller": {
+    "description": "Please select an image smaller than 10MB"
+  },
+
+  "no_image_selected": "कोई इमेज नहीं चुनी गई",
+  "@no_image_selected": {
+    "description": "No image selected"
+  },
+
+  "fill_all_fields": "कृपया सभी फ़ील्ड भरें",
+  "@fill_all_fields": {
+    "description": "Please fill all fields"
+  },
+
+  "select_at_least_one": "कम से कम एक चुनें",
+  "@select_at_least_one": {
+    "description": "Select at least one"
+  },
+
+  "email_sent": "ईमेल भेजा गया",
+  "@email_sent": {
+    "description": "Email sent"
+  },
+
+  "pdf_generated": "PDF बना दी गई",
+  "@pdf_generated": {
+    "description": "PDF generated"
+  },
+
+  "share_coming_soon": "साझा करने की सुविधा जल्द आ रही है",
+  "@share_coming_soon": {
+    "description": "Share feature coming soon"
+  },
+
+  "no_fields_found": "कोई खेत नहीं मिला",
+  "@no_fields_found": {
+    "description": "No fields found"
+  },
+
+  "add_fields_to_see": "एनालिटिक्स देखने के लिए खेत जोड़ें",
+  "@add_fields_to_see": {
+    "description": "Add fields to see analytics"
+  },
+
+  "crop_rotation_history": "फसल चक्र इतिहास",
+  "@crop_rotation_history": {
+    "description": "Crop rotation history"
+  },
+
+  "no_crop_rotation_history": "कोई फसल चक्र इतिहास उपलब्ध नहीं",
+  "@no_crop_rotation_history": {
+    "description": "No crop rotation history available"
+  },
+
+  "enter_manually": "मैन्युअल रूप से दर्ज करें",
+  "@enter_manually": {
+    "description": "Enter manually"
+  },
+
+  "save_field": "खेत सेव करें",
+  "@save_field": {
+    "description": "Save field"
+  },
+
+  "application_update": "आवेदन अपडेट",
+  "@application_update": {
+    "description": "Application update notification"
+  },
+
+  "checklist": "चेकलिस्ट",
+  "@checklist": {
+    "description": "Checklist"
+  },
+
+  "opening_application_portal": "आवेदन पोर्टल खोला जा रहा है...",
+  "@opening_application_portal": {
+    "description": "Opening application portal"
+  },
+
+  "application_link_not_available": "आवेदन लिंक उपलब्ध नहीं",
+  "@application_link_not_available": {
+    "description": "Application link not available"
+  },
+
+  "user_data_not_available": "उपयोगकर्ता डेटा उपलब्ध नहीं",
+  "@user_data_not_available": {
+    "description": "User data not available"
+  },
+
+  "analysis_results": "विश्लेषण परिणाम",
+  "@analysis_results": {
+    "description": "Analysis results"
+  },
+
+  "disease": "रोग",
+  "@disease": {
+    "description": "Disease"
+  },
+
+  "pest": "कीट",
+  "@pest": {
+    "description": "Pest"
+  },
+
+  "view_result": "परिणाम देखें",
+  "@view_result": {
+    "description": "View result"
+  },
+
+  "no_diagnostic_history": "कोई निदान इतिहास नहीं",
+  "@no_diagnostic_history": {
+    "description": "No diagnostic history"
+  },
+
+  "failed_to_analyze": "विश्लेषण में विफल",
+  "@failed_to_analyze": {
+    "description": "Failed to analyze"
+  }
+}

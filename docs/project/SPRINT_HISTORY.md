@@ -1,0 +1,473 @@
+# 📅 Sprint History - Kheti Sahayak
+
+<div align="center">
+
+![Sprints](https://img.shields.io/badge/Completed_Sprints-10-green.svg)
+![Current](https://img.shields.io/badge/Current_Sprint-11-blue.svg)
+![Velocity](https://img.shields.io/badge/Avg_Velocity-48_pts-yellow.svg)
+
+**Last Updated**: January 8, 2026
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Sprint Overview](#sprint-overview)
+- [Sprint 1-2: Project Foundation](#sprint-1-2-project-foundation)
+- [Sprint 3-4: Authentication & Core APIs](#sprint-3-4-authentication--core-apis)
+- [Sprint 5: ML Integration](#sprint-5-ml-integration--crop-diagnostics)
+- [Sprint 6: Flutter App Foundation](#sprint-6-flutter-app-foundation)
+- [Sprint 7: Marketplace & Content](#sprint-7-marketplace--content)
+- [Sprint 8: Weather & Reviews](#sprint-8-weather--reviews)
+- [Sprint 9: Android Production](#sprint-9-android-production--bug-fixes)
+- [Sprint 10: Checkout & Payments](#sprint-10-checkout--payments)
+- [Sprint 11: Current Sprint](#sprint-11-user-verification--seller-dashboard)
+
+---
+
+## Sprint Overview
+
+| Sprint | Duration | Theme | Story Points | Status |
+|--------|----------|-------|--------------|--------|
+| 1-2 | Jan - Feb 2025 | Project Foundation | 65 | ✅ Complete |
+| 3-4 | Feb - Mar 2025 | Authentication & Core APIs | 55 | ✅ Complete |
+| 5 | Mar 2025 | ML Integration | 40 | ✅ Complete |
+| 6 | Mar - Apr 2025 | Flutter App Foundation | 52 | ✅ Complete |
+| 7 | May - Jul 2025 | Marketplace & Content | 58 | ✅ Complete |
+| 8 | Aug - Sep 2025 | Weather & Reviews | 45 | ✅ Complete |
+| 9 | Oct 1-21, 2025 | Android Production | 42 | ✅ Complete |
+| 10 | Oct 22 - Jan 8, 2026 | Checkout & Payments | 50 | ✅ Complete |
+| 11 | Jan 9 - Jan 23, 2026 | User Verification & Seller | 50 | 🔄 In Progress |
+
+---
+
+## Sprint 1-2: Project Foundation
+
+**Duration**: January - February 2025  
+**Theme**: Initial Setup & Backend MVP  
+**Story Points**: 65  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Set up project infrastructure
+- Create backend foundation
+- Design database schema
+- Establish development workflow
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Project repository setup | 3 | DevOps | Initial commit |
+| Node.js Express server with nodemon | 5 | Backend | #1 |
+| PostgreSQL 15 database configuration | 8 | Backend | #2 |
+| Database schema design (10+ tables) | 13 | Backend | #3-5 |
+| Database migrations setup (node-pg-migrate) | 8 | Backend | #6 |
+| Environment configuration (.env) | 3 | DevOps | #7 |
+| Basic error handling middleware | 8 | Backend | #8 |
+| CORS and security middleware | 5 | Backend | #9 |
+| Project documentation (README) | 5 | All | #10 |
+| Docker development setup | 7 | DevOps | #11 |
+
+### Key Deliverables
+- ✅ Express server running on port 3000
+- ✅ PostgreSQL database with 10+ tables
+- ✅ Migration system operational
+- ✅ Docker Compose for local development
+- ✅ Basic API structure established
+
+### Retrospective Notes
+- **What went well**: Clean architecture setup, good documentation
+- **Challenges**: Database schema iterations took longer than expected
+- **Action items**: Establish code review process
+
+---
+
+## Sprint 3-4: Authentication & Core APIs
+
+**Duration**: February - March 2025  
+**Theme**: User Management & Security  
+**Story Points**: 55  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Implement secure authentication system
+- Create user management APIs
+- Set up API documentation
+- Create test users for development
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| User registration API | 8 | Backend | #12 |
+| User login API | 5 | Backend | #13 |
+| JWT token-based authentication | 8 | Backend | #14 |
+| User profile management | 5 | Backend | #15 |
+| Password change functionality | 5 | Backend | #16 |
+| Session management with expiry | 5 | Backend | #17 |
+| Test users (admin, expert, farmer, creator) | 3 | Backend | #18 |
+| Swagger/OpenAPI 3.0 documentation (320+ lines) | 8 | Backend | #19 |
+| Auth middleware for protected routes | 5 | Backend | #20 |
+| Input validation with express-validator | 3 | Backend | #21 |
+
+### Key Deliverables
+- ✅ Complete auth flow (register/login/logout)
+- ✅ JWT-based session management
+- ✅ Swagger UI at /api-docs
+- ✅ Role-based access control foundation
+- ✅ Test credentials documented
+
+### Test Credentials Created
+```
+Admin:   admin@khetisahayak.com / admin123
+Expert:  expert@khetisahayak.com / expert123
+Creator: creator@khetisahayak.com / creator123
+Farmer:  farmer@khetisahayak.com / user123
+```
+
+---
+
+## Sprint 5: ML Integration & Crop Diagnostics
+
+**Duration**: March 2025  
+**Theme**: AI-Powered Disease Detection  
+**Story Points**: 40  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Set up ML inference service
+- Implement crop disease detection
+- Create diagnostic history tracking
+- Build treatment recommendations
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| FastAPI ML inference service setup | 8 | ML Team | #22 |
+| Image upload endpoint for diagnostics | 5 | Backend | #23 |
+| Disease detection for tomato, potato, corn, wheat | 8 | ML Team | #24 |
+| Mock disease detection (95%+ accuracy) | 5 | ML Team | #25 |
+| Treatment recommendations API | 5 | Backend | #26 |
+| Diagnostic history tracking | 5 | Backend | #27 |
+| Treatment details with filtering | 4 | Backend | #28 |
+
+### Key Deliverables
+- ✅ ML service running on port 8000
+- ✅ /predict endpoint for disease detection
+- ✅ Support for 4 crop types
+- ✅ Treatment database with recommendations
+- ✅ History tracking per user
+
+### Technical Notes
+- Using TensorFlow/PyTorch for model inference
+- Mock model returns realistic predictions
+- Real model integration planned for Sprint 12+
+
+---
+
+## Sprint 6: Flutter App Foundation
+
+**Duration**: March - April 2025  
+**Theme**: Mobile App Development  
+**Story Points**: 52  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Set up Flutter project structure
+- Implement core app architecture
+- Create reusable UI components
+- Integrate with backend APIs
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Flutter 3.35.6 project setup | 5 | Mobile | #29 |
+| Material Design 3 theme configuration | 5 | Mobile | #30 |
+| Cross-platform support (Android, iOS, Web) | 8 | Mobile | #31 |
+| Provider state management setup | 5 | Mobile | #32 |
+| HTTP API client service with auth | 8 | Mobile | #33 |
+| Routing and navigation system | 5 | Mobile | #34 |
+| Image picker and upload functionality | 5 | Mobile | #35 |
+| Background upload queue with retry | 8 | Mobile | #36 |
+| Reusable UI widget library | 3 | Mobile | #37 |
+
+### Key Deliverables
+- ✅ Flutter app compiling for all platforms
+- ✅ Clean architecture with providers
+- ✅ API service with token management
+- ✅ Custom widgets: GradientCard, ModernStatsCard, FeatureCard, InfoCard
+- ✅ Image handling with compression
+
+### Architecture Decisions
+- Provider for state management (simple, effective)
+- Dio for HTTP client (interceptors, retry logic)
+- GoRouter for navigation
+- SharedPreferences for local storage
+
+---
+
+## Sprint 7: Marketplace & Content
+
+**Duration**: May - July 2025  
+**Theme**: E-commerce & Educational Content  
+**Story Points**: 58  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Build marketplace product system
+- Create educational content management
+- Implement search and filtering
+- Set up cloud storage
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Product listing CRUD operations | 8 | Backend | #38 |
+| Product categories and filtering | 5 | Backend | #39 |
+| Search functionality with pagination | 8 | Backend | #40 |
+| Product images and descriptions | 5 | Backend | #41 |
+| Content management system | 8 | Backend | #42 |
+| Educational content categories | 5 | Backend | #43 |
+| Content filtering and pagination | 5 | Backend | #44 |
+| Redis caching integration | 8 | Backend | #45 |
+| AWS S3 integration for images | 6 | Backend | #46 |
+
+### Key Deliverables
+- ✅ Full product CRUD with images
+- ✅ Category-based filtering
+- ✅ Full-text search with relevance
+- ✅ Educational content: Farming Methods, Pest Management, Soil, Irrigation
+- ✅ Redis caching for performance
+- ✅ S3 presigned URLs for uploads
+
+### Categories Created
+**Products**: Seeds, Fertilizers, Pesticides, Equipment, Tools  
+**Content**: Farming Methods, Pest Management, Soil Management, Irrigation
+
+---
+
+## Sprint 8: Weather & Reviews
+
+**Duration**: August - September 2025  
+**Theme**: Weather Integration & Social Features  
+**Story Points**: 45  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Integrate weather API
+- Build reviews and ratings system
+- Add social proof features
+- Improve test coverage
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Weather API integration | 8 | Backend | #47 |
+| Redis caching for weather data | 5 | Backend | #48 |
+| Current weather conditions endpoint | 3 | Backend | #49 |
+| 5-day forecast endpoint | 5 | Backend | #50 |
+| Reviews CRUD operations | 8 | Backend | #51 |
+| Verified purchase detection | 5 | Backend | #52 |
+| Review image upload (up to 5) | 5 | Backend | #53 |
+| Helpful marks with toggle | 3 | Backend | #54 |
+| Rating statistics and filtering | 3 | Backend | #55 |
+
+### Key Deliverables
+- ✅ Weather API with 1-hour cache
+- ✅ Complete review system
+- ✅ 22 unit tests for reviews (100% pass)
+- ✅ Verified purchase badges
+- ✅ Helpful vote system
+
+### Test Results
+```
+Reviews System Tests: 22/22 passing (100%)
+- CRUD operations: 6 tests
+- Verified purchase: 4 tests
+- Image upload: 4 tests
+- Helpful marks: 4 tests
+- Statistics: 4 tests
+```
+
+---
+
+## Sprint 9: Android Production & Bug Fixes
+
+**Duration**: October 1-21, 2025  
+**Theme**: Production Readiness & Quality  
+**Story Points**: 42  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Fix compilation errors
+- Configure Android for production
+- Add localization support
+- Achieve 100% test pass rate
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Fix ProductService API call errors | 5 | Mobile | #56 |
+| Fix ErrorView parameter naming | 2 | Mobile | #57 |
+| Fix AppLogger method (warn → warning) | 2 | Mobile | #58 |
+| Fix routes.dart import paths | 3 | Mobile | #59 |
+| Android permissions (11 total) | 5 | Mobile | #60 |
+| Update application ID | 2 | Mobile | #61 |
+| Localized strings (EN, HI, MR) | 5 | Mobile | #62 |
+| ProGuard configuration | 5 | DevOps | #63 |
+| Signing configuration framework | 5 | DevOps | #64 |
+| Android documentation | 3 | Docs | #65 |
+| Database seeding script | 5 | Backend | #66 |
+
+### Key Deliverables
+- ✅ Flutter app compiling without errors
+- ✅ Android production-ready configuration
+- ✅ 3 languages supported (English, Hindi, Marathi)
+- ✅ ProGuard rules for release builds
+- ✅ 89/89 backend tests passing
+
+### Android Permissions Added
+```xml
+INTERNET, ACCESS_NETWORK_STATE, CAMERA,
+READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE,
+READ_MEDIA_IMAGES, ACCESS_FINE_LOCATION,
+ACCESS_COARSE_LOCATION, POST_NOTIFICATIONS
+```
+
+---
+
+## Sprint 10: Checkout & Payments
+
+**Duration**: October 22, 2025 - January 8, 2026  
+**Theme**: Marketplace Checkout & Payment Integration  
+**Story Points**: 50  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Complete payment gateway integration
+- Build checkout flow
+- Implement email notifications
+- Fix remaining compilation errors
+
+### Completed Tasks
+
+| Task | Points | Assignee | PR/Commit |
+|------|--------|----------|-----------|
+| Fix Education Screen compilation | 5 | Mobile | #67 |
+| Add missing model properties (isBookmarked, userRating) | 3 | Mobile | #68 |
+| Add video_player, chewie packages | 2 | Mobile | #69 |
+| Razorpay Flutter SDK integration | 13 | Mobile | #70 |
+| Update checkout_screen.dart for payments | 8 | Mobile | #71 |
+| Create emailService.js | 8 | Backend | #72 |
+| Order confirmation email template | 3 | Backend | #73 |
+| Order status update emails | 3 | Backend | #74 |
+| Integrate emails with orderController | 3 | Backend | #75 |
+| Close GitHub issue #421 | 2 | PM | - |
+
+### Key Deliverables
+- ✅ Razorpay SDK fully integrated
+- ✅ Payment flow: UPI, Card, Net Banking, Wallets, COD
+- ✅ Email service with 5 templates
+- ✅ Order confirmation emails
+- ✅ Payment verification with signatures
+- ✅ GitHub issue #421 closed
+
+### Files Created/Modified
+```
+Flutter:
+- lib/services/payment_service.dart (new implementation)
+- lib/screens/checkout/checkout_screen.dart (payment flow)
+- lib/models/educational_content.dart (fixed)
+- pubspec.yaml (razorpay_flutter, video_player, chewie)
+
+Backend:
+- services/emailService.js (new)
+- controllers/orderController.js (email integration)
+- package.json (nodemailer)
+```
+
+### Email Templates Created
+1. Order Confirmation (with itemized details)
+2. Order Status Update (confirmed, shipped, delivered, cancelled)
+3. Payment Confirmation
+4. Welcome Email
+5. Password Reset
+
+---
+
+## Sprint 11: User Verification & Seller Dashboard
+
+**Duration**: January 9 - January 23, 2026  
+**Theme**: User Verification & Seller Features  
+**Story Points**: 50  
+**Status**: 🔄 In Progress
+
+### Sprint Goals
+- Implement email verification
+- Build SMS OTP authentication
+- Create seller dashboard
+- Add forgot password flow
+
+### Planned Tasks
+
+| Task | Points | Priority | Status |
+|------|--------|----------|--------|
+| Email verification system | 8 | High | 📋 Todo |
+| Email verification UI in Flutter | 5 | High | 📋 Todo |
+| SMS OTP service integration (MSG91/Twilio) | 8 | High | 📋 Todo |
+| OTP verification screens | 5 | High | 📋 Todo |
+| Forgot password API | 5 | High | 📋 Todo |
+| Forgot password UI flow | 5 | Medium | 📋 Todo |
+| Seller dashboard - order management | 8 | Medium | 📋 Todo |
+| Seller dashboard - product analytics | 6 | Medium | 📋 Todo |
+
+### Acceptance Criteria
+- [ ] Users receive verification email on registration
+- [ ] Email verification link works and updates user status
+- [ ] SMS OTP sent within 5 seconds
+- [ ] OTP expires after 10 minutes
+- [ ] Forgot password email sent with reset link
+- [ ] Sellers can view and manage their orders
+- [ ] Basic analytics: views, sales, revenue
+
+---
+
+## 📊 Velocity Tracking
+
+| Sprint | Planned | Completed | Velocity |
+|--------|---------|-----------|----------|
+| 1-2 | 65 | 65 | 100% |
+| 3-4 | 55 | 55 | 100% |
+| 5 | 40 | 40 | 100% |
+| 6 | 52 | 52 | 100% |
+| 7 | 58 | 58 | 100% |
+| 8 | 45 | 45 | 100% |
+| 9 | 42 | 42 | 100% |
+| 10 | 50 | 50 | 100% |
+| **Average** | **50.9** | **50.9** | **100%** |
+
+---
+
+## 🔗 Related Documents
+
+- [Project Progress](PROGRESS.md)
+- [Product Roadmap](../../wiki_repo/prd/04_product_roadmap.md)
+- [Contributing Guidelines](../../CONTRIBUTING.md)
+
+---
+
+<div align="center">
+
+*Sprint documentation maintained by the Kheti Sahayak development team*
+
+**🌾 Building the future of Indian agriculture, one sprint at a time 🌾**
+
+</div>

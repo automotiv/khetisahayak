@@ -11,8 +11,15 @@ const {
   logoutUser,
   getAllUsers,
   deleteUser,
+  verifyEmail,
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword,
+  sendOTP,
+  verifyOTP,
 } = require('../controllers/authController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { authRateLimiter, sensitiveRateLimiter } = require('../middleware/securityMiddleware');
 const db = require('../db');
 
 /**
@@ -136,7 +143,7 @@ const passwordChangeValidationRules = [
  *       409:
  *         description: Email already exists
  */
-router.post('/register', registerValidationRules, registerUser);
+router.post('/register', authRateLimiter, registerValidationRules, registerUser);
 
 /**
  * @swagger
@@ -178,7 +185,7 @@ router.post('/register', registerValidationRules, registerUser);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', loginValidationRules, loginUser);
+router.post('/login', authRateLimiter, loginValidationRules, loginUser);
 
 /**
  * @swagger
@@ -311,7 +318,165 @@ router.put('/change-password', protect, passwordChangeValidationRules, changePas
  */
 router.post('/logout', protect, logoutUser);
 
-// Admin routes
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   get:
+ *     summary: Verify email address
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email verification token
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.get('/verify-email', verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ *       400:
+ *         description: Email already verified
+ *       401:
+ *         description: Not authorized
+ */
+router.post('/resend-verification', protect, resendVerificationEmail);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Password reset email sent (if account exists)
+ */
+router.post('/forgot-password', sensitiveRateLimiter, [
+  body('email', 'Please include a valid email').isEmail().normalizeEmail(),
+], forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post('/reset-password', sensitiveRateLimiter, [
+  body('token', 'Reset token is required').not().isEmpty(),
+  body('password', 'Password must be at least 6 characters long').isLength({ min: 6 }),
+], resetPassword);
+
+/**
+ * @swagger
+ * /api/auth/send-otp:
+ *   post:
+ *     summary: Send OTP for phone verification
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phone
+ *             properties:
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       429:
+ *         description: Too many OTP requests
+ */
+router.post('/send-otp', protect, sensitiveRateLimiter, [
+  body('phone', 'Phone number is required').not().isEmpty().isMobilePhone(),
+], sendOTP);
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phone
+ *               - otp
+ *             properties:
+ *               phone:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Phone verified successfully
+ *       400:
+ *         description: Invalid OTP
+ */
+router.post('/verify-otp', protect, [
+  body('phone', 'Phone number is required').not().isEmpty(),
+  body('otp', 'OTP is required').not().isEmpty().isLength({ min: 6, max: 6 }),
+], verifyOTP);
+
 router.get('/users', protect, authorize('admin'), getAllUsers);
 router.delete('/users/:id', protect, authorize('admin'), deleteUser);
 

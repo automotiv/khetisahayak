@@ -15,11 +15,22 @@ import 'package:kheti_sahayak_app/screens/diagnostics/diagnostics_screen.dart';
 import 'package:kheti_sahayak_app/screens/profile/profile_screen.dart';
 import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 import 'package:kheti_sahayak_app/screens/weather/weather_screen.dart';
+import 'package:kheti_sahayak_app/screens/weather/weather_alerts_screen.dart';
 import 'package:kheti_sahayak_app/screens/crop/crop_advisory_screen.dart';
 import 'package:kheti_sahayak_app/screens/market/market_prices_screen.dart';
 import 'package:kheti_sahayak_app/screens/crop/crop_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/market/market_price_detail_screen.dart';
 import 'package:kheti_sahayak_app/screens/tracking/application_tracking_screen.dart';
+// Expert Consultation Screens
+import 'package:kheti_sahayak_app/screens/expert/expert_list_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/expert_profile_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/book_consultation_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/consultation_list_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/consultation_detail_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/video_call_screen.dart';
+import 'package:kheti_sahayak_app/screens/expert/add_review_screen.dart';
+import 'package:kheti_sahayak_app/models/consultation.dart';
+import 'package:kheti_sahayak_app/models/expert.dart';
 
 class AppRoutes {
   // Route names
@@ -45,7 +56,16 @@ class AppRoutes {
   static const String marketPriceDetail = '/market-price-detail';
   static const String editProfile = '/edit-profile';
   static const String applicationTracking = '/application-tracking';
-
+  static const String weatherAlerts = '/weather-alerts';
+  
+  // Expert Consultation Routes
+  static const String expertList = '/experts';
+  static const String expertProfile = '/expert-profile';
+  static const String bookConsultation = '/book-consultation';
+  static const String consultationHistory = '/consultation-history';
+  static const String consultationDetail = '/consultation-detail';
+  static const String videoCall = '/video-call';
+  static const String addReview = '/add-review';
 
   // Routes map
   static final Map<String, WidgetBuilder> routes = {
@@ -57,7 +77,8 @@ class AppRoutes {
     marketplace: (context) => const MarketplaceScreen(),
     productDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-      return ProductDetailScreen(productId: args?['productId'] ?? '');
+      final product = args?['product'];
+      return ProductDetailScreen(product: product);
     },
     cart: (context) => const CartScreen(),
     checkout: (context) => const CheckoutScreen(),
@@ -79,8 +100,14 @@ class AppRoutes {
     profile: (context) => const ProfileScreen(),
     changePassword: (context) => const ChangePasswordScreen(),
     weather: (context) => const WeatherScreen(),
-    cropAdvisory: (context) => const CropAdvisoryScreen(),
-    marketPrices: (context) => const MarketPricesScreen(),
+    cropAdvisory: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Crop Advisory')),
+      body: const Center(child: Text('Crop Advisory Coming Soon')),
+    ),
+    marketPrices: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Market Prices')),
+      body: const Center(child: Text('Market Prices Coming Soon')),
+    ),
     cropDetail: (context) { 
       final cropName = ModalRoute.of(context)!.settings.arguments as String;
       return CropDetailScreen(cropName: cropName);
@@ -89,8 +116,39 @@ class AppRoutes {
       final commodity = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
       return MarketPriceDetailScreen(commodity: commodity);
     },
-    editProfile: (context) => const EditProfileScreen(),
-    applicationTracking: (context) => const ApplicationTrackingScreen(),
+    editProfile: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Edit Profile')),
+      body: const Center(child: Text('Edit Profile Coming Soon')),
+    ),
+    applicationTracking: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Application Tracking')),
+      body: const Center(child: Text('Application Tracking Coming Soon')),
+    ),
+    weatherAlerts: (context) => const WeatherAlertsScreen(),
+    
+    // Expert Consultation Routes
+    expertList: (context) => const ExpertListScreen(),
+    expertProfile: (context) {
+      final expert = ModalRoute.of(context)!.settings.arguments as Expert;
+      return ExpertProfileScreen(expert: expert);
+    },
+    bookConsultation: (context) {
+      final expert = ModalRoute.of(context)!.settings.arguments as Expert;
+      return BookConsultationScreen(expert: expert);
+    },
+    consultationHistory: (context) => const ConsultationListScreen(),
+    consultationDetail: (context) {
+      final consultation = ModalRoute.of(context)!.settings.arguments as Consultation;
+      return ConsultationDetailScreen(consultation: consultation);
+    },
+    videoCall: (context) {
+      final consultation = ModalRoute.of(context)!.settings.arguments as Consultation;
+      return VideoCallScreen(consultation: consultation);
+    },
+    addReview: (context) {
+      final consultation = ModalRoute.of(context)!.settings.arguments as Consultation;
+      return AddReviewScreen(consultation: consultation);
+    },
   };
 
   // Auth guard

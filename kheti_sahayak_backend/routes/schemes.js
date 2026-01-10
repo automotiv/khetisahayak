@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { schemeQueryValidation, validateIdParam } = require('../middleware/validationMiddleware');
 
 /**
  * @swagger
@@ -41,7 +42,7 @@ const db = require('../db');
  *                       eligibility:
  *                         type: string
  */
-router.get('/', async (req, res) => {
+router.get('/', schemeQueryValidation, async (req, res) => {
     try {
         const {
             farm_size,
@@ -127,7 +128,7 @@ router.get('/', async (req, res) => {
  *       404:
  *         description: Scheme not found
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateIdParam, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await db.query('SELECT * FROM schemes WHERE id = $1', [id]);

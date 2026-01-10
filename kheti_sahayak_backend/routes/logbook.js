@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { protect } = require('../middleware/authMiddleware');
+const { logbookEntryValidation, validateIdParam, validatePagination, handleValidationErrors } = require('../middleware/validationMiddleware');
 
 /**
  * @swagger
@@ -22,15 +23,20 @@ const { protect } = require('../middleware/authMiddleware');
  *       200:
  *         description: List of logbook entries
  */
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, [...validatePagination, handleValidationErrors], async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        
         const result = await db.query(
-            'SELECT * FROM logbook WHERE user_id = $1 ORDER BY date DESC, created_at DESC',
-            [req.user.id]
+            'SELECT * FROM logbook WHERE user_id = $1 ORDER BY date DESC, created_at DESC LIMIT $2 OFFSET $3',
+            [req.user.id, limit, offset]
         );
         res.json({
             success: true,
-            data: result.rows
+            data: result.rows,
+            pagination: { page, limit }
         });
     } catch (error) {
         console.error('Error fetching logbook entries:', error);
@@ -74,16 +80,9 @@ router.get('/', protect, async (req, res) => {
  *       201:
  *         description: Entry created
  */
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, logbookEntryValidation, async (req, res) => {
     try {
         const { activity_type, date, description, cost, income } = req.body;
-
-        if (!activity_type || !date) {
-            return res.status(400).json({
-                success: false,
-                message: 'Activity type and date are required'
-            });
-        }
 
         const result = await db.query(
             `INSERT INTO logbook (user_id, activity_type, date, description, cost, income)
@@ -125,7 +124,7 @@ router.post('/', protect, async (req, res) => {
  *       404:
  *         description: Entry not found
  */
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, validateIdParam, async (req, res) => {
     try {
         const { id } = req.params;
 

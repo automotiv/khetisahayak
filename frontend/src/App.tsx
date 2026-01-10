@@ -16,6 +16,10 @@ import SharingPlatform from './components/sharing/SharingPlatform';
 import NotificationCenter from './components/notifications/NotificationCenter';
 import UserProfile from './components/profile/UserProfile';
 import LoginForm from './components/auth/LoginForm';
+import SellerDashboard from './components/seller/SellerDashboard';
+import SellerOrders from './components/seller/SellerOrders';
+import SellerAnalytics from './components/seller/SellerAnalytics';
+import SellerInventory from './components/seller/SellerInventory';
 import theme from './theme/theme';
 import { mockQuery } from './data/khetiSahayakMockData';
 import { enhancedMockQuery, enhancedMockStore } from './data/enhancedKhetiSahayakMockData';
@@ -90,13 +94,15 @@ const App: React.FC = () => {
           }));
         };
 
-        if (productsData && productsData.products) {
+        if (productsData?.products) {
           setProducts(transformProducts(productsData.products));
-        } else if (productsData && productsData.data) {
+        } else if (productsData?.data) {
           setProducts(transformProducts(productsData.data));
         }
 
-        if (contentData && contentData.data) {
+        if (contentData?.content) {
+          setContent(contentData.content);
+        } else if (contentData?.data) {
           setContent(contentData.data);
         }
 
@@ -104,7 +110,7 @@ const App: React.FC = () => {
           setEquipment(equipmentData.data);
         }
 
-        if (newsRes && newsRes.data) {
+        if (newsRes?.data) {
           setNews(newsRes.data);
         }
 
@@ -231,6 +237,27 @@ const App: React.FC = () => {
             preferences={enhancedMockStore.userPreferences}
           />
         );
+      case 13:
+        return (
+          <SellerDashboard
+            sellerName={enhancedMockStore.user.name}
+            onNavigate={(tab) => {
+              const tabMap: Record<string, number> = {
+                dashboard: 13,
+                orders: 14,
+                analytics: 15,
+                inventory: 16,
+              };
+              setCurrentTab(tabMap[tab] || 13);
+            }}
+          />
+        );
+      case 14:
+        return <SellerOrders />;
+      case 15:
+        return <SellerAnalytics />;
+      case 16:
+        return <SellerInventory />;
       default:
         return (
           <Dashboard

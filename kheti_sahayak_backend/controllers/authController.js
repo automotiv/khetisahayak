@@ -4,6 +4,8 @@ const db = require('../db');
 const asyncHandler = require('express-async-handler');
 const { validationResult } = require('express-validator');
 const { uploadFileToS3 } = require('../s3');
+const verificationService = require('../services/verificationService');
+const emailService = require('../services/emailService');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -26,13 +28,23 @@ const registerUser = asyncHandler(async (req, res) => {
   const user = result.rows[0];
   delete user.password_hash;
 
-  // Generate JWT token
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
+  // Send verification email (non-blocking)
+  verificationService.sendVerificationEmail(user).catch(err => {
+    console.error('[Auth] Failed to send verification email:', err.message);
+  });
+
+  // Send welcome email (non-blocking)
+  emailService.sendWelcomeEmail(user).catch(err => {
+    console.error('[Auth] Failed to send welcome email:', err.message);
+  });
+
   res.status(201).json({ 
-    message: 'User registered successfully', 
+    message: 'User registered successfully. Please check your email to verify your account.', 
     user,
-    token 
+    token,
+    emailVerificationRequired: true
   });
 });
 
@@ -233,6 +245,151 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ message: 'User deleted successfully' });
 });
 
+// @desc    Verify email with token
+// @route   GET /api/auth/verify-email
+// @access  Public
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.query;
+  
+  if (!token) {
+    res.status(400);
+    throw new Error('Verification token is required');
+  }
+  
+  const result = await verificationService.verifyEmail(token);
+  
+  if (!result.success) {
+    res.status(400);
+    throw new Error(result.error);
+  }
+  
+  res.json({ 
+    message: 'Email verified successfully',
+    user: result.user 
+  });
+});
+
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-verification
+// @access  Private
+const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const userResult = await db.query(
+    'SELECT id, email, username, first_name, email_verified FROM users WHERE id = $1',
+    [req.user.id]
+  );
+  
+  if (userResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+  
+  const user = userResult.rows[0];
+  
+  if (user.email_verified) {
+    res.status(400);
+    throw new Error('Email is already verified');
+  }
+  
+  await verificationService.sendVerificationEmail(user);
+  
+  res.json({ message: 'Verification email sent successfully' });
+});
+
+// @desc    Request password reset
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
+  const { email } = req.body;
+  
+  const result = await verificationService.createPasswordResetToken(email);
+  
+  // Always return success to prevent email enumeration
+  res.json({ 
+    message: 'If an account exists with this email, a password reset link has been sent' 
+  });
+});
+
+// @desc    Reset password with token
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
+  const { token, password } = req.body;
+  
+  if (!token) {
+    res.status(400);
+    throw new Error('Reset token is required');
+  }
+  
+  const result = await verificationService.resetPassword(token, password);
+  
+  if (!result.success) {
+    res.status(400);
+    throw new Error(result.error);
+  }
+  
+  res.json({ message: 'Password reset successfully' });
+});
+
+// @desc    Send OTP for phone verification
+// @route   POST /api/auth/send-otp
+// @access  Private
+const sendOTP = asyncHandler(async (req, res) => {
+  const { phone } = req.body;
+  
+  if (!phone) {
+    res.status(400);
+    throw new Error('Phone number is required');
+  }
+  
+  const result = await verificationService.createOTP(phone, req.user.id, 'phone_verification');
+  
+  if (!result.success) {
+    res.status(429);
+    throw new Error(result.error);
+  }
+  
+  // In production, send OTP via SMS service
+  // For development, log the OTP
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[DEV] OTP for ${phone}: ${result.otp}`);
+  }
+  
+  // TODO: Integrate SMS service (MSG91/Twilio) to send OTP
+  
+  res.json({ message: 'OTP sent successfully' });
+});
+
+// @desc    Verify OTP
+// @route   POST /api/auth/verify-otp
+// @access  Private
+const verifyOTP = asyncHandler(async (req, res) => {
+  const { phone, otp } = req.body;
+  
+  if (!phone || !otp) {
+    res.status(400);
+    throw new Error('Phone number and OTP are required');
+  }
+  
+  const result = await verificationService.verifyOTP(phone, otp, 'phone_verification');
+  
+  if (!result.success) {
+    res.status(400);
+    throw new Error(result.error);
+  }
+  
+  res.json({ message: 'Phone number verified successfully' });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -243,4 +400,10 @@ module.exports = {
   logoutUser,
   getAllUsers,
   deleteUser,
+  verifyEmail,
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword,
+  sendOTP,
+  verifyOTP,
 };

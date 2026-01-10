@@ -6,11 +6,57 @@ import 'package:kheti_sahayak_app/utils/constants.dart';
 class ApiService {
   static const String baseUrl = '${AppConstants.baseUrl}/api'; // Production API
 
+  /// Get crops list (used by CropAdvisoryScreen)
+  Future<List<dynamic>> getCrops() async {
+    try {
+      final response = await ApiService.get('crops');
+      if (response['crops'] != null) {
+        return response['crops'] as List;
+      } else if (response['data'] != null) {
+        return response['data'] as List;
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching crops: $e');
+      // Return mock data for offline/error scenarios
+      return [
+        {'name': 'Rice', 'category': 'Cereals'},
+        {'name': 'Wheat', 'category': 'Cereals'},
+        {'name': 'Cotton', 'category': 'Cash Crops'},
+        {'name': 'Sugarcane', 'category': 'Cash Crops'},
+        {'name': 'Tomato', 'category': 'Vegetables'},
+        {'name': 'Potato', 'category': 'Vegetables'},
+      ];
+    }
+  }
+
+  /// Get market prices (used by MarketPricesScreen)
+  Future<List<dynamic>> getMarketPrices() async {
+    try {
+      final response = await ApiService.get('market-prices');
+      if (response['prices'] != null) {
+        return response['prices'] as List;
+      } else if (response['data'] != null) {
+        return response['data'] as List;
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching market prices: $e');
+      // Return mock data for offline/error scenarios
+      return [
+        {'name': 'Rice', 'price': 2500, 'unit': 'quintal', 'market': 'APMC Nashik'},
+        {'name': 'Wheat', 'price': 2200, 'unit': 'quintal', 'market': 'APMC Nashik'},
+        {'name': 'Cotton', 'price': 6500, 'unit': 'quintal', 'market': 'APMC Nagpur'},
+        {'name': 'Tomato', 'price': 1500, 'unit': 'quintal', 'market': 'APMC Pune'},
+      ];
+    }
+  }
+
   static Future<Map<String, dynamic>> syncLogbook({
     String? lastSyncTimestamp,
     required List<Map<String, dynamic>> changes,
   }) async {
-    final token = await AuthService().getToken();
+    final token = await AuthService.getToken();
     if (token == null) throw Exception('Not authenticated');
 
     // Transform local changes to match backend schema
@@ -52,7 +98,6 @@ class ApiService {
     // ... existing implementation ...
     return {'success': true}; // Mock
   }
-  }
 
   // ================== REQUEST BATCHING ==================
   
@@ -75,8 +120,8 @@ class ApiService {
   /// Flush queued requests
   static Future<void> flushQueue() async {
     if (_requestQueue.isEmpty) return;
-    
-    final token = await AuthService().getToken();
+
+    final token = await AuthService.getToken();
     if (token == null) return; // Or handle appropriately
     
     final batch = List<Map<String, dynamic>>.from(_requestQueue);
@@ -116,6 +161,127 @@ class ApiService {
       print('Error flushing queue: $e');
       // Re-queue?
       _requestQueue.addAll(batch);
+    }
+  }
+
+  // ================== GENERIC API METHODS ==================
+
+  static Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? queryParams}) async {
+    try {
+      final token = await AuthService.getToken();
+      final uri = queryParams != null
+          ? Uri.parse('$baseUrl/$endpoint').replace(queryParameters: queryParams)
+          : Uri.parse('$baseUrl/$endpoint');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('API Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
+    try {
+      final token = await AuthService.getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('API Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> data) async {
+    try {
+      final token = await AuthService.getToken();
+      final response = await http.put(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('API Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> delete(String endpoint) async {
+    try {
+      final token = await AuthService.getToken();
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('API Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> postMultipart(String endpoint, Map<String, dynamic> data) async {
+    try {
+      final token = await AuthService.getToken();
+      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/$endpoint'));
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      // Add fields and files from data
+      data.forEach((key, value) {
+        if (value is String) {
+          request.fields[key] = value;
+        }
+      });
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(responseBody);
+      } else {
+        throw Exception('API Error: ${response.statusCode} - $responseBody');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
     }
   }
 }

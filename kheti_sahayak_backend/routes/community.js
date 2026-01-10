@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { communityPostValidation, validateIdParam, validatePagination, handleValidationErrors } = require('../middleware/validationMiddleware');
 
 /**
  * @swagger
@@ -44,12 +45,20 @@ const db = require('../db');
  *                         type: string
  *                         format: date-time
  */
-router.get('/posts', async (req, res) => {
+router.get('/posts', [...validatePagination, handleValidationErrors], async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM community_posts ORDER BY timestamp DESC');
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        
+        const result = await db.query(
+            'SELECT * FROM community_posts ORDER BY timestamp DESC LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
         res.json({
             success: true,
-            data: result.rows
+            data: result.rows,
+            pagination: { page, limit }
         });
     } catch (error) {
         console.error('Error fetching community posts:', error);
@@ -86,16 +95,9 @@ router.get('/posts', async (req, res) => {
  *       201:
  *         description: Post created
  */
-router.post('/posts', async (req, res) => {
+router.post('/posts', communityPostValidation, async (req, res) => {
     try {
         const { user_name, content, image_url } = req.body;
-
-        if (!user_name || !content) {
-            return res.status(400).json({
-                success: false,
-                message: 'User name and content are required'
-            });
-        }
 
         const result = await db.query(
             'INSERT INTO community_posts (user_name, content, image_url) VALUES ($1, $2, $3) RETURNING *',

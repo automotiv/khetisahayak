@@ -1,0 +1,15 @@
+# Flutter Localization Configuration
+# This file configures the Flutter localization system for Kheti Sahayak
+# Run 'flutter gen-l10n' to generate localization files after adding new translations
+
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n/generated
+synthetic-package: false
+nullable-getter: false
+
+# Supported locales for Kheti Sahayak
+# Primary: Hindi (for Indian farmers)
+# Additional: English, Marathi, Tamil, Kannada, Telugu, Gujarati

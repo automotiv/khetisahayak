@@ -9,6 +9,7 @@ const {
   getCartSummary,
 } = require('../controllers/cartController');
 const { protect } = require('../middleware/authMiddleware');
+const { cartAddValidation, cartUpdateValidation, validateUUID, handleValidationErrors } = require('../middleware/validationMiddleware');
 
 /**
  * @swagger
@@ -115,7 +116,7 @@ router.get('/summary', protect, getCartSummary);
  *       404:
  *         description: Product not found
  */
-router.post('/', protect, addToCart);
+router.post('/', protect, cartAddValidation, addToCart);
 
 /**
  * @swagger
@@ -155,7 +156,7 @@ router.post('/', protect, addToCart);
  *       404:
  *         description: Cart item not found
  */
-router.put('/:itemId', protect, updateCartItem);
+router.put('/:itemId', protect, cartUpdateValidation, updateCartItem);
 
 /**
  * @swagger
@@ -181,7 +182,12 @@ router.put('/:itemId', protect, updateCartItem);
  *       404:
  *         description: Cart item not found
  */
-router.delete('/:itemId', protect, removeCartItem);
+const removeItemValidation = [
+  validateUUID('itemId', 'param'),
+  handleValidationErrors
+];
+
+router.delete('/:itemId', protect, removeItemValidation, removeCartItem);
 
 /**
  * @swagger

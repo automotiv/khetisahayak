@@ -24,16 +24,8 @@ class DiagnosticService {
 
       final response = await ApiService.get('diagnostics', queryParams: queryParams);
 
-      // Handle various response formats
-      if (response is List) {
-        // Direct array response
-        return {
-          'diagnostics': response
-              .map((diagnosticJson) => Diagnostic.fromJson(diagnosticJson))
-              .toList(),
-          'pagination': {'total': response.length, 'page': 1, 'limit': response.length},
-        };
-      } else if (response is Map) {
+      // Handle various response formats - ApiService.get always returns Map<String, dynamic>
+      if (response is Map<String, dynamic>) {
         // Map response with 'data' or 'diagnostics' key
         final diagnosticsList = response['data'] ?? response['diagnostics'] ?? [];
         if (diagnosticsList is List) {
@@ -174,12 +166,12 @@ class DiagnosticService {
   }
 
   // Get detailed treatment recommendations with disease info (New MVP endpoint)
-  Future<TreatmentRecommendationsResponse> getTreatmentRecommendations(int diagnosticId) async {
+  Future<TreatmentRecommendationsResponse> getTreatmentRecommendationsV2(int diagnosticId) async {
     try {
       final response = await ApiService.get('diagnostics/$diagnosticId/treatments');
       return TreatmentRecommendationsResponse.fromJson(response);
     } catch (e) {
-      print('Error in getTreatmentRecommendations: $e');
+      print('Error in getTreatmentRecommendationsV2: $e');
       rethrow;
     }
   }

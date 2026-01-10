@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/field.dart';
 import 'package:kheti_sahayak_app/services/field_service.dart';
-import 'package:kheti_sahayak_app/widgets/dashboard/yield_trend_chart.dart';
+import 'package:kheti_sahayak_app/widgets/charts/yield_trend_chart.dart';
 
 class LogbookAnalyticsTab extends StatefulWidget {
   const LogbookAnalyticsTab({Key? key}) : super(key: key);
@@ -72,7 +72,7 @@ class _LogbookAnalyticsTabState extends State<LogbookAnalyticsTab> {
           const SizedBox(height: 16),
           const SizedBox(
             height: 300,
-            child: YieldTrendChart(), // Uses internal logic to fetch data, might need update to accept fieldId
+            child: YieldTrendChart(yieldData: const []), // TODO: Pass actual yield data based on selected field
           ),
           const SizedBox(height: 24),
           const Text(

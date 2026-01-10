@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Scheme {
   final int id;
   final String name;

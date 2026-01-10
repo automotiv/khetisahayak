@@ -1,7 +1,17 @@
 const express = require('express');
 const axios = require('axios');
 const redisClient = require('../redisClient');
-const { getRecommendations, getForecast: getEnhancedForecast } = require('../controllers/weatherController');
+const { protect } = require('../middleware/authMiddleware');
+const {
+  getRecommendations,
+  getForecast: getEnhancedForecast,
+  getHourlyForecast,
+  getWeatherAlerts,
+  getSeasonalAdvisory,
+  subscribeToAlerts,
+  unsubscribeFromAlerts,
+  getMyAlertSubscriptions,
+} = require('../controllers/weatherController');
 
 const router = express.Router();
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -437,6 +447,292 @@ router.get('/forecast-enhanced', getEnhancedForecast);
 
 /**
  * @swagger
+ * /api/weather/hourly:
+ *   get:
+ *     summary: Get 24-hour hourly forecast with agricultural suitability
+ *     description: Returns hourly weather forecast for the next 24 hours including agricultural suitability ratings for spraying, irrigation, harvesting, and field work
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: 24-hour hourly forecast with agricultural suitability
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     location:
+ *                       type: object
+ *                     hourly_forecast:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           datetime:
+ *                             type: string
+ *                           temp:
+ *                             type: number
+ *                           humidity:
+ *                             type: number
+ *                           wind_speed:
+ *                             type: number
+ *                           precipitation_probability:
+ *                             type: number
+ *                           agricultural_suitability:
+ *                             type: object
+ *                             properties:
+ *                               spraying:
+ *                                 type: string
+ *                                 enum: [good, moderate, poor]
+ *                               irrigation:
+ *                                 type: string
+ *                                 enum: [good, moderate, poor]
+ *                               harvesting:
+ *                                 type: string
+ *                                 enum: [good, moderate, poor]
+ *                               field_work:
+ *                                 type: string
+ *                                 enum: [good, moderate, poor]
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/hourly', getHourlyForecast);
+
+/**
+ * @swagger
+ * /api/weather/alerts:
+ *   get:
+ *     summary: Get active weather alerts for location
+ *     description: Returns active weather alerts including heat wave, heavy rain, frost, storm, and drought warnings
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: Active weather alerts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     alerts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           alert_type:
+ *                             type: string
+ *                             enum: [heat_wave, heavy_rain, frost, storm, drought]
+ *                           severity:
+ *                             type: string
+ *                             enum: [low, moderate, high, severe]
+ *                           title:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           start_time:
+ *                             type: string
+ *                           end_time:
+ *                             type: string
+ *                           recommendations:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                     alert_count:
+ *                       type: integer
+ *                     has_severe_alerts:
+ *                       type: boolean
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/alerts', getWeatherAlerts);
+
+/**
+ * @swagger
+ * /api/weather/seasonal-advisory:
+ *   get:
+ *     summary: Get seasonal farming advisory
+ *     description: Returns crop-specific advisories based on current agricultural season (Kharif, Rabi, Zaid)
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *       - in: query
+ *         name: crop
+ *         schema:
+ *           type: string
+ *         description: Specific crop for targeted advisory (e.g., rice, wheat, cotton)
+ *     responses:
+ *       200:
+ *         description: Seasonal farming advisory
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     season:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         phase:
+ *                           type: string
+ *                           enum: [early, mid, late]
+ *                     advisory:
+ *                       type: object
+ *                       properties:
+ *                         general_advisory:
+ *                           type: array
+ *                         crop_specific:
+ *                           type: object
+ *                     recommended_crops:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/seasonal-advisory', getSeasonalAdvisory);
+
+/**
+ * @swagger
+ * /api/weather/alerts/subscribe:
+ *   post:
+ *     summary: Subscribe to weather alerts for a location
+ *     description: Subscribe to receive weather alerts for a specific location. Requires authentication.
+ *     tags: [Weather]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - lat
+ *               - lon
+ *             properties:
+ *               lat:
+ *                 type: number
+ *                 description: Latitude
+ *               lon:
+ *                 type: number
+ *                 description: Longitude
+ *               alert_types:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [heat_wave, heavy_rain, frost, storm, drought]
+ *                 description: Types of alerts to subscribe to (defaults to all)
+ *     responses:
+ *       201:
+ *         description: Successfully subscribed to alerts
+ *       400:
+ *         description: Missing required parameters
+ *       401:
+ *         description: Authentication required
+ */
+router.post('/alerts/subscribe', protect, subscribeToAlerts);
+
+/**
+ * @swagger
+ * /api/weather/alerts/unsubscribe:
+ *   delete:
+ *     summary: Unsubscribe from weather alerts
+ *     description: Unsubscribe from weather alerts for a specific location or all locations. Requires authentication.
+ *     tags: [Weather]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               lat:
+ *                 type: number
+ *                 description: Latitude (optional - if not provided, unsubscribes from all)
+ *               lon:
+ *                 type: number
+ *                 description: Longitude (optional - if not provided, unsubscribes from all)
+ *     responses:
+ *       200:
+ *         description: Successfully unsubscribed from alerts
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: No subscription found
+ */
+router.delete('/alerts/unsubscribe', protect, unsubscribeFromAlerts);
+
+/**
+ * @swagger
+ * /api/weather/alerts/subscriptions:
+ *   get:
+ *     summary: Get user's alert subscriptions
+ *     description: Returns all weather alert subscriptions for the authenticated user
+ *     tags: [Weather]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User's alert subscriptions
+ *       401:
+ *         description: Authentication required
+ */
+router.get('/alerts/subscriptions', protect, getMyAlertSubscriptions);
+
+/**
+ * @swagger
  * /api/weather/:city:
  *   get:
  *     summary: Get current weather by city name (legacy endpoint)
@@ -457,7 +753,6 @@ router.get('/forecast-enhanced', getEnhancedForecast);
 router.get('/:city', async (req, res) => {
   const city = req.params.city;
 
-  // Redirect to new /current endpoint
   req.query.city = city;
   return router.handle({ ...req, url: '/current', query: req.query }, res);
 });

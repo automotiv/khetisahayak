@@ -121,3 +121,8 @@
 -keepclassmembers class kotlin.Metadata {
     public <methods>;
 }
+
+# Google Play Core library (for deferred components / dynamic feature delivery)
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
