@@ -197,18 +197,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: secrets.DOCKERHUB_USERNAME != ''
+        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
+        continue-on-error: true
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./kheti_sahayak_backend
-          push: ${{ secrets.DOCKERHUB_USERNAME != '' }}
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build Docker image
+        run: docker build -t kheti-sahayak-backend:${{ github.sha }} ./kheti_sahayak_backend
+
+      - name: Push to DockerHub
+        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
+        continue-on-error: true
+        run: |
+          docker tag kheti-sahayak-backend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest
+          docker tag kheti-sahayak-backend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:${{ github.sha }}
 
   build-flutter:
     name: Build Flutter APK
