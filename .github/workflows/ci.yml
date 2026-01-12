@@ -230,7 +230,7 @@ jobs:
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-apk
           path: kheti_sahayak_app/build/app/outputs/flutter-apk/app-release.apk

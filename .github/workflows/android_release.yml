@@ -58,7 +58,7 @@ jobs:
       run: flutter build appbundle --release
 
     - name: Upload App Bundle
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: app-release-bundle
         path: kheti_sahayak_app/build/app/outputs/bundle/release/app-release.aab
