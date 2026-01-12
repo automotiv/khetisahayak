@@ -336,13 +336,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download Android AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: android-aab
           path: ./artifacts
 
       - name: Download iOS IPA
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ios-ipa
           path: ./artifacts
