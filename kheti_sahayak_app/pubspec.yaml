@@ -53,7 +53,7 @@ dependencies:
   path_provider:
   connectivity_plus: ^6.1.0
   permission_handler: ^11.3.1
-  flutter_local_notifications: ^17.0.0
+  flutter_local_notifications: ^19.5.0
 
   # Form Validation
   form_validator:
