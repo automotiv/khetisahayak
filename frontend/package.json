@@ -21,7 +21,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.26.2",
-    "recharts": "^2.15.0"
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
