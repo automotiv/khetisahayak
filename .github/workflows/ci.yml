@@ -200,7 +200,7 @@ jobs:
         if: secrets.DOCKERHUB_USERNAME != ''
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./kheti_sahayak_backend
           push: ${{ secrets.DOCKERHUB_USERNAME != '' }}
