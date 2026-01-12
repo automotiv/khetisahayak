@@ -46,7 +46,7 @@ jobs:
           cache-dependency-path: kheti_sahayak_backend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run linter
         run: npm run lint --if-present
@@ -87,7 +87,7 @@ jobs:
           cache-dependency-path: kheti_sahayak_backend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run npm audit
         run: npm audit --audit-level=high
@@ -162,7 +162,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run linter
         run: npm run lint --if-present
