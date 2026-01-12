@@ -99,6 +99,13 @@ dependencies:
   # TensorFlow Lite for offline ML
   tflite_flutter: ^0.10.4
 
+  # Social Login
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^7.1.1
+
+  # Error Monitoring
+  sentry_flutter: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -131,6 +138,7 @@ flutter:
     - lib/.env
     - assets/images/
     - assets/icons/
+    - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

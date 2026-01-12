@@ -12,6 +12,9 @@ class User {
   final DateTime? updatedAt;
   final bool isEmailVerified;
   final bool isPhoneVerified;
+  final String? authProvider;
+  final String? googleId;
+  final String? facebookId;
 
   // Farm details
   final double? farmSize;
@@ -34,6 +37,9 @@ class User {
     this.updatedAt,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
+    this.authProvider,
+    this.googleId,
+    this.facebookId,
     this.farmSize,
     this.soilType,
     this.irrigationType,
@@ -77,8 +83,11 @@ class User {
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'])
           : null,
-      isEmailVerified: json['is_email_verified'] ?? json['is_verified'] ?? false,
-      isPhoneVerified: json['is_phone_verified'] ?? false,
+      isEmailVerified: json['is_email_verified'] ?? json['email_verified'] ?? json['is_verified'] ?? false,
+      isPhoneVerified: json['is_phone_verified'] ?? json['phone_verified'] ?? false,
+      authProvider: json['auth_provider'],
+      googleId: json['google_id'],
+      facebookId: json['facebook_id'],
       farmSize: json['farm_size'] != null ? double.tryParse(json['farm_size'].toString()) : null,
       soilType: json['soil_type'],
       irrigationType: json['irrigation_type'],
@@ -102,6 +111,9 @@ class User {
       'updated_at': updatedAt?.toIso8601String(),
       'is_email_verified': isEmailVerified,
       'is_phone_verified': isPhoneVerified,
+      if (authProvider != null) 'auth_provider': authProvider,
+      if (googleId != null) 'google_id': googleId,
+      if (facebookId != null) 'facebook_id': facebookId,
       if (farmSize != null) 'farm_size': farmSize,
       if (soilType != null) 'soil_type': soilType,
       if (irrigationType != null) 'irrigation_type': irrigationType,
@@ -122,6 +134,9 @@ class User {
     String? role,
     bool? isEmailVerified,
     bool? isPhoneVerified,
+    String? authProvider,
+    String? googleId,
+    String? facebookId,
     double? farmSize,
     String? soilType,
     String? irrigationType,
@@ -142,6 +157,9 @@ class User {
       updatedAt: updatedAt,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      authProvider: authProvider ?? this.authProvider,
+      googleId: googleId ?? this.googleId,
+      facebookId: facebookId ?? this.facebookId,
       farmSize: farmSize ?? this.farmSize,
       soilType: soilType ?? this.soilType,
       irrigationType: irrigationType ?? this.irrigationType,

@@ -17,6 +17,11 @@ const {
   resetPassword,
   sendOTP,
   verifyOTP,
+  googleSignIn,
+  unlinkGoogle,
+  facebookSignIn,
+  unlinkFacebook,
+  getAuthProviders,
 } = require('../controllers/authController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { authRateLimiter, sensitiveRateLimiter } = require('../middleware/securityMiddleware');
@@ -479,5 +484,120 @@ router.post('/verify-otp', protect, [
 
 router.get('/users', protect, authorize('admin'), getAllUsers);
 router.delete('/users/:id', protect, authorize('admin'), deleteUser);
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   post:
+ *     summary: Sign in with Google
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - idToken
+ *             properties:
+ *               idToken:
+ *                 type: string
+ *                 description: Google ID token from client
+ *     responses:
+ *       200:
+ *         description: Google sign-in successful
+ *       400:
+ *         description: Invalid token
+ *       503:
+ *         description: Google Sign-In not configured
+ */
+router.post('/google', authRateLimiter, [
+  body('idToken', 'Google ID token is required').not().isEmpty(),
+], googleSignIn);
+
+/**
+ * @swagger
+ * /api/auth/google/unlink:
+ *   post:
+ *     summary: Unlink Google account
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Google account unlinked
+ *       400:
+ *         description: Cannot unlink (no other auth method)
+ */
+router.post('/google/unlink', protect, unlinkGoogle);
+
+/**
+ * @swagger
+ * /api/auth/facebook:
+ *   post:
+ *     summary: Sign in with Facebook
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - accessToken
+ *             properties:
+ *               accessToken:
+ *                 type: string
+ *                 description: Facebook access token from client
+ *     responses:
+ *       200:
+ *         description: Facebook sign-in successful
+ *       400:
+ *         description: Invalid token
+ *       503:
+ *         description: Facebook Sign-In not configured
+ */
+router.post('/facebook', authRateLimiter, [
+  body('accessToken', 'Facebook access token is required').not().isEmpty(),
+], facebookSignIn);
+
+/**
+ * @swagger
+ * /api/auth/facebook/unlink:
+ *   post:
+ *     summary: Unlink Facebook account
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Facebook account unlinked
+ *       400:
+ *         description: Cannot unlink (no other auth method)
+ */
+router.post('/facebook/unlink', protect, unlinkFacebook);
+
+/**
+ * @swagger
+ * /api/auth/providers:
+ *   get:
+ *     summary: Get available authentication providers
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: List of available auth providers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 google:
+ *                   type: boolean
+ *                 facebook:
+ *                   type: boolean
+ *                 email:
+ *                   type: boolean
+ */
+router.get('/providers', getAuthProviders);
 
 module.exports = router;

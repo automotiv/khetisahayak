@@ -10,7 +10,8 @@ import 'package:kheti_sahayak_app/widgets/success_dialog.dart';
 import 'package:kheti_sahayak_app/services/diagnostic_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
-import 'package:kheti_sahayak_app/screens/diagnostics/treatment_details_screen.dart';
+import 'package:kheti_sahayak_app/screens/diagnostics/localized_treatment_details_screen.dart';
+import 'package:kheti_sahayak_app/widgets/localized_diagnostic_result_card.dart';
 
 class DiagnosticsScreen extends StatefulWidget {
   const DiagnosticsScreen({super.key});
@@ -174,7 +175,20 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
                 isLoading: _isAnalyzing,
               ),
             if (_showResult && _currentDiagnostic != null)
-              _buildAnalysisResults(context, _currentDiagnostic!, _aiAnalysis),
+              LocalizedDiagnosticResultCard(
+                diagnostic: _currentDiagnostic!,
+                aiAnalysis: _aiAnalysis,
+                onViewTreatment: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LocalizedTreatmentDetailsScreen(
+                        diagnosticId: _currentDiagnostic!.id.toString(),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
             if (_recentAnalyses.isNotEmpty) ...[
               const SizedBox(height: 24),
@@ -247,42 +261,7 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
     );
   }
 
-  Widget _buildAnalysisResults(BuildContext context, Diagnostic diagnostic, Map<String, dynamic>? aiAnalysis) {
-    final confidence = aiAnalysis != null && aiAnalysis['confidence'] != null ? (aiAnalysis['confidence'] * 100).toStringAsFixed(1) : null;
-    return Card(
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Analysis Results', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            Text('Disease: ${aiAnalysis?['disease']?['name'] ?? diagnostic.diagnosisResult ?? 'N/A'}', style: Theme.of(context).textTheme.titleMedium),
-            if (confidence != null) ...[const SizedBox(height: 4), Text('Confidence: $confidence%')],
-            const SizedBox(height: 16),
-            if (diagnostic.recommendations != null) ...[ 
-              Text('Recommendations:', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 4),
-              Text(diagnostic.recommendations!)
-            ],
-             const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => TreatmentDetailsScreen(diagnosticId: diagnostic.id.toString())));
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4CAF50)),
-                  child: const Text('View Treatment Details', style: TextStyle(color: Colors.white)),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  // NOTE: _buildAnalysisResults removed - now using LocalizedDiagnosticResultCard widget
 
   Widget _buildRecentAnalysesSection(BuildContext context, List<Diagnostic> recentAnalyses) {
      return Column(
@@ -300,24 +279,9 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
               return Container(
                 width: 200,
                 margin: const EdgeInsets.only(right: 12),
-                child: Card(
-                  elevation: 2.0,
-                  child: InkWell(
-                    onTap: () => _viewDiagnosticResult(diagnostic),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(diagnostic.cropType, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text('Status: ${diagnostic.status}', style: Theme.of(context).textTheme.bodySmall),
-                          const Spacer(),
-                          const Text('View Result', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: LocalizedDiagnosticListItem(
+                  diagnostic: diagnostic,
+                  onTap: () => _viewDiagnosticResult(diagnostic),
                 ),
               );
             },

@@ -4,6 +4,9 @@ import 'package:kheti_sahayak_app/screens/auth/new_login_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/register_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/forgot_password_screen.dart';
 import 'package:kheti_sahayak_app/screens/auth/change_password_screen.dart';
+import 'package:kheti_sahayak_app/screens/auth/email_verification_screen.dart';
+import 'package:kheti_sahayak_app/screens/auth/otp_verification_screen.dart';
+import 'package:kheti_sahayak_app/screens/auth/reset_password_screen.dart';
 import 'package:kheti_sahayak_app/screens/home_page.dart';
 import 'package:kheti_sahayak_app/screens/main_sections/marketplace_screen.dart';
 import 'package:kheti_sahayak_app/screens/marketplace/product_detail_screen.dart';
@@ -31,6 +34,10 @@ import 'package:kheti_sahayak_app/screens/expert/video_call_screen.dart';
 import 'package:kheti_sahayak_app/screens/expert/add_review_screen.dart';
 import 'package:kheti_sahayak_app/models/consultation.dart';
 import 'package:kheti_sahayak_app/models/expert.dart';
+import 'package:kheti_sahayak_app/screens/marketplace/wishlist_screen.dart';
+import 'package:kheti_sahayak_app/screens/marketplace/product_comparison_screen.dart';
+import 'package:kheti_sahayak_app/screens/settings/storage_management_screen.dart';
+import 'package:kheti_sahayak_app/screens/diagnostics/localized_treatment_details_screen.dart';
 
 class AppRoutes {
   // Route names
@@ -38,6 +45,9 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
+  static const String emailVerification = '/email-verification';
+  static const String otpVerification = '/otp-verification';
   static const String dashboard = '/dashboard';
   static const String marketplace = '/marketplace';
   static const String productDetail = '/product-detail';
@@ -57,6 +67,12 @@ class AppRoutes {
   static const String editProfile = '/edit-profile';
   static const String applicationTracking = '/application-tracking';
   static const String weatherAlerts = '/weather-alerts';
+  static const String wishlist = '/wishlist';
+  static const String productComparison = '/product-comparison';
+  static const String storageManagement = '/storage-management';
+  
+  // Diagnostic Routes
+  static const String treatmentDetails = '/treatment-details';
   
   // Expert Consultation Routes
   static const String expertList = '/experts';
@@ -73,6 +89,21 @@ class AppRoutes {
     login: (context) => const NewLoginScreen(),
     register: (context) => const RegisterScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
+    resetPassword: (context) {
+      final token = ModalRoute.of(context)!.settings.arguments as String;
+      return ResetPasswordScreen(token: token);
+    },
+    emailVerification: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return EmailVerificationScreen(email: args?['email']);
+    },
+    otpVerification: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      return OTPVerificationScreen(
+        phoneNumber: args['phone'],
+        canSkip: args['canSkip'] ?? true,
+      );
+    },
     dashboard: (context) => const HomePage(),
     marketplace: (context) => const MarketplaceScreen(),
     productDetail: (context) {
@@ -125,6 +156,18 @@ class AppRoutes {
       body: const Center(child: Text('Application Tracking Coming Soon')),
     ),
     weatherAlerts: (context) => const WeatherAlertsScreen(),
+    wishlist: (context) => const WishlistScreen(),
+    productComparison: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as List<String>?;
+      return ProductComparisonScreen(productIds: args);
+    },
+    storageManagement: (context) => const StorageManagementScreen(),
+    
+    // Diagnostic Routes
+    treatmentDetails: (context) {
+      final diagnosticId = ModalRoute.of(context)!.settings.arguments as String;
+      return LocalizedTreatmentDetailsScreen(diagnosticId: diagnosticId);
+    },
     
     // Expert Consultation Routes
     expertList: (context) => const ExpertListScreen(),

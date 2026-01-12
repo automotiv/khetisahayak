@@ -337,6 +337,103 @@ const getSellerProducts = asyncHandler(async (req, res) => {
   res.json(result.rows);
 });
 
+// @desc    Compare multiple products
+// @route   POST /api/marketplace/compare
+// @access  Public
+const compareProducts = asyncHandler(async (req, res) => {
+  const { product_ids } = req.body;
+
+  if (!product_ids || !Array.isArray(product_ids) || product_ids.length < 2) {
+    res.status(400);
+    throw new Error('At least 2 product IDs are required for comparison');
+  }
+
+  if (product_ids.length > 5) {
+    res.status(400);
+    throw new Error('Maximum 5 products can be compared at once');
+  }
+
+  // Build parameterized query for product IDs
+  const placeholders = product_ids.map((_, index) => `$${index + 1}`).join(', ');
+  
+  const result = await db.query(`
+    SELECT 
+      p.*,
+      u.username as seller_name,
+      u.first_name,
+      u.last_name,
+      COALESCE(r.avg_rating, 0) as avg_rating,
+      COALESCE(r.review_count, 0) as review_count
+    FROM products p
+    LEFT JOIN users u ON p.seller_id = u.id
+    LEFT JOIN (
+      SELECT product_id, AVG(rating) as avg_rating, COUNT(*) as review_count
+      FROM reviews
+      GROUP BY product_id
+    ) r ON p.id = r.product_id
+    WHERE p.id IN (${placeholders})
+  `, product_ids);
+
+  if (result.rows.length === 0) {
+    res.status(404);
+    throw new Error('No products found');
+  }
+
+  // Build comparison data
+  const products = result.rows;
+  const comparisonAttributes = [];
+
+  // Extract all unique specification keys
+  const specKeys = new Set();
+  products.forEach(product => {
+    if (product.specifications && typeof product.specifications === 'object') {
+      Object.keys(product.specifications).forEach(key => specKeys.add(key));
+    }
+  });
+
+  // Build comparison attributes
+  const attributes = [
+    { key: 'price', label: 'Price', type: 'currency' },
+    { key: 'category', label: 'Category', type: 'text' },
+    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'is_organic', label: 'Organic', type: 'boolean' },
+    { key: 'stock_quantity', label: 'Stock', type: 'number' },
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'avg_rating', label: 'Rating', type: 'rating' },
+    { key: 'review_count', label: 'Reviews', type: 'number' },
+  ];
+
+  // Add specification attributes
+  specKeys.forEach(key => {
+    attributes.push({ key: `spec_${key}`, label: key, type: 'text', isSpec: true });
+  });
+
+  // Format products with all comparison data
+  const formattedProducts = products.map(product => {
+    const formatted = { ...product };
+    
+    // Flatten specifications into the product object with prefix
+    if (product.specifications && typeof product.specifications === 'object') {
+      Object.entries(product.specifications).forEach(([key, value]) => {
+        formatted[`spec_${key}`] = value;
+      });
+    }
+    
+    return formatted;
+  });
+
+  res.json({
+    success: true,
+    products: formattedProducts,
+    attributes,
+    comparison_summary: {
+      lowest_price: Math.min(...products.map(p => parseFloat(p.price))),
+      highest_rating: Math.max(...products.map(p => parseFloat(p.avg_rating) || 0)),
+      product_count: products.length,
+    }
+  });
+});
+
 // @desc    Get product categories
 // @route   GET /api/marketplace/categories
 // @access  Public
@@ -370,4 +467,5 @@ module.exports = {
   uploadProductImages,
   getSellerProducts,
   getProductCategories,
+  compareProducts,
 };

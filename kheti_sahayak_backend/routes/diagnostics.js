@@ -13,6 +13,10 @@ const {
   getExpertAssignedDiagnostics,
   getCropRecommendations,
   getDiagnosticStats,
+  aiChatDiagnosis,
+  aiDetailedDiagnosis,
+  getAiHealth,
+  clearDiagnosisCache,
 } = require('../controllers/diagnosticsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -104,6 +108,147 @@ const recommendationsQueryValidation = [
 ];
 
 router.get('/recommendations', recommendationsQueryValidation, getCropRecommendations);
+
+/**
+ * @swagger
+ * /api/diagnostics/ai-health:
+ *   get:
+ *     summary: Get AI/LLaVA service health status
+ *     tags: [Diagnostics]
+ *     responses:
+ *       200:
+ *         description: AI service health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 llava_service:
+ *                   type: object
+ *                 cache:
+ *                   type: object
+ */
+router.get('/ai-health', getAiHealth);
+
+/**
+ * @swagger
+ * /api/diagnostics/ai-chat:
+ *   post:
+ *     summary: Conversational AI diagnosis - ask follow-up questions about crop image
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *               - questions
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Crop/leaf image
+ *               questions:
+ *                 type: string
+ *                 description: JSON array of questions to ask about the image
+ *               crop_type:
+ *                 type: string
+ *                 description: Optional crop type for context
+ *     responses:
+ *       200:
+ *         description: AI chat responses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 responses:
+ *                   type: object
+ *                   description: Map of questions to AI responses
+ *       400:
+ *         description: Invalid request - missing image or questions
+ *       401:
+ *         description: Not authorized
+ */
+router.post('/ai-chat', protect, uploadRateLimiter, upload.single('image'), aiChatDiagnosis);
+
+/**
+ * @swagger
+ * /api/diagnostics/ai-detailed:
+ *   post:
+ *     summary: Get detailed AI diagnosis with disease, severity, treatment, and prevention
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Crop/leaf image
+ *               crop_type:
+ *                 type: string
+ *                 description: Optional crop type for context
+ *     responses:
+ *       200:
+ *         description: Detailed AI diagnosis
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 diagnosis:
+ *                   type: object
+ *                   properties:
+ *                     disease:
+ *                       type: string
+ *                     severity:
+ *                       type: string
+ *                     treatment:
+ *                       type: string
+ *                     prevention:
+ *                       type: string
+ *       400:
+ *         description: Invalid request - missing image
+ *       401:
+ *         description: Not authorized
+ */
+router.post('/ai-detailed', protect, uploadRateLimiter, upload.single('image'), aiDetailedDiagnosis);
+
+/**
+ * @swagger
+ * /api/diagnostics/cache/clear:
+ *   post:
+ *     summary: Clear the diagnosis cache (Admin only)
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache cleared successfully
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Access denied - Admin role required
+ */
+router.post('/cache/clear', protect, authorize('admin'), clearDiagnosisCache);
 
 /**
  * @swagger

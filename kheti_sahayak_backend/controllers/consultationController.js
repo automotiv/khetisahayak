@@ -2,6 +2,7 @@ const db = require('../db');
 const asyncHandler = require('express-async-handler');
 const paymentService = require('../services/paymentService');
 const consultationService = require('../services/consultationService');
+const agoraService = require('../services/agoraService');
 
 const getExperts = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, specialization, min_rating, language, is_verified, sort = 'rating' } = req.query;
@@ -957,6 +958,350 @@ const getExpertReviews = asyncHandler(async (req, res) => {
   });
 });
 
+const confirmConsultation = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const consultationResult = await db.query(
+    `SELECT * FROM consultations WHERE id = $1 AND expert_id = $2`,
+    [id, userId]
+  );
+
+  if (consultationResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Consultation not found or you are not the expert for this consultation');
+  }
+
+  const consultation = consultationResult.rows[0];
+
+  if (consultation.status !== 'pending') {
+    res.status(400);
+    throw new Error('Only pending consultations can be confirmed');
+  }
+
+  if (consultation.payment_status !== 'paid') {
+    res.status(400);
+    throw new Error('Cannot confirm consultation - payment not completed');
+  }
+
+  const result = await db.query(
+    `UPDATE consultations 
+     SET status = 'confirmed', updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING *`,
+    [id]
+  );
+
+  consultationService.sendStatusNotification(id, consultationService.ConsultationStatus.CONFIRMED, 'farmer').catch(console.error);
+
+  res.json({
+    success: true,
+    message: 'Consultation confirmed successfully',
+    consultation: result.rows[0]
+  });
+});
+
+const rejectConsultation = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const { reason } = req.body;
+
+  const consultationResult = await db.query(
+    `SELECT * FROM consultations WHERE id = $1 AND expert_id = $2`,
+    [id, userId]
+  );
+
+  if (consultationResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Consultation not found or you are not the expert for this consultation');
+  }
+
+  const consultation = consultationResult.rows[0];
+
+  if (consultation.status !== 'pending') {
+    res.status(400);
+    throw new Error('Only pending consultations can be rejected');
+  }
+
+  const client = await db.pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    await client.query(
+      `UPDATE consultations 
+       SET status = 'cancelled',
+           cancellation_reason = $2,
+           cancelled_by = $3,
+           cancelled_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [id, reason || 'Rejected by expert', userId]
+    );
+
+    if (consultation.payment_status === 'paid' && consultation.payment_id) {
+      await paymentService.initiateRefund(consultation.payment_id, parseFloat(consultation.amount));
+      await client.query(
+        `UPDATE consultations SET payment_status = 'refunded' WHERE id = $1`,
+        [id]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    consultationService.sendStatusNotification(id, consultationService.ConsultationStatus.CANCELLED, 'farmer').catch(console.error);
+
+    res.json({
+      success: true,
+      message: 'Consultation rejected. Full refund initiated for the farmer.',
+      refund_amount: parseFloat(consultation.amount)
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
+const getVideoTokens = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const consultationResult = await db.query(
+    `SELECT * FROM consultations WHERE id = $1 AND (farmer_id = $2 OR expert_id = $2)`,
+    [id, userId]
+  );
+
+  if (consultationResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Consultation not found');
+  }
+
+  const consultation = consultationResult.rows[0];
+
+  if (!['confirmed', 'in_progress'].includes(consultation.status)) {
+    res.status(400);
+    throw new Error('Video tokens are only available for confirmed or in-progress consultations');
+  }
+
+  if (consultation.payment_status !== 'paid') {
+    res.status(400);
+    throw new Error('Payment must be completed before joining the video call');
+  }
+
+  const scheduledTime = new Date(consultation.scheduled_at);
+  const now = new Date();
+  const minutesUntilStart = (scheduledTime - now) / (1000 * 60);
+
+  if (minutesUntilStart > 15) {
+    res.status(400);
+    throw new Error(`Video call can only be joined within 15 minutes of scheduled time. Time remaining: ${Math.round(minutesUntilStart)} minutes`);
+  }
+
+  let channelName = consultation.call_room_id;
+  if (!channelName) {
+    channelName = agoraService.generateChannelName(consultation.id);
+    await db.query(
+      `UPDATE consultations SET call_room_id = $2 WHERE id = $1`,
+      [id, channelName]
+    );
+  }
+
+  const userRole = userId === consultation.expert_id ? 'expert' : 'farmer';
+  const rtcToken = agoraService.generateRtcToken(channelName, userId, 'publisher', 7200);
+  const rtmToken = agoraService.generateRtmToken(userId, 7200);
+
+  res.json({
+    success: true,
+    video_session: {
+      channel_name: channelName,
+      app_id: agoraService.getAppId(),
+      rtc_token: rtcToken.token,
+      rtm_token: rtmToken.token,
+      uid: rtcToken.uid,
+      role: userRole,
+      expires_at: rtcToken.expiresAt,
+      consultation_type: consultation.consultation_type,
+      duration_minutes: consultation.duration_minutes
+    }
+  });
+});
+
+const joinConsultation = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const consultationResult = await db.query(
+    `SELECT c.*, 
+            f.first_name as farmer_first_name, f.last_name as farmer_last_name,
+            e.first_name as expert_first_name, e.last_name as expert_last_name,
+            ep.specialization
+     FROM consultations c
+     JOIN users f ON c.farmer_id = f.id
+     JOIN users e ON c.expert_id = e.id
+     LEFT JOIN expert_profiles ep ON c.expert_id = ep.user_id
+     WHERE c.id = $1 AND (c.farmer_id = $2 OR c.expert_id = $2)`,
+    [id, userId]
+  );
+
+  if (consultationResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Consultation not found');
+  }
+
+  const consultation = consultationResult.rows[0];
+
+  if (!['confirmed', 'in_progress'].includes(consultation.status)) {
+    res.status(400);
+    throw new Error('Cannot join - consultation is not active');
+  }
+
+  if (consultation.payment_status !== 'paid') {
+    res.status(400);
+    throw new Error('Cannot join - payment not completed');
+  }
+
+  let channelName = consultation.call_room_id;
+  if (!channelName) {
+    channelName = agoraService.generateChannelName(consultation.id);
+  }
+
+  const tokens = agoraService.generateConsultationTokens(
+    channelName,
+    consultation.farmer_id,
+    consultation.expert_id,
+    7200
+  );
+
+  const isExpert = userId === consultation.expert_id;
+  const userTokens = isExpert ? tokens.expert : tokens.farmer;
+
+  if (consultation.status === 'confirmed' && isExpert) {
+    await db.query(
+      `UPDATE consultations 
+       SET status = 'in_progress',
+           call_room_id = $2,
+           call_started_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [id, channelName]
+    );
+
+    consultationService.sendStatusNotification(id, consultationService.ConsultationStatus.IN_PROGRESS, 'farmer').catch(console.error);
+  }
+
+  res.json({
+    success: true,
+    session: {
+      consultation_id: id,
+      channel_name: channelName,
+      app_id: tokens.appId,
+      rtc_token: userTokens.rtcToken,
+      rtm_token: userTokens.rtmToken,
+      uid: userTokens.uid,
+      expires_at: userTokens.expiresAt,
+      role: isExpert ? 'expert' : 'farmer',
+      participant: isExpert 
+        ? { name: `${consultation.farmer_first_name} ${consultation.farmer_last_name}`, role: 'farmer' }
+        : { name: `${consultation.expert_first_name} ${consultation.expert_last_name}`, role: 'expert', specialization: consultation.specialization },
+      consultation_type: consultation.consultation_type,
+      duration_minutes: consultation.duration_minutes,
+      issue_description: consultation.issue_description,
+      issue_images: consultation.issue_images
+    }
+  });
+});
+
+const getPendingConsultations = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const { page = 1, limit = 10 } = req.query;
+
+  const expertResult = await db.query(
+    `SELECT id FROM expert_profiles WHERE user_id = $1`,
+    [userId]
+  );
+
+  if (expertResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Expert profile not found');
+  }
+
+  const result = await db.query(
+    `SELECT c.*, u.first_name, u.last_name, u.profile_image
+     FROM consultations c
+     JOIN users u ON c.farmer_id = u.id
+     WHERE c.expert_id = $1 AND c.status = 'pending' AND c.payment_status = 'paid'
+     ORDER BY c.scheduled_at ASC
+     LIMIT $2 OFFSET $3`,
+    [userId, parseInt(limit), (parseInt(page) - 1) * parseInt(limit)]
+  );
+
+  const countResult = await db.query(
+    `SELECT COUNT(*) FROM consultations WHERE expert_id = $1 AND status = 'pending' AND payment_status = 'paid'`,
+    [userId]
+  );
+
+  const totalCount = parseInt(countResult.rows[0].count);
+
+  res.json({
+    success: true,
+    consultations: result.rows,
+    pagination: {
+      current_page: parseInt(page),
+      total_pages: Math.ceil(totalCount / parseInt(limit)),
+      total_items: totalCount,
+      items_per_page: parseInt(limit)
+    }
+  });
+});
+
+const markNoShow = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const consultationResult = await db.query(
+    `SELECT * FROM consultations WHERE id = $1 AND expert_id = $2`,
+    [id, userId]
+  );
+
+  if (consultationResult.rows.length === 0) {
+    res.status(404);
+    throw new Error('Consultation not found or you are not the expert');
+  }
+
+  const consultation = consultationResult.rows[0];
+
+  if (consultation.status !== 'confirmed') {
+    res.status(400);
+    throw new Error('Only confirmed consultations can be marked as no-show');
+  }
+
+  const scheduledTime = new Date(consultation.scheduled_at);
+  const now = new Date();
+  const minutesPastScheduled = (now - scheduledTime) / (1000 * 60);
+
+  if (minutesPastScheduled < 10) {
+    res.status(400);
+    throw new Error('Cannot mark as no-show until 10 minutes after scheduled time');
+  }
+
+  const result = await db.query(
+    `UPDATE consultations 
+     SET status = 'no_show', updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING *`,
+    [id]
+  );
+
+  res.json({
+    success: true,
+    message: 'Consultation marked as no-show',
+    consultation: result.rows[0]
+  });
+});
+
 module.exports = {
   getExperts,
   getExpertById,
@@ -972,5 +1317,11 @@ module.exports = {
   startConsultation,
   completeConsultation,
   addReview,
-  getExpertReviews
+  getExpertReviews,
+  confirmConsultation,
+  rejectConsultation,
+  getVideoTokens,
+  joinConsultation,
+  getPendingConsultations,
+  markNoShow
 };

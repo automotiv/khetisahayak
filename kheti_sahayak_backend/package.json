@@ -9,12 +9,15 @@
     "test": "jest --runInBand --detectOpenHandles",
     "db:init": "node init_db.js",
     "db:seed": "node seedData.js",
+    "db:seed:schemes": "node seeds/schemesSeed.js",
     "db:verify": "node scripts/verify-migrations.js",
     "migrate:create": "node-pg-migrate create",
     "migrate:up": "node-pg-migrate -r dotenv/config up",
     "migrate:down": "node-pg-migrate -r dotenv/config down",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "security:audit": "node scripts/security-audit.js",
+    "audit:deps": "npm audit --audit-level=moderate"
   },
   "keywords": [
     "kheti",
@@ -43,6 +46,8 @@
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.1.0",
     "firebase-admin": "^13.6.0",
+    "google-auth-library": "^9.14.0",
+    "@sentry/node": "^8.0.0",
     "form-data": "^4.0.0",
     "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",

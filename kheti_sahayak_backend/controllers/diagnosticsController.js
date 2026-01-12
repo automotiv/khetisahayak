@@ -716,6 +716,139 @@ const getDiagnosticStats = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    AI Chat - Conversational diagnosis with follow-up questions
+// @route   POST /api/diagnostics/ai-chat
+// @access  Private
+const aiChatDiagnosis = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(400);
+    throw new Error('No image file provided');
+  }
+
+  const { questions, crop_type } = req.body;
+  
+  if (!questions) {
+    res.status(400);
+    throw new Error('Questions array is required');
+  }
+
+  let questionList;
+  try {
+    questionList = typeof questions === 'string' ? JSON.parse(questions) : questions;
+    if (!Array.isArray(questionList) || questionList.length === 0) {
+      throw new Error('Questions must be a non-empty array');
+    }
+  } catch (parseError) {
+    res.status(400);
+    throw new Error('Invalid questions format. Expected JSON array of strings.');
+  }
+
+  const file = req.file;
+
+  try {
+    const responses = await mlService.conversationalDiagnosis(file.buffer, questionList);
+
+    res.json({
+      success: true,
+      message: 'AI chat diagnosis completed',
+      crop_type: crop_type || 'unknown',
+      question_count: questionList.length,
+      responses: responses.responses,
+      source: responses.source
+    });
+  } catch (error) {
+    console.error('Error in AI chat diagnosis:', error);
+    
+    const mockResponses = {};
+    questionList.forEach(q => {
+      mockResponses[q] = 'AI service temporarily unavailable. Please try again later or consult an expert.';
+    });
+
+    res.json({
+      success: true,
+      message: 'Using fallback responses - AI service unavailable',
+      crop_type: crop_type || 'unknown',
+      question_count: questionList.length,
+      responses: mockResponses,
+      source: 'fallback'
+    });
+  }
+});
+
+// @desc    Get detailed AI diagnosis (disease, severity, treatment, prevention)
+// @route   POST /api/diagnostics/ai-detailed
+// @access  Private
+const aiDetailedDiagnosis = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(400);
+    throw new Error('No image file provided');
+  }
+
+  const { crop_type } = req.body;
+  const file = req.file;
+
+  try {
+    const result = await mlService.getDetailedLlavaDiagnosis(file.buffer);
+
+    res.json({
+      success: true,
+      message: 'Detailed AI diagnosis completed',
+      crop_type: crop_type || 'unknown',
+      diagnosis: {
+        disease: result.disease,
+        severity: result.severity,
+        treatment: result.treatment,
+        prevention: result.prevention
+      },
+      source: result.source,
+      cached: result.cached || false
+    });
+  } catch (error) {
+    console.error('Error in detailed AI diagnosis:', error);
+    
+    res.json({
+      success: true,
+      message: 'Using fallback - AI service unavailable',
+      crop_type: crop_type || 'unknown',
+      diagnosis: {
+        disease: 'Unable to determine - please consult an expert',
+        severity: 'Unknown - manual inspection recommended',
+        treatment: 'Consult with agricultural expert for proper treatment plan',
+        prevention: 'Maintain good agricultural practices and regular monitoring'
+      },
+      source: 'fallback',
+      cached: false
+    });
+  }
+});
+
+// @desc    Get LLaVA service health status
+// @route   GET /api/diagnostics/ai-health
+// @access  Public
+const getAiHealth = asyncHandler(async (req, res) => {
+  const llavaHealth = await mlService.getLlavaHealth();
+  const cacheStats = mlService.getCacheStats();
+  
+  res.json({
+    success: true,
+    llava_service: llavaHealth,
+    cache: cacheStats,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// @desc    Clear diagnosis cache
+// @route   POST /api/diagnostics/cache/clear
+// @access  Private (Admin only)
+const clearDiagnosisCache = asyncHandler(async (req, res) => {
+  mlService.clearCache();
+  
+  res.json({
+    success: true,
+    message: 'Diagnosis cache cleared successfully'
+  });
+});
+
 module.exports = {
   uploadForDiagnosis,
   getDiagnosticHistory,
@@ -726,4 +859,8 @@ module.exports = {
   getExpertAssignedDiagnostics,
   getCropRecommendations,
   getDiagnosticStats,
+  aiChatDiagnosis,
+  aiDetailedDiagnosis,
+  getAiHealth,
+  clearDiagnosisCache,
 };

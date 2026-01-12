@@ -55,7 +55,26 @@ const getExpertBookingsForDate = async (expertId, dateStr) => {
   return result.rows;
 };
 
+const checkDateOverride = async (expertId, dateStr) => {
+  const result = await db.query(
+    `SELECT is_available, reason FROM expert_date_overrides 
+     WHERE expert_id = $1 AND date = $2`,
+    [expertId, dateStr]
+  );
+  
+  if (result.rows.length > 0) {
+    return result.rows[0];
+  }
+  return null;
+};
+
 const generateTimeSlots = async (availability, dateStr, expertId) => {
+  const dateOverride = await checkDateOverride(expertId, dateStr);
+  
+  if (dateOverride && !dateOverride.is_available) {
+    return [];
+  }
+  
   const date = new Date(dateStr);
   const dayOfWeek = date.getDay();
   
@@ -117,6 +136,16 @@ const isSlotAvailable = async (expertId, dateTime, durationMinutes = 30) => {
     return {
       available: false,
       reason: `Bookings must be made at least ${BookingRules.MIN_ADVANCE_HOURS} hours in advance`
+    };
+  }
+  
+  const dateStr = requestedTime.toISOString().split('T')[0];
+  const dateOverride = await checkDateOverride(expertId, dateStr);
+  
+  if (dateOverride && !dateOverride.is_available) {
+    return {
+      available: false,
+      reason: `Expert is not available on this date${dateOverride.reason ? ': ' + dateOverride.reason : ''}`
     };
   }
   
@@ -407,6 +436,7 @@ module.exports = {
   BookingRules,
   generateTimeSlots,
   isSlotAvailable,
+  checkDateOverride,
   getExpertBookingsForDate,
   calculateConsultationFee,
   generateCallRoomId,

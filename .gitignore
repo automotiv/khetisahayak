@@ -70,3 +70,20 @@ khetisahayak.wiki/
 # Secrets
 kheti_sahayak_backend/render_db_details.txt
 render_mcp/.env
+*.pem
+*.key
+*.p12
+*.keystore
+*.jks
+credentials.json
+service-account*.json
+
+# Backup files
+.opencode_backup/
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

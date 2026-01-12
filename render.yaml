@@ -56,6 +56,37 @@ services:
       # Logging
       - key: LOG_LEVEL
         value: info
+      # Google OAuth (set in Render dashboard)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_ID_IOS
+        sync: false
+      - key: GOOGLE_CLIENT_ID_ANDROID
+        sync: false
+      # Facebook OAuth (set in Render dashboard)
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+      # Email/SMTP (set in Render dashboard)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      # SMS Service (set in Render dashboard)
+      - key: SMS_PROVIDER
+        sync: false
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_SENDER_ID
+        sync: false
+      # Sentry Error Monitoring (set in Render dashboard)
+      - key: SENTRY_DSN
+        sync: false
 
 # PostgreSQL Database
 databases:

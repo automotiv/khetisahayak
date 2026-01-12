@@ -11,8 +11,17 @@ const {
   uploadProductImages,
   getSellerProducts,
   getProductCategories,
+  compareProducts,
 } = require('../controllers/marketplaceController');
+const {
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  isInWishlist,
+  getWishlistProductIds,
+} = require('../controllers/wishlistController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { validateUUID } = require('../middleware/validationMiddleware');
 
 /**
  * @swagger
@@ -147,6 +156,149 @@ router.get('/', productsQueryValidation, getAllProducts);
  *                     type: string
  */
 router.get('/categories', getProductCategories);
+
+router.post('/compare', [
+  body('product_ids')
+    .isArray({ min: 2, max: 5 })
+    .withMessage('Must provide 2-5 product IDs for comparison'),
+  body('product_ids.*')
+    .isUUID()
+    .withMessage('Each product ID must be a valid UUID'),
+], compareProducts);
+
+/**
+ * @swagger
+ * /api/marketplace/wishlist:
+ *   get:
+ *     summary: Get user's wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wishlist items retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/wishlist', protect, getWishlist);
+
+/**
+ * @swagger
+ * /api/marketplace/wishlist/ids:
+ *   get:
+ *     summary: Get product IDs in user's wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wishlist product IDs retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/wishlist/ids', protect, getWishlistProductIds);
+
+/**
+ * @swagger
+ * /api/marketplace/wishlist/{productId}:
+ *   get:
+ *     summary: Check if product is in wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Returns whether product is in wishlist
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/wishlist/:productId', protect, [validateUUID('productId', 'param')], isInWishlist);
+
+/**
+ * @swagger
+ * /api/marketplace/wishlist/{productId}:
+ *   post:
+ *     summary: Add product to wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       201:
+ *         description: Product added to wishlist
+ *       400:
+ *         description: Product already in wishlist
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found
+ */
+router.post('/wishlist/:productId', protect, [validateUUID('productId', 'param')], addToWishlist);
+
+/**
+ * @swagger
+ * /api/marketplace/wishlist/{productId}:
+ *   delete:
+ *     summary: Remove product from wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Product removed from wishlist
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found in wishlist
+ */
+router.delete('/wishlist/:productId', protect, [validateUUID('productId', 'param')], removeFromWishlist);
+
+/**
+ * @swagger
+ * /api/marketplace/seller/products:
+ *   get:
+ *     summary: Get seller's products
+ *     tags: [Marketplace]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Seller's products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       401:
+ *         description: Not authorized
+ */
+router.get('/seller/products', protect, getSellerProducts);
 
 /**
  * @swagger
@@ -335,32 +487,5 @@ router.delete('/:id', protect, validateIdParam, deleteProduct);
  *         description: Not authorized
  */
 router.post('/:id/images', protect, validateIdParam, upload.array('images', 5), uploadProductImages);
-
-/**
- * @swagger
- * /api/marketplace/seller/products:
- *   get:
- *     summary: Get seller's products
- *     tags: [Marketplace]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Seller's products
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 products:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       401:
- *         description: Not authorized
- */
-router.get('/seller/products', protect, getSellerProducts);
 
 module.exports = router;

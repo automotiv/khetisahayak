@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kheti_sahayak_app/models/product.dart';
 import 'package:kheti_sahayak_app/services/product_service.dart';
+import 'package:kheti_sahayak_app/services/wishlist_service.dart';
 import 'package:kheti_sahayak_app/routes/routes.dart';
+import 'package:kheti_sahayak_app/widgets/wishlist_button.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   const MarketplaceScreen({super.key});
@@ -17,6 +19,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   void initState() {
     super.initState();
     _productsFuture = ProductService.getProducts();
+    WishlistService.initializeCache();
   }
 
   Future<void> _refreshProducts() async {
@@ -42,6 +45,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         title: const Text('Marketplace'),
         automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite_border),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.wishlist),
+            tooltip: 'Wishlist',
+          ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () => Navigator.pushNamed(context, AppRoutes.cart),
@@ -113,17 +121,36 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Container(
-                              color: Colors.grey[200],
-                              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                                  ? Image.network(
-                                      product.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Center(child: Icon(Icons.eco, size: 50, color: Colors.green)),
-                                    )
-                                  : const Center(child: Icon(Icons.eco, size: 50, color: Colors.green)),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  color: Colors.grey[200],
+                                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                                      ? Image.network(
+                                          product.imageUrl!,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Center(child: Icon(Icons.eco, size: 50, color: Colors.green)),
+                                        )
+                                      : const Center(child: Icon(Icons.eco, size: 50, color: Colors.green)),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: WishlistButton(
+                                      productId: product.id,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Padding(

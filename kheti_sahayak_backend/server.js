@@ -14,8 +14,17 @@ const {
   securityLogging 
 } = require('./middleware/securityMiddleware');
 const { createSanitizationMiddleware } = require('./utils/sanitizer');
+const sentryService = require('./services/sentryService');
+const { 
+  responseTimeMiddleware, 
+  cacheControlMiddleware, 
+  etagMiddleware,
+  defaultCacheableRoutes 
+} = require('./middleware/performanceMiddleware');
 
 const app = express();
+
+sentryService.initSentry(app);
 const port = process.env.PORT || 3000;
 
 // Import routes
@@ -43,15 +52,21 @@ const externalApiRoutes = require('./routes/external_apis');
 const newsRoutes = require('./routes/news'); // Added news routes
 const marketPriceRoutes = require('./routes/market_prices');
 const sellerRoutes = require('./routes/sellers');
+const weatherAlertsRoutes = require('./routes/weatherAlerts');
+const villageWeatherRoutes = require('./routes/villageWeather');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
+app.use(sentryService.requestHandler());
 app.use(requestIdMiddleware);
+app.use(responseTimeMiddleware);
 app.use(securityHeaders);
 app.use(cors(createCorsConfig()));
 app.use(generalRateLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(createSanitizationMiddleware({ sanitizeBody: true, sanitizeQuery: true }));
+app.use(cacheControlMiddleware({ cacheableRoutes: defaultCacheableRoutes }));
+app.use(etagMiddleware);
 app.use(securityLogging);
 
 app.use((req, res, next) => {
@@ -89,6 +104,8 @@ app.use('/api/logbook', logbookRoutes);
 app.use('/api/news', newsRoutes); // Added news endpoint
 app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/sellers', sellerRoutes);
+app.use('/api/weather-alerts', weatherAlertsRoutes);
+app.use('/api/village-weather', villageWeatherRoutes);
 app.use('/api/external', externalApiRoutes);
 
 app.get('/', (req, res) => {
@@ -101,6 +118,7 @@ app.get('/', (req, res) => {
             auth: '/api/auth',
             health: '/api/health',
             weather: '/api/weather',
+            weatherAlerts: '/api/weather-alerts',
             diagnostics: '/api/diagnostics',
             marketplace: '/api/marketplace',
             educationalContent: '/api/educational-content',
@@ -113,12 +131,14 @@ app.get('/', (req, res) => {
             technology: '/api/technology',
             sellers: '/api/sellers',
             consultations: '/api/consultations',
+            villageWeather: '/api/village-weather',
             external: '/api/external (agro-weather, soil-data, market-prices, news, crop-calendar, pest-alerts)'
         }
     });
 });
 
 // Error Handling Middleware
+app.use(sentryService.errorHandler());
 app.use(notFound);
 app.use(errorHandler);
 

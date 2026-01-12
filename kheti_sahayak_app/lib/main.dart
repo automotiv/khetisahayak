@@ -1,11 +1,14 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kheti_sahayak_app/providers/user_provider.dart';
 import 'package:kheti_sahayak_app/providers/cart_provider.dart';
 import 'package:kheti_sahayak_app/providers/order_provider.dart';
 import 'package:kheti_sahayak_app/providers/offline_provider.dart';
+import 'package:kheti_sahayak_app/providers/learning_provider.dart';
 import 'package:kheti_sahayak_app/routes/routes.dart';
 import 'package:kheti_sahayak_app/theme/app_theme.dart';
 import 'package:kheti_sahayak_app/utils/logger.dart';
@@ -13,25 +16,43 @@ import 'package:kheti_sahayak_app/screens/splash/splash_screen.dart';
 import 'package:kheti_sahayak_app/services/language_service.dart';
 import 'package:kheti_sahayak_app/services/notification_preferences_service.dart';
 import 'package:kheti_sahayak_app/services/connectivity_service.dart';
+import 'package:kheti_sahayak_app/services/sentry_service.dart';
+import 'package:kheti_sahayak_app/services/diagnostic_translation_service.dart';
 import 'services/task/upload_queue.dart';
 import 'package:kheti_sahayak_app/services/local_notification_service.dart';
 import 'package:kheti_sahayak_app/services/sync_service.dart';
 
 Future<void> main() async {
-  // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize logger
   AppLogger.init();
 
-  // Initialize language service
+  await dotenv.load(fileName: 'lib/.env');
+  
+  await SentryService.init();
+
   await LanguageService.instance.initialize();
 
-  // Initialize local notifications
+  // Initialize diagnostic translations for offline use
+  await DiagnosticTranslationService.instance.initialize();
+
   await LocalNotificationService().initialize();
 
-  // Initialize connectivity service
   await ConnectivityService.initialize();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    SentryService.captureException(
+      details.exception,
+      stackTrace: details.stack,
+      tags: {'source': 'flutter_error'},
+    );
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    SentryService.captureException(error, stackTrace: stack, tags: {'source': 'platform_error'});
+    return true;
+  };
 
   runApp(
     MultiProvider(
@@ -40,6 +61,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => OfflineProvider()),
+        ChangeNotifierProvider(create: (_) => LearningProvider()),
         ChangeNotifierProvider.value(value: LanguageService.instance),
         ChangeNotifierProvider(create: (_) => NotificationPreferencesService()),
       ],

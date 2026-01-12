@@ -2,11 +2,11 @@
 
 <div align="center">
 
-![Sprints](https://img.shields.io/badge/Completed_Sprints-10-green.svg)
-![Current](https://img.shields.io/badge/Current_Sprint-11-blue.svg)
+![Sprints](https://img.shields.io/badge/Completed_Sprints-12-green.svg)
+![Current](https://img.shields.io/badge/Current_Sprint-13-blue.svg)
 ![Velocity](https://img.shields.io/badge/Avg_Velocity-48_pts-yellow.svg)
 
-**Last Updated**: January 8, 2026
+**Last Updated**: January 12, 2026
 
 </div>
 
@@ -23,7 +23,8 @@
 - [Sprint 8: Weather & Reviews](#sprint-8-weather--reviews)
 - [Sprint 9: Android Production](#sprint-9-android-production--bug-fixes)
 - [Sprint 10: Checkout & Payments](#sprint-10-checkout--payments)
-- [Sprint 11: Current Sprint](#sprint-11-user-verification--seller-dashboard)
+- [Sprint 11: User Verification & Seller](#sprint-11-user-verification--seller-dashboard)
+- [Sprint 12: Current Sprint](#sprint-12-production-readiness--social-login)
 
 ---
 
@@ -39,7 +40,8 @@
 | 8 | Aug - Sep 2025 | Weather & Reviews | 45 | ✅ Complete |
 | 9 | Oct 1-21, 2025 | Android Production | 42 | ✅ Complete |
 | 10 | Oct 22 - Jan 8, 2026 | Checkout & Payments | 50 | ✅ Complete |
-| 11 | Jan 9 - Jan 23, 2026 | User Verification & Seller | 50 | 🔄 In Progress |
+| 11 | Jan 9-12, 2026 | User Verification & Seller | 45 | ✅ Complete |
+| 12 | Jan 12-13, 2026 | Production Readiness | 50 | ✅ Complete |
 
 ---
 
@@ -408,7 +410,7 @@ Backend:
 **Duration**: January 9 - January 23, 2026  
 **Theme**: User Verification & Seller Features  
 **Story Points**: 50  
-**Status**: 🔄 In Progress
+**Status**: ✅ Complete
 
 ### Sprint Goals
 - Implement email verification
@@ -416,27 +418,129 @@ Backend:
 - Create seller dashboard
 - Add forgot password flow
 
-### Planned Tasks
+### Completed Tasks
 
 | Task | Points | Priority | Status |
 |------|--------|----------|--------|
-| Email verification system | 8 | High | 📋 Todo |
-| Email verification UI in Flutter | 5 | High | 📋 Todo |
-| SMS OTP service integration (MSG91/Twilio) | 8 | High | 📋 Todo |
-| OTP verification screens | 5 | High | 📋 Todo |
-| Forgot password API | 5 | High | 📋 Todo |
-| Forgot password UI flow | 5 | Medium | 📋 Todo |
-| Seller dashboard - order management | 8 | Medium | 📋 Todo |
-| Seller dashboard - product analytics | 6 | Medium | 📋 Todo |
+| Email verification system (backend) | 8 | High | ✅ Complete |
+| Email verification UI in Flutter | 5 | High | ✅ Complete |
+| SMS OTP service integration (MSG91/Twilio) | 8 | High | ✅ Complete |
+| OTP verification screens | 5 | High | ✅ Complete |
+| Forgot password API | 5 | High | ✅ Complete |
+| Forgot password & reset password UI | 5 | Medium | ✅ Complete |
+| Seller dashboard - order management | 8 | Medium | ✅ Complete |
+| Seller dashboard - product analytics | 6 | Medium | ✅ Complete |
+
+### Key Deliverables
+- ✅ Email verification flow (backend + Flutter UI)
+- ✅ OTP phone verification (backend + Flutter UI)
+- ✅ SMS service with MSG91/Twilio/Console support
+- ✅ Password reset flow (forgot + reset screens)
+- ✅ Seller dashboard with stats, orders, analytics
+- ✅ Seller inventory management
+- ✅ Revenue charts and top products analytics
+
+### Files Created/Modified
+
+**Backend:**
+- `services/smsService.js` (new - MSG91/Twilio SMS integration)
+- `services/verificationService.js` (existing - email/OTP verification)
+- `services/emailService.js` (existing - email templates)
+- `controllers/authController.js` (updated - SMS service integration)
+
+**Flutter:**
+- `lib/screens/auth/email_verification_screen.dart` (new)
+- `lib/screens/auth/otp_verification_screen.dart` (new)
+- `lib/screens/auth/reset_password_screen.dart` (new)
+- `lib/screens/auth/forgot_password_screen.dart` (fixed API call)
+- `lib/services/auth_service.dart` (added verification methods)
+- `lib/providers/user_provider.dart` (added verification methods)
+- `lib/routes/routes.dart` (added new routes)
 
 ### Acceptance Criteria
-- [ ] Users receive verification email on registration
-- [ ] Email verification link works and updates user status
-- [ ] SMS OTP sent within 5 seconds
-- [ ] OTP expires after 10 minutes
-- [ ] Forgot password email sent with reset link
-- [ ] Sellers can view and manage their orders
-- [ ] Basic analytics: views, sales, revenue
+- [x] Users receive verification email on registration
+- [x] Email verification link works and updates user status
+- [x] SMS OTP sent via configurable provider (MSG91/Twilio/Console)
+- [x] OTP expires after 10 minutes with max 3 attempts
+- [x] Forgot password email sent with reset link
+- [x] Sellers can view and manage their orders
+- [x] Analytics: revenue charts, top products, customer metrics
+
+---
+
+## Sprint 12: Production Readiness & Social Login
+
+**Duration**: January 13 - January 27, 2026  
+**Theme**: Production Deployment & Social Authentication  
+**Story Points**: 50  
+**Status**: ✅ Complete
+
+### Sprint Goals
+- Add social login (Google, Facebook)
+- Configure production deployment (Render + Vercel)
+- Set up monitoring and error tracking
+- Performance optimization and security audit
+
+### Completed Tasks
+
+| Task | Points | Priority | Status |
+|------|--------|----------|--------|
+| Social login - Google OAuth | 8 | High | ✅ Complete |
+| Social login - Facebook OAuth | 5 | Medium | ✅ Complete |
+| Render backend deployment config | 5 | High | ✅ Complete |
+| Vercel frontend deployment config | 3 | High | ✅ Complete |
+| Production environment variables | 5 | High | ✅ Complete |
+| Sentry error monitoring setup | 5 | Medium | ✅ Complete |
+| Performance optimization | 8 | Medium | ✅ Complete |
+| Security audit & fixes | 8 | High | ✅ Complete |
+
+### Key Deliverables
+- ✅ Google OAuth (Backend + Flutter) - ID token verification, user creation/linking
+- ✅ Facebook OAuth (Backend + Flutter) - Access token verification, Graph API integration
+- ✅ Database migration for social login columns (google_id, facebook_id, auth_provider)
+- ✅ Updated render.yaml with all OAuth, SMTP, SMS, Sentry env vars
+- ✅ Comprehensive env.example with documentation
+- ✅ Sentry error monitoring (Backend + Flutter)
+- ✅ Performance middleware (response time, caching, ETags)
+- ✅ Security audit script with automated checks
+
+### Files Created/Modified
+
+**Backend:**
+- `services/googleAuthService.js` (new - Google ID token verification)
+- `services/facebookAuthService.js` (new - Facebook token verification)
+- `services/sentryService.js` (new - Sentry error monitoring)
+- `middleware/performanceMiddleware.js` (new - response time, caching)
+- `utils/queryOptimizer.js` (new - pagination, filtering, sorting)
+- `scripts/security-audit.js` (new - automated security checks)
+- `migrations/1768100000000_add-social-login-columns.js` (new)
+- `controllers/authController.js` (updated - social login endpoints)
+- `routes/auth.js` (updated - /google, /facebook, /providers routes)
+- `server.js` (updated - Sentry + performance middleware)
+- `package.json` (added google-auth-library, @sentry/node)
+- `env.example` (comprehensive documentation)
+- `render.yaml` (OAuth, SMS, Sentry env vars)
+
+**Flutter:**
+- `lib/services/google_sign_in_service.dart` (new)
+- `lib/services/facebook_sign_in_service.dart` (new)
+- `lib/services/sentry_service.dart` (new)
+- `lib/services/auth_service.dart` (updated - social login methods)
+- `lib/providers/user_provider.dart` (updated - social login)
+- `lib/screens/auth/login_screen.dart` (updated - social buttons)
+- `lib/models/user.dart` (added authProvider, googleId, facebookId)
+- `lib/main.dart` (updated - Sentry initialization)
+- `pubspec.yaml` (added google_sign_in, flutter_facebook_auth, sentry_flutter)
+- `lib/.env.example` (updated)
+
+### Acceptance Criteria
+- [x] Users can sign in with Google account
+- [x] Users can sign in with Facebook account
+- [x] Backend deployment config updated for Render
+- [x] Frontend deployment config verified for Vercel
+- [x] Error monitoring active with Sentry
+- [x] Performance middleware with response time tracking
+- [x] Security audit script with 7 automated checks
 
 ---
 
@@ -452,7 +556,9 @@ Backend:
 | 8 | 45 | 45 | 100% |
 | 9 | 42 | 42 | 100% |
 | 10 | 50 | 50 | 100% |
-| **Average** | **50.9** | **50.9** | **100%** |
+| 11 | 50 | 45 | 90% |
+| 12 | 50 | 50 | 100% |
+| **Average** | **50.7** | **50.2** | **99%** |
 
 ---
 

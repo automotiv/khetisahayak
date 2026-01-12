@@ -17,7 +17,13 @@ const {
   startConsultation,
   completeConsultation,
   addReview,
-  getExpertReviews
+  getExpertReviews,
+  confirmConsultation,
+  rejectConsultation,
+  getVideoTokens,
+  joinConsultation,
+  getPendingConsultations,
+  markNoShow
 } = require('../controllers/consultationController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -161,6 +167,11 @@ router.post('/book', protect, bookConsultationValidation, bookConsultation);
 
 router.get('/', protect, consultationsQueryValidation, getMyConsultations);
 
+router.get('/expert/pending', protect, [
+  ...validatePagination,
+  handleValidationErrors
+], getPendingConsultations);
+
 router.get('/:id', protect, [validateUUID('id', 'param'), handleValidationErrors], getConsultationById);
 
 router.put('/:id/reschedule', protect, rescheduleValidation, rescheduleConsultation);
@@ -172,5 +183,19 @@ router.post('/:id/start', protect, [validateUUID('id', 'param'), handleValidatio
 router.post('/:id/complete', protect, completeValidation, completeConsultation);
 
 router.post('/:id/review', protect, reviewValidation, addReview);
+
+router.post('/:id/confirm', protect, [validateUUID('id', 'param'), handleValidationErrors], confirmConsultation);
+
+router.post('/:id/reject', protect, [
+  validateUUID('id', 'param'),
+  body('reason').optional().trim().isLength({ max: 500 }),
+  handleValidationErrors
+], rejectConsultation);
+
+router.get('/:id/video-tokens', protect, [validateUUID('id', 'param'), handleValidationErrors], getVideoTokens);
+
+router.post('/:id/join', protect, [validateUUID('id', 'param'), handleValidationErrors], joinConsultation);
+
+router.post('/:id/no-show', protect, [validateUUID('id', 'param'), handleValidationErrors], markNoShow);
 
 module.exports = router;

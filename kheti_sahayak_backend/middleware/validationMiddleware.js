@@ -499,6 +499,69 @@ const schemeQueryValidation = [
   sanitizeString('state', { required: false, maxLength: 100, location: 'query' }),
   sanitizeString('district', { required: false, maxLength: 100, location: 'query' }),
   sanitizeString('land_ownership', { required: false, maxLength: 50, location: 'query' }),
+  sanitizeString('category', { required: false, maxLength: 50, location: 'query' }),
+  sanitizeString('scheme_type', { required: false, maxLength: 50, location: 'query' }),
+  sanitizeString('search', { required: false, maxLength: 200, location: 'query' }),
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer')
+    .toInt(),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100')
+    .toInt(),
+  handleValidationErrors
+];
+
+const eligibilityProfileValidation = [
+  body('farm_size_hectares')
+    .optional()
+    .isFloat({ min: 0, max: 10000 })
+    .withMessage('Farm size must be between 0 and 10000 hectares')
+    .toFloat(),
+  body('annual_income')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Annual income must be a positive number')
+    .toFloat(),
+  body('land_ownership_type')
+    .optional()
+    .isIn(['owner', 'tenant', 'sharecropper', 'lease'])
+    .withMessage('Land ownership type must be owner, tenant, sharecropper, or lease'),
+  body('primary_crops')
+    .optional()
+    .isArray()
+    .withMessage('Primary crops must be an array'),
+  sanitizeString('state', { required: false, maxLength: 100 }),
+  sanitizeString('district', { required: false, maxLength: 100 }),
+  sanitizeString('block', { required: false, maxLength: 100 }),
+  sanitizeString('village', { required: false, maxLength: 100 }),
+  sanitizeString('social_category', { required: false, maxLength: 50 }),
+  sanitizeString('gender', { required: false, maxLength: 20 }),
+  body('age')
+    .optional()
+    .isInt({ min: 18, max: 120 })
+    .withMessage('Age must be between 18 and 120')
+    .toInt(),
+  body('has_bank_account')
+    .optional()
+    .isBoolean()
+    .withMessage('has_bank_account must be a boolean')
+    .toBoolean(),
+  body('has_aadhar')
+    .optional()
+    .isBoolean()
+    .withMessage('has_aadhar must be a boolean')
+    .toBoolean(),
+  body('has_kcc')
+    .optional()
+    .isBoolean()
+    .withMessage('has_kcc must be a boolean')
+    .toBoolean(),
+  sanitizeString('irrigation_type', { required: false, maxLength: 50 }),
+  sanitizeString('soil_type', { required: false, maxLength: 50 }),
   handleValidationErrors
 ];
 
@@ -548,5 +611,6 @@ module.exports = {
   reviewValidation,
   technologyExperienceValidation,
   schemeQueryValidation,
+  eligibilityProfileValidation,
   validateIdParam
 };

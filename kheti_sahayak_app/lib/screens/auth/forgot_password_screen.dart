@@ -35,19 +35,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     
     setState(() => _isLoading = true);
     
-    // Comment out or remove the call to userProvider.forgotPassword
-    // final success = await userProvider.forgotPassword(
-    //   _emailController.text.trim(),
-    // );
+    final success = await userProvider.requestPasswordReset(
+      _emailController.text.trim(),
+    );
 
     setState(() {
       _isLoading = false;
-      if (false) { // Assuming success is false if the call is commented out
+      if (success) {
         _emailSent = true;
       }
     });
 
-    if (false) { // Assuming success is false if the call is commented out
+    if (success) {
       if (mounted) {
         await showDialog(
           context: context,

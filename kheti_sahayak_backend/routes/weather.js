@@ -12,6 +12,7 @@ const {
   unsubscribeFromAlerts,
   getMyAlertSubscriptions,
 } = require('../controllers/weatherController');
+const weatherService = require('../services/weatherService');
 
 const router = express.Router();
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -730,6 +731,293 @@ router.delete('/alerts/unsubscribe', protect, unsubscribeFromAlerts);
  *         description: Authentication required
  */
 router.get('/alerts/subscriptions', protect, getMyAlertSubscriptions);
+
+/**
+ * @swagger
+ * /api/weather/village:
+ *   get:
+ *     summary: Get village-level hyperlocal weather forecast with agricultural advisories
+ *     description: Returns comprehensive weather data including current conditions, 5-day forecast, hourly forecast, and detailed agricultural advisories for farming activities
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude of the village location
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude of the village location
+ *       - in: query
+ *         name: village
+ *         schema:
+ *           type: string
+ *         description: Village name (optional, will be auto-detected from coordinates)
+ *     responses:
+ *       200:
+ *         description: Village-level weather forecast with agricultural advisories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 location:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     district:
+ *                       type: string
+ *                     state:
+ *                       type: string
+ *                     lat:
+ *                       type: number
+ *                     lon:
+ *                       type: number
+ *                 current:
+ *                   type: object
+ *                   description: Current weather conditions
+ *                 forecast:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: 5-day forecast with daily agricultural advisories
+ *                 agricultural_advisory:
+ *                   type: object
+ *                   properties:
+ *                     current_conditions:
+ *                       type: object
+ *                       description: Activity-wise suitability assessment
+ *                     season:
+ *                       type: object
+ *                       description: Current agricultural season info
+ *                     forecast_trend:
+ *                       type: object
+ *                       description: Weather trend analysis
+ *                     weekly_outlook:
+ *                       type: object
+ *                       description: Best days for farming activities
+ *                     crop_specific_advice:
+ *                       type: object
+ *                       description: Advice for current season crops
+ *                     irrigation_schedule:
+ *                       type: object
+ *                       description: Recommended irrigation timing
+ *                     pest_disease_risk:
+ *                       type: object
+ *                       description: Pest and disease risk assessment
+ *                 alerts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: Active weather alerts for the location
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Server error
+ */
+router.get('/village', async (req, res) => {
+  const { lat, lon, village } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({
+      success: false,
+      error: 'Latitude and longitude are required for village-level forecast',
+    });
+  }
+
+  try {
+    const villageForecast = await weatherService.getVillageForecast(
+      parseFloat(lat),
+      parseFloat(lon),
+      village
+    );
+
+    res.json(villageForecast);
+  } catch (error) {
+    console.error('Error fetching village forecast:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch village-level forecast',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/weather/advisory:
+ *   get:
+ *     summary: Get agricultural weather advisory for current conditions
+ *     description: Returns detailed activity recommendations based on current weather
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: Agricultural weather advisory
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 advisory:
+ *                   type: object
+ *                   properties:
+ *                     overall_suitability:
+ *                       type: object
+ *                     activities:
+ *                       type: object
+ *                       description: Suitability for each farming activity
+ *                     warnings:
+ *                       type: array
+ *                     tips:
+ *                       type: array
+ *                     best_activities:
+ *                       type: array
+ *                     avoid_activities:
+ *                       type: array
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/advisory', async (req, res) => {
+  const { lat, lon } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({
+      success: false,
+      error: 'Latitude and longitude are required',
+    });
+  }
+
+  try {
+    const currentWeather = await weatherService.getCurrentWeather(
+      parseFloat(lat),
+      parseFloat(lon)
+    );
+
+    const advisory = weatherService.generateAgricultureAdvisory(
+      currentWeather.current || currentWeather
+    );
+
+    res.json({
+      success: true,
+      location: currentWeather.location,
+      current_weather: currentWeather.current,
+      advisory,
+      generated_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Error generating advisory:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate agricultural advisory',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/weather/current-enhanced:
+ *   get:
+ *     summary: Get enhanced current weather from real APIs with fallback
+ *     description: Uses OpenWeatherMap (primary) with Open-Meteo fallback and Redis caching
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         description: City name (alternative to lat/lon)
+ *     responses:
+ *       200:
+ *         description: Current weather data with source info
+ *       400:
+ *         description: Missing required parameters
+ */
+router.get('/current-enhanced', async (req, res) => {
+  const { lat, lon, city } = req.query;
+
+  if (!city && (!lat || !lon)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Either city name or lat/lon coordinates are required',
+    });
+  }
+
+  try {
+    const weather = await weatherService.getCurrentWeather(
+      lat ? parseFloat(lat) : null,
+      lon ? parseFloat(lon) : null,
+      city
+    );
+
+    res.json(weather);
+  } catch (error) {
+    console.error('Error fetching enhanced weather:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch weather data',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/weather/forecast-enhanced:
+ *   get:
+ *     summary: Get enhanced 5-day forecast from real APIs with agricultural advisories
+ *     description: Returns 5-day forecast with daily agricultural activity recommendations
+ *     tags: [Weather]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Longitude
+ *     responses:
+ *       200:
+ *         description: 5-day forecast with agricultural advisories
+ */
+router.get('/forecast-enhanced', getEnhancedForecast);
 
 /**
  * @swagger

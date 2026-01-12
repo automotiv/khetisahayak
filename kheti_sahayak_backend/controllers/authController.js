@@ -6,6 +6,9 @@ const { validationResult } = require('express-validator');
 const { uploadFileToS3 } = require('../s3');
 const verificationService = require('../services/verificationService');
 const emailService = require('../services/emailService');
+const smsService = require('../services/smsService');
+const googleAuthService = require('../services/googleAuthService');
+const facebookAuthService = require('../services/facebookAuthService');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -358,13 +361,11 @@ const sendOTP = asyncHandler(async (req, res) => {
     throw new Error(result.error);
   }
   
-  // In production, send OTP via SMS service
-  // For development, log the OTP
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`[DEV] OTP for ${phone}: ${result.otp}`);
+  try {
+    await smsService.sendOTP(phone, result.otp);
+  } catch (smsError) {
+    console.error('[Auth] SMS send failed:', smsError.message);
   }
-  
-  // TODO: Integrate SMS service (MSG91/Twilio) to send OTP
   
   res.json({ message: 'OTP sent successfully' });
 });
@@ -390,6 +391,78 @@ const verifyOTP = asyncHandler(async (req, res) => {
   res.json({ message: 'Phone number verified successfully' });
 });
 
+const googleSignIn = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  
+  if (!idToken) {
+    res.status(400);
+    throw new Error('Google ID token is required');
+  }
+  
+  if (!googleAuthService.isGoogleAuthConfigured()) {
+    res.status(503);
+    throw new Error('Google Sign-In is not available');
+  }
+  
+  const googleProfile = await googleAuthService.verifyGoogleToken(idToken);
+  const { user, token } = await googleAuthService.findOrCreateUser(googleProfile);
+  
+  emailService.sendWelcomeEmail(user).catch(err => {
+    console.error('[Auth] Failed to send welcome email:', err.message);
+  });
+  
+  res.json({
+    message: 'Google sign-in successful',
+    user,
+    token,
+  });
+});
+
+const unlinkGoogle = asyncHandler(async (req, res) => {
+  const result = await googleAuthService.unlinkGoogleAccount(req.user.id);
+  res.json(result);
+});
+
+const facebookSignIn = asyncHandler(async (req, res) => {
+  const { accessToken } = req.body;
+  
+  if (!accessToken) {
+    res.status(400);
+    throw new Error('Facebook access token is required');
+  }
+  
+  if (!facebookAuthService.isFacebookAuthConfigured()) {
+    res.status(503);
+    throw new Error('Facebook Sign-In is not available');
+  }
+  
+  const facebookProfile = await facebookAuthService.verifyFacebookToken(accessToken);
+  const { user, token } = await facebookAuthService.findOrCreateUser(facebookProfile);
+  
+  emailService.sendWelcomeEmail(user).catch(err => {
+    console.error('[Auth] Failed to send welcome email:', err.message);
+  });
+  
+  res.json({
+    message: 'Facebook sign-in successful',
+    user,
+    token,
+  });
+});
+
+const unlinkFacebook = asyncHandler(async (req, res) => {
+  const result = await facebookAuthService.unlinkFacebookAccount(req.user.id);
+  res.json(result);
+});
+
+const getAuthProviders = asyncHandler(async (req, res) => {
+  res.json({
+    google: googleAuthService.isGoogleAuthConfigured(),
+    facebook: facebookAuthService.isFacebookAuthConfigured(),
+    email: true,
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -406,4 +479,9 @@ module.exports = {
   resetPassword,
   sendOTP,
   verifyOTP,
+  googleSignIn,
+  unlinkGoogle,
+  facebookSignIn,
+  unlinkFacebook,
+  getAuthProviders,
 };

@@ -7,9 +7,14 @@ enum AppLanguage {
   hindi('hi', 'हिन्दी', 'Hindi'),
   marathi('mr', 'मराठी', 'Marathi'),
   tamil('ta', 'தமிழ்', 'Tamil'),
-  kannada('kn', 'कन्नड़', 'Kannada'),
+  kannada('kn', 'ಕನ್ನಡ', 'Kannada'),
   telugu('te', 'తెలుగు', 'Telugu'),
-  gujarati('gu', 'ગુજરાતી', 'Gujarati');
+  gujarati('gu', 'ગુજરાતી', 'Gujarati'),
+  bengali('bn', 'বাংলা', 'Bengali'),
+  punjabi('pa', 'ਪੰਜਾਬੀ', 'Punjabi'),
+  odia('or', 'ଓଡ଼ିଆ', 'Odia'),
+  malayalam('ml', 'മലയാളം', 'Malayalam'),
+  urdu('ur', 'اردو', 'Urdu');
 
   final String code;
   final String nativeName;
@@ -111,6 +116,11 @@ class AppLocalizations {
     'kn': _kannadaStrings,
     'te': _teluguStrings,
     'gu': _gujaratiStrings,
+    'bn': _bengaliStrings,
+    'pa': _punjabiStrings,
+    'or': _odiaStrings,
+    'ml': _malayalamStrings,
+    'ur': _urduStrings,
   };
 
   String translate(String key) {
@@ -237,7 +247,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) {
-    return ['en', 'hi', 'mr', 'ta', 'kn', 'te', 'gu'].contains(locale.languageCode);
+    return ['en', 'hi', 'mr', 'ta', 'kn', 'te', 'gu', 'bn', 'pa', 'or', 'ml', 'ur'].contains(locale.languageCode);
   }
 
   @override

@@ -21,6 +21,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isFacebookLoading = false;
 
   @override
   void dispose() {
@@ -317,9 +319,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
 
+                          const SizedBox(height: 24),
+
+                          _buildGoogleSignInButton(context, theme, colorScheme),
+
+                          const SizedBox(height: 12),
+
+                          _buildFacebookSignInButton(context, theme, colorScheme),
+
                           const SizedBox(height: 32),
 
-                          // Sign up link
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -367,5 +376,138 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
     );
+  }
+
+  Widget _buildGoogleSignInButton(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+    return OutlinedButton(
+      onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      child: _isGoogleLoading
+          ? SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colorScheme.primary,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.network(
+                  'https://www.google.com/favicon.ico',
+                  height: 24,
+                  width: 24,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.g_mobiledata,
+                    size: 24,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Continue with Google',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    setState(() => _isGoogleLoading = true);
+
+    final success = await userProvider.signInWithGoogle();
+
+    setState(() => _isGoogleLoading = false);
+
+    if (success && mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+    } else if (mounted && userProvider.error != null) {
+      if (!userProvider.error!.contains('cancelled')) {
+        showDialog(
+          context: context,
+          builder: (ctx) => ErrorDialog(
+            title: 'Google Sign-In Failed',
+            content: userProvider.error!,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildFacebookSignInButton(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+    return OutlinedButton(
+      onPressed: _isFacebookLoading ? null : _signInWithFacebook,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      child: _isFacebookLoading
+          ? SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colorScheme.primary,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.facebook,
+                  size: 24,
+                  color: const Color(0xFF1877F2),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Continue with Facebook',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Future<void> _signInWithFacebook() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    setState(() => _isFacebookLoading = true);
+
+    final success = await userProvider.signInWithFacebook();
+
+    setState(() => _isFacebookLoading = false);
+
+    if (success && mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+    } else if (mounted && userProvider.error != null) {
+      if (!userProvider.error!.contains('cancelled')) {
+        showDialog(
+          context: context,
+          builder: (ctx) => ErrorDialog(
+            title: 'Facebook Sign-In Failed',
+            content: userProvider.error!,
+          ),
+        );
+      }
+    }
   }
 }
