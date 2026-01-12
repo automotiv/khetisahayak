@@ -97,7 +97,7 @@ dependencies:
   agora_rtc_engine: ^6.3.2
   
   # TensorFlow Lite for offline ML
-  tflite_flutter: ^0.10.4
+  tflite_flutter: ^0.12.1
 
   # Social Login
   google_sign_in: ^7.2.0
