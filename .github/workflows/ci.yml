@@ -189,28 +189,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
-        continue-on-error: true
-
       - name: Build Docker image
         run: docker build -t kheti-sahayak-backend:${{ github.sha }} ./kheti_sahayak_backend
-
-      - name: Push to DockerHub
-        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
-        continue-on-error: true
-        run: |
-          docker tag kheti-sahayak-backend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest
-          docker tag kheti-sahayak-backend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kheti-sahayak-backend:${{ github.sha }}
 
   build-flutter:
     name: Build Flutter APK
