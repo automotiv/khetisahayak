@@ -20,7 +20,6 @@ import {
   TrendingDown,
   People,
   Repeat,
-  PersonAdd,
   Star,
   ShoppingBag,
 } from '@mui/icons-material';
@@ -40,7 +39,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { sellerApi } from '../../services/sellerApi';
-import { AnalyticsData, AnalyticsPeriod, TopProduct, OrderStatusCount } from '../../types/seller';
+import { AnalyticsData, AnalyticsPeriod } from '../../types/seller';
 import { formatCurrency } from '../../utils/formatters';
 import { OrderStatus } from '../../types/enums';
 
@@ -95,7 +94,6 @@ const CustomRevenueTooltip: React.FC<TooltipProps<number, string>> = ({ active, 
 const SellerAnalytics: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<AnalyticsPeriod>('30d');
@@ -483,7 +481,7 @@ const SellerAnalytics: React.FC = () => {
                                 ))}
                               </Pie>
                               <Tooltip
-                                formatter={(value: number, name: string, props: any) => [
+                                formatter={(value: number, _name: string, props: any) => [
                                   `${value} orders (${props.payload.percentage}%)`,
                                   props.payload.status,
                                 ]}

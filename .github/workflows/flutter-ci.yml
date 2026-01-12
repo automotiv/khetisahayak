@@ -1,0 +1,176 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'kheti_sahayak_app/**'
+      - '.github/workflows/flutter-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'kheti_sahayak_app/**'
+      - '.github/workflows/flutter-ci.yml'
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+  JAVA_VERSION: '17'
+
+jobs:
+  analyze:
+    name: Analyze & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kheti_sahayak_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Create .env file
+        run: |
+          echo "API_BASE_URL=http://localhost:3000/api" > lib/.env
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    defaults:
+      run:
+        working-directory: kheti_sahayak_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Create .env file
+        run: |
+          echo "API_BASE_URL=http://localhost:3000/api" > lib/.env
+
+      - name: Run unit tests with coverage
+        run: flutter test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: kheti_sahayak_app/coverage/lcov.info
+          flags: flutter
+          name: flutter-coverage
+          fail_ci_if_error: false
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: kheti_sahayak_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Create .env file
+        run: |
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL || 'http://localhost:3000/api' }}" > lib/.env
+
+      - name: Build APK (Debug)
+        run: flutter build apk --debug
+
+      - name: Build APK (Release)
+        run: flutter build apk --release
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: kheti_sahayak_app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: kheti_sahayak_app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: kheti_sahayak_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Create .env file
+        run: |
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL || 'http://localhost:3000/api' }}" > lib/.env
+
+      - name: Build Web
+        run: flutter build web --release
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: kheti_sahayak_app/build/web
+          retention-days: 7

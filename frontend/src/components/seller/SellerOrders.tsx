@@ -28,8 +28,6 @@ import {
   Download,
   CheckCircle,
   LocalShipping,
-  Inventory,
-  Cancel,
   MoreVert,
   AccessTime,
   Done,
@@ -52,7 +50,6 @@ const statusTabs = [
 const SellerOrders: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<SellerOrder[]>([]);
