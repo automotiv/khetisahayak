@@ -100,7 +100,7 @@ dependencies:
   tflite_flutter: ^0.10.4
 
   # Social Login
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   flutter_facebook_auth: ^7.1.1
 
   # Error Monitoring
