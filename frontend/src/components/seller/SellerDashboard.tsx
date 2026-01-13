@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Button,
-  Skeleton,
   useTheme,
   alpha,
   useMediaQuery,

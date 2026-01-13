@@ -20,7 +20,6 @@ import {
   TrendingDown,
   People,
   Repeat,
-  PersonAdd,
   Star,
   ShoppingBag,
 } from '@mui/icons-material';
@@ -37,10 +36,9 @@ import {
   PieChart,
   Pie,
   Cell,
-  TooltipProps,
 } from 'recharts';
 import { sellerApi } from '../../services/sellerApi';
-import { AnalyticsData, AnalyticsPeriod, TopProduct, OrderStatusCount } from '../../types/seller';
+import { AnalyticsData, AnalyticsPeriod } from '../../types/seller';
 import { formatCurrency } from '../../utils/formatters';
 import { OrderStatus } from '../../types/enums';
 
@@ -59,10 +57,11 @@ const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.RETURNED]: '#9E9E9E',
 };
 
-const CustomRevenueTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+const CustomRevenueTooltip = (props: any) => {
+  const { active, payload, label } = props;
   if (!active || !payload || !payload.length) return null;
 
-  const date = new Date(label);
+  const date = new Date(label as string);
   const formattedDate = date.toLocaleDateString('en-IN', {
     weekday: 'short',
     day: 'numeric',
@@ -95,7 +94,6 @@ const CustomRevenueTooltip: React.FC<TooltipProps<number, string>> = ({ active, 
 const SellerAnalytics: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<AnalyticsPeriod>('30d');
@@ -432,7 +430,7 @@ const SellerAnalytics: React.FC = () => {
                             width={100}
                           />
                           <Tooltip
-                            formatter={(value: number) => [formatCurrency(value), 'Revenue']}
+                            formatter={(value: number | undefined) => value !== undefined ? [formatCurrency(value), 'Revenue'] : ['', '']}
                             contentStyle={{
                               borderRadius: '12px',
                               border: 'none',
@@ -470,7 +468,7 @@ const SellerAnalytics: React.FC = () => {
                           <ResponsiveContainer>
                             <PieChart>
                               <Pie
-                                data={analytics.ordersByStatus}
+                                data={analytics.ordersByStatus as any}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={50}
@@ -483,10 +481,12 @@ const SellerAnalytics: React.FC = () => {
                                 ))}
                               </Pie>
                               <Tooltip
-                                formatter={(value: number, name: string, props: any) => [
-                                  `${value} orders (${props.payload.percentage}%)`,
-                                  props.payload.status,
-                                ]}
+                                formatter={(value: number | undefined, _name: string | undefined, entry: any) =>
+                                  value !== undefined ? [
+                                    `${value} orders (${entry.payload.percentage}%)`,
+                                    entry.payload.status,
+                                  ] : ['', '']
+                                }
                                 contentStyle={{
                                   borderRadius: '12px',
                                   border: 'none',

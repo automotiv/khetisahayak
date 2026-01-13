@@ -73,6 +73,7 @@ jobs:
 
       - name: Notify deployment
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
           payload: |
             {
@@ -80,7 +81,6 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: secrets.SLACK_WEBHOOK_URL != ''
 
   deploy-production:
     name: Deploy to Production
@@ -139,6 +139,7 @@ jobs:
 
       - name: Notify deployment
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
           payload: |
             {
@@ -146,7 +147,6 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: secrets.SLACK_WEBHOOK_URL != ''
 
   rollback:
     name: Rollback Deployment
@@ -172,6 +172,7 @@ jobs:
 
       - name: Notify rollback
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
           payload: |
             {
@@ -179,4 +180,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: secrets.SLACK_WEBHOOK_URL != ''

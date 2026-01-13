@@ -8,7 +8,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 import { RevenueData } from '../../../types/seller';
 import { formatCurrency } from '../../../utils/formatters';
@@ -20,11 +19,12 @@ interface RevenueChartProps {
   height?: number;
 }
 
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+const CustomTooltip = (props: any) => {
+  const { active, payload, label } = props;
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0].payload as RevenueData;
-  const date = new Date(label);
+  const date = new Date(label as string);
   const formattedDate = date.toLocaleDateString('en-IN', {
     weekday: 'short',
     day: 'numeric',

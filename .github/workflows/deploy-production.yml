@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
@@ -177,7 +177,7 @@ jobs:
             --build-name=${{ needs.validate.outputs.version }}
 
       - name: Upload AAB artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-aab
           path: kheti_sahayak_app/build/app/outputs/bundle/release/app-release.aab
@@ -251,7 +251,7 @@ jobs:
             --build-name=${{ needs.validate.outputs.version }}
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ios-ipa
           path: kheti_sahayak_app/build/ios/ipa/*.ipa
@@ -336,13 +336,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download Android AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: android-aab
           path: ./artifacts
 
       - name: Download iOS IPA
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ios-ipa
           path: ./artifacts

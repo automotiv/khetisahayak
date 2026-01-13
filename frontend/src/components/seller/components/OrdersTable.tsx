@@ -20,7 +20,6 @@ import {
   useMediaQuery,
   Card,
   Stack,
-  Button,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -28,7 +27,6 @@ import {
   Inventory,
   MoreVert,
   Phone,
-  LocationOn,
 } from '@mui/icons-material';
 import { SellerOrder } from '../../../types/seller';
 import { OrderStatus } from '../../../types/enums';

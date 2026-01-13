@@ -39,7 +39,7 @@ dependencies:
   cached_network_image:
   image_picker:
   intl:
-  fl_chart: ^0.68.0 # New chart dependency
+  fl_chart: ^1.1.1 # New chart dependency
 
   # State Management
   provider:
@@ -53,7 +53,7 @@ dependencies:
   path_provider:
   connectivity_plus: ^6.1.0
   permission_handler: ^11.3.1
-  flutter_local_notifications: ^17.0.0
+  flutter_local_notifications: ^19.5.0
 
   # Form Validation
   form_validator:
@@ -97,14 +97,14 @@ dependencies:
   agora_rtc_engine: ^6.3.2
   
   # TensorFlow Lite for offline ML
-  tflite_flutter: ^0.10.4
+  tflite_flutter: ^0.12.1
 
   # Social Login
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   flutter_facebook_auth: ^7.1.1
 
   # Error Monitoring
-  sentry_flutter: ^8.0.0
+  sentry_flutter: ^9.9.2
 
 dev_dependencies:
   flutter_test:
