@@ -7,6 +7,7 @@ void main() {
       final record = ActivityRecord(
         activityType: 'Sowing',
         timestamp: DateTime(2023, 10, 1),
+        timezoneOffset: '+05:30',
         metadata: {'crop': 'Wheat'},
       );
 
@@ -21,6 +22,7 @@ void main() {
         id: 1,
         activityType: 'Irrigation',
         timestamp: DateTime(2023, 10, 2, 10, 30),
+        timezoneOffset: '+05:30',
         metadata: {'duration': '2 hours'},
         synced: 1,
       );

@@ -192,6 +192,7 @@ class DiagnosticService {
       diagnosisResult: 'Disease: $diseaseName (Confidence: ${(confidence * 100).toStringAsFixed(1)}%)',
       recommendations: isOffline ? 'Offline analysis - will sync when online' : null,
       confidenceScore: confidence,
+      imageUrls: [],
       status: 'analyzed',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
