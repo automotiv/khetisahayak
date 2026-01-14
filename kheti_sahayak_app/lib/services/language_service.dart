@@ -116,11 +116,11 @@ class AppLocalizations {
     'kn': _kannadaStrings,
     'te': _teluguStrings,
     'gu': _gujaratiStrings,
-    'bn': _bengaliStrings,
-    'pa': _punjabiStrings,
-    'or': _odiaStrings,
-    'ml': _malayalamStrings,
-    'ur': _urduStrings,
+    'bn': _englishStrings,
+    'pa': _englishStrings,
+    'or': _englishStrings,
+    'ml': _englishStrings,
+    'ur': _englishStrings,
   };
 
   String translate(String key) {
