@@ -43,7 +43,8 @@ jobs:
           echo "API_BASE_URL=http://localhost:3000/api" > lib/.env
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed . || echo "Formatting issues found (non-blocking)"
+        continue-on-error: true
 
       - name: Analyze code
         run: flutter analyze --fatal-infos

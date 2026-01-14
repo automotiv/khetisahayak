@@ -332,7 +332,6 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-  Future<void> logout() async {
     try {
       await _authService.logout();
       _user = null;
