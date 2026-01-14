@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-  FLUTTER_VERSION: '3.24.0'
+  FLUTTER_VERSION: '3.27.1'
 
 jobs:
   backend-test:
