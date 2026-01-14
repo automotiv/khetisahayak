@@ -45,5 +45,16 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Firebase Cloud Messaging Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<!-- FCM: Enable push notifications capability in Xcode -->
+	<!-- 1. Open ios/Runner.xcworkspace in Xcode -->
+	<!-- 2. Select Runner target > Signing & Capabilities -->
+	<!-- 3. Add "Push Notifications" capability -->
+	<!-- 4. Add "Background Modes" and check "Remote notifications" -->
 </dict>
 </plist>

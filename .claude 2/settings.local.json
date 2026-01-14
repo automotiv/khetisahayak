@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(brew install:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(flutter --version:*)",
+      "Bash(keytool:*)",
+      "Bash(flutter clean:*)",
+      "Bash(export PATH=\"$PATH:$HOME/flutter/bin:$HOME/development/flutter/bin:/usr/local/flutter/bin\")",
+      "Bash(git clone:*)",
+      "Bash(export PATH=\"$PATH:$HOME/flutter/bin\")",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter config:*)",
+      "Bash(export ANDROID_HOME=~/Android/Sdk)",
+      "Bash(export PATH=\"$PATH:$ANDROID_HOME/cmdline-tools/latest/bin\")",
+      "Bash(yes:*)",
+      "Bash(sdkmanager:*)",
+      "Bash(~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager:*)",
+      "Bash(printf:*)",
+      "Bash(export PATH=\"$PATH:$HOME/flutter/bin:$HOME/Android/Sdk/platform-tools\")",
+      "Bash(~/flutter/bin/flutter doctor:*)",
+      "Bash(~/flutter/bin/flutter clean:*)",
+      "Bash(~/flutter/bin/flutter pub:*)",
+      "Bash(~/flutter/bin/flutter build:*)",
+      "Bash(tee:*)"
+    ]
+  }
+}

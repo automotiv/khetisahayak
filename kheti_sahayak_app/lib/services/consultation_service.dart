@@ -121,8 +121,8 @@ class ConsultationService {
 
   // ==================== CONSULTATIONS ====================
 
-  /// Book a consultation
-  static Future<Consultation?> bookConsultation({
+  /// Book a consultation and get payment details
+  static Future<ConsultationBookingResult> bookConsultation({
     required String expertId,
     required DateTime scheduledAt,
     required ConsultationType type,
@@ -135,7 +135,7 @@ class ConsultationService {
       if (token == null) throw Exception('Not authenticated');
       
       final response = await http.post(
-        Uri.parse('$baseUrl/consultations'),
+        Uri.parse('$baseUrl/consultations/book'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -143,24 +143,40 @@ class ConsultationService {
         body: json.encode({
           'expert_id': expertId,
           'scheduled_at': scheduledAt.toIso8601String(),
-          'type': type.value,
-          'fee': fee,
+          'consultation_type': type.value,
           'issue_description': issueDescription,
-          'attached_images': attachedImages,
+          'issue_images': attachedImages,
         }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          return Consultation.fromJson(data['data']);
+        if (data['success'] == true) {
+          final consultation = data['consultation'] != null 
+              ? Consultation.fromJson(data['consultation']) 
+              : null;
+          
+          final payment = data['payment'];
+          
+          return ConsultationBookingResult(
+            success: true,
+            consultation: consultation,
+            razorpayOrderId: payment?['order_id'],
+            amount: payment?['amount'],
+            currency: payment?['currency'] ?? 'INR',
+            razorpayKey: payment?['key_id'],
+          );
         }
       }
       
-      throw Exception('Failed to book consultation');
+      final errorData = json.decode(response.body);
+      return ConsultationBookingResult(
+        success: false,
+        error: errorData['error'] ?? 'Failed to book consultation',
+      );
     } catch (e) {
       print('Error booking consultation: $e');
-      return null;
+      return ConsultationBookingResult(success: false, error: e.toString());
     }
   }
 
@@ -489,4 +505,24 @@ class ConsultationService {
       ),
     ];
   }
+}
+
+class ConsultationBookingResult {
+  final bool success;
+  final Consultation? consultation;
+  final String? razorpayOrderId;
+  final int? amount;
+  final String? currency;
+  final String? razorpayKey;
+  final String? error;
+
+  ConsultationBookingResult({
+    required this.success,
+    this.consultation,
+    this.razorpayOrderId,
+    this.amount,
+    this.currency,
+    this.razorpayKey,
+    this.error,
+  });
 }

@@ -1,4 +1,7 @@
 import 'package:kheti_sahayak_app/services/api_service.dart';
+import 'package:kheti_sahayak_app/services/connectivity_service.dart';
+import 'package:kheti_sahayak_app/services/tflite_service.dart';
+import 'package:kheti_sahayak_app/services/offline_ml_service.dart';
 import 'package:kheti_sahayak_app/models/diagnostic.dart';
 import 'package:kheti_sahayak_app/models/crop_recommendation.dart';
 import 'package:kheti_sahayak_app/models/treatment.dart';
@@ -55,24 +58,144 @@ class DiagnosticService {
     return Diagnostic.fromJson(response['diagnostic']);
   }
 
-  // Upload image for diagnosis
+  // Upload image for diagnosis with offline fallback
   static Future<Map<String, dynamic>> uploadForDiagnosis({
     required File imageFile,
     required String cropType,
     required String issueDescription,
   }) async {
-    final formData = {
-      'image': imageFile,
-      'crop_type': cropType,
-      'issue_description': issueDescription,
-    };
-
-    final response = await ApiService.postMultipart('diagnostics/upload', formData);
+    // Check network connectivity
+    final isOnline = await ConnectivityService.isOnline;
     
-    return {
-      'diagnostic': Diagnostic.fromJson(response['diagnostic']),
-      'aiAnalysis': response['aiAnalysis'],
-    };
+    if (isOnline) {
+      // Online mode: Use backend ML service
+      try {
+        final formData = {
+          'image': imageFile,
+          'crop_type': cropType,
+          'issue_description': issueDescription,
+        };
+
+        final response = await ApiService.postMultipart('diagnostics/upload', formData);
+        
+        return {
+          'diagnostic': Diagnostic.fromJson(response['diagnostic']),
+          'aiAnalysis': response['aiAnalysis'],
+          'isOffline': false,
+        };
+      } catch (e) {
+        // If backend fails, try offline fallback
+        print('Backend diagnosis failed, trying offline fallback: $e');
+        return await _runOfflineDiagnosis(imageFile, cropType, issueDescription);
+      }
+    } else {
+      // Offline mode: Use local TFLite or mock predictions
+      return await _runOfflineDiagnosis(imageFile, cropType, issueDescription);
+    }
+  }
+
+  /// Run offline diagnosis using TFLite or mock ML service
+  static Future<Map<String, dynamic>> _runOfflineDiagnosis(
+    File imageFile,
+    String cropType,
+    String issueDescription,
+  ) async {
+    try {
+      // Try TFLite service first (real model inference)
+      final tfliteService = TFLiteService.instance;
+      await tfliteService.initialize();
+      
+      if (tfliteService.isModelLoaded) {
+        final result = await tfliteService.diagnose(imageFile, cropType: cropType);
+        
+        // Convert TFLite result to diagnostic format
+        final topPrediction = result.topPrediction;
+        final treatmentInfo = topPrediction != null 
+            ? tfliteService.getTreatmentInfo(topPrediction.diseaseId)
+            : null;
+        
+        return {
+          'diagnostic': _createOfflineDiagnostic(
+            cropType: cropType,
+            issueDescription: issueDescription,
+            diseaseName: topPrediction?.diseaseName ?? 'Unknown',
+            confidence: topPrediction?.confidence ?? 0.0,
+            isOffline: true,
+          ),
+          'aiAnalysis': {
+            'disease': topPrediction?.diseaseName ?? 'Unknown',
+            'confidence': topPrediction?.confidence ?? 0.0,
+            'severity': topPrediction?.severity ?? 'unknown',
+            'recommendations': treatmentInfo?.description ?? 'Consult an agricultural expert.',
+            'treatment_steps': treatmentInfo?.treatments ?? [],
+            'symptoms': [],
+            'source': 'tflite_offline',
+          },
+          'isOffline': true,
+          'predictions': result.predictions.map((p) => p.toJson()).toList(),
+        };
+      }
+    } catch (e) {
+      print('TFLite diagnosis failed: $e');
+    }
+
+    // Fallback to OfflineMLService (mock predictions)
+    try {
+      final offlineML = OfflineMLService.instance;
+      await offlineML.initialize();
+      
+      final predictions = await offlineML.predict(imageFile);
+      final topPrediction = predictions.isNotEmpty ? predictions.first : null;
+      final treatmentInfo = topPrediction != null 
+          ? offlineML.getTreatmentInfo(topPrediction.label)
+          : null;
+
+      return {
+        'diagnostic': _createOfflineDiagnostic(
+          cropType: cropType,
+          issueDescription: issueDescription,
+          diseaseName: topPrediction?.displayName ?? 'Unknown',
+          confidence: topPrediction?.confidence ?? 0.0,
+          isOffline: true,
+        ),
+        'aiAnalysis': {
+          'disease': topPrediction?.displayName ?? 'Unknown',
+          'confidence': topPrediction?.confidence ?? 0.0,
+          'severity': 'unknown',
+          'recommendations': treatmentInfo?['description'] ?? 'Consult an agricultural expert.',
+          'treatment_steps': treatmentInfo?['treatments'] ?? [],
+          'symptoms': [],
+          'source': 'offline_mock',
+        },
+        'isOffline': true,
+        'predictions': predictions.map((p) => p.toJson()).toList(),
+      };
+    } catch (e) {
+      print('Offline ML service failed: $e');
+      rethrow;
+    }
+  }
+
+  /// Create a temporary offline diagnostic object
+  static Diagnostic _createOfflineDiagnostic({
+    required String cropType,
+    required String issueDescription,
+    required String diseaseName,
+    required double confidence,
+    required bool isOffline,
+  }) {
+    return Diagnostic(
+      id: 'offline_${DateTime.now().millisecondsSinceEpoch}',
+      userId: 'offline_user',
+      cropType: cropType,
+      issueDescription: issueDescription,
+      diagnosisResult: 'Disease: $diseaseName (Confidence: ${(confidence * 100).toStringAsFixed(1)}%)',
+      recommendations: isOffline ? 'Offline analysis - will sync when online' : null,
+      confidenceScore: confidence,
+      status: 'analyzed',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
   }
 
   // Request expert review

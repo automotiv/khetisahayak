@@ -39,4 +39,7 @@
     <color name="card_background">#FFFFFF</color>
     <color name="card_background_dark">#2C2C2C</color>
     <color name="card_shadow">#1A000000</color>
+
+    <!-- FCM Notification Color -->
+    <color name="notification_color">#4CAF50</color>
 </resources>

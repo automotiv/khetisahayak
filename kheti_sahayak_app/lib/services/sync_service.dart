@@ -280,13 +280,6 @@ class SyncService {
       itemsFailed: failureCount,
       errors: errors,
     );
-    return SyncResult(
-      success: failureCount == 0,
-      message: 'Synced $successCount tasks',
-      itemsSynced: successCount,
-      itemsFailed: failureCount,
-      errors: errors,
-    );
   }
 
   /// Sync pending activity records
@@ -503,13 +496,9 @@ class SyncService {
         final pendingCount = await getPendingUploadsCount();
         if (pendingCount > 0) {
           print('Connectivity restored. Auto-syncing $pendingCount pending items...');
-          print('Connectivity restored. Auto-syncing $pendingCount pending items...');
           await syncPendingDiagnostics();
           await syncPendingTasks();
-          print('Connectivity restored. Auto-syncing $pendingCount pending items...');
-          await syncPendingDiagnostics();
-          await syncPendingTasks();
-          // await syncPendingActivityRecords(); // Deprecated in favor of bidirectional
+          // syncPendingActivityRecords deprecated in favor of bidirectional sync
           await syncLogbookBidirectional();
           await syncSchemes();
         } else {

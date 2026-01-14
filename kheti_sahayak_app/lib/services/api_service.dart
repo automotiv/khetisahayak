@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:kheti_sahayak_app/services/auth_service.dart';
 import 'package:kheti_sahayak_app/utils/constants.dart';
 
@@ -266,11 +268,27 @@ class ApiService {
       }
 
       // Add fields and files from data
-      data.forEach((key, value) {
-        if (value is String) {
+      for (final entry in data.entries) {
+        final key = entry.key;
+        final value = entry.value;
+        
+        if (value is File) {
+          // Handle File objects - add as multipart file
+          final filename = value.path.split('/').last;
+          final mimeType = _getMimeType(filename);
+          request.files.add(await http.MultipartFile.fromPath(
+            key,
+            value.path,
+            contentType: MediaType.parse(mimeType),
+          ));
+        } else if (value is String) {
+          // Handle string fields
           request.fields[key] = value;
+        } else if (value != null) {
+          // Handle other types by converting to string
+          request.fields[key] = value.toString();
         }
-      });
+      }
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
@@ -282,6 +300,28 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Network error: $e');
+    }
+  }
+
+  /// Get MIME type from filename extension
+  static String _getMimeType(String filename) {
+    final ext = filename.toLowerCase().split('.').last;
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'pdf':
+        return 'application/pdf';
+      default:
+        return 'application/octet-stream';
     }
   }
 }

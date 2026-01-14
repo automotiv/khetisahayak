@@ -1,0 +1,55 @@
+{
+  "_INSTRUCTIONS": [
+    "==========================================================",
+    "FIREBASE CLOUD MESSAGING SETUP GUIDE",
+    "==========================================================",
+    "",
+    "1. Go to https://console.firebase.google.com/",
+    "2. Create a new project or select existing project",
+    "3. Add an Android app with package name: com.khetisahayak.app",
+    "4. Download the google-services.json file",
+    "5. Replace this file with the downloaded google-services.json",
+    "6. Remove the .example extension",
+    "",
+    "IMPORTANT: Never commit the real google-services.json to git!",
+    "The actual file should be in .gitignore",
+    "=========================================================="
+  ],
+  "project_info": {
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_ID",
+        "android_client_info": {
+          "package_name": "com.khetisahayak.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

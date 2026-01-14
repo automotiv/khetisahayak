@@ -21,6 +21,7 @@ import 'package:kheti_sahayak_app/services/diagnostic_translation_service.dart';
 import 'services/task/upload_queue.dart';
 import 'package:kheti_sahayak_app/services/local_notification_service.dart';
 import 'package:kheti_sahayak_app/services/sync_service.dart';
+import 'package:kheti_sahayak_app/services/fcm_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,18 @@ Future<void> main() async {
   await DiagnosticTranslationService.instance.initialize();
 
   await LocalNotificationService().initialize();
+
+  // Initialize Firebase Cloud Messaging for push notifications
+  // Wrapped in try-catch so app works without Firebase configured
+  try {
+    await FcmService().initialize();
+    AppLogger.info('FCM initialized successfully');
+  } catch (e, stack) {
+    AppLogger.warning('FCM initialization skipped: Firebase not configured or unavailable');
+    if (kDebugMode) {
+      AppLogger.error('FCM init error details', e, stack);
+    }
+  }
 
   await ConnectivityService.initialize();
 

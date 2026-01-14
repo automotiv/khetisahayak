@@ -52,3 +52,10 @@ android/app/upload-keystore.jks
 android/fastlane/secrets/
 **/play-store-service-account.json
 **/google-play-credentials.json
+
+# Firebase configuration files - NEVER commit these!
+# Use the .example files as templates
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+ios/GoogleService-Info.plist
+**/firebase_options.dart

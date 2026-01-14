@@ -5,7 +5,9 @@ import 'dart:io';
 import 'package:kheti_sahayak_app/models/expert.dart';
 import 'package:kheti_sahayak_app/models/consultation.dart';
 import 'package:kheti_sahayak_app/services/consultation_service.dart';
+import 'package:kheti_sahayak_app/services/payment_service.dart';
 import 'package:kheti_sahayak_app/widgets/primary_button.dart';
+import 'package:kheti_sahayak_app/utils/logger.dart';
 
 /// Book Consultation Screen
 /// 
@@ -50,6 +52,55 @@ class _BookConsultationScreenState extends State<BookConsultationScreen>
       duration: const Duration(milliseconds: 600),
     )..forward();
     _loadAvailableSlots();
+    _initPaymentService();
+  }
+
+  Future<void> _initPaymentService() async {
+    await PaymentService.instance.init(
+      onSuccess: _handlePaymentSuccess,
+      onError: _handlePaymentError,
+      onWalletSelected: () {
+        AppLogger.info('External wallet selected for consultation');
+      },
+    );
+  }
+
+  void _handlePaymentSuccess(Map<String, dynamic> response) async {
+    AppLogger.info('Consultation payment success: $response');
+    
+    final verifyResult = await PaymentService.instance.verifyPayment(
+      razorpayOrderId: response['razorpay_order_id'] ?? '',
+      razorpayPaymentId: response['razorpay_payment_id'] ?? '',
+      razorpaySignature: response['razorpay_signature'] ?? '',
+    );
+
+    if (mounted) {
+      setState(() => _isBooking = false);
+      
+      if (verifyResult.success) {
+        _showSuccessDialog();
+      } else {
+        _showErrorSnackbar('Payment verification failed. Please contact support.');
+      }
+    }
+  }
+
+  void _handlePaymentError(Map<String, dynamic> response) {
+    AppLogger.error('Consultation payment failed: $response');
+    if (mounted) {
+      setState(() => _isBooking = false);
+      _showErrorSnackbar(response['message'] ?? 'Payment failed. Please try again.');
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter()),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -128,13 +179,53 @@ class _BookConsultationScreenState extends State<BookConsultationScreen>
 
     setState(() => _isBooking = true);
 
-    // In a real app, upload images first and get URLs
-    // For now, we'll just simulate the booking
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final scheduledDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedSlot!.startTime.hour,
+        _selectedSlot!.startTime.minute,
+      );
 
-    if (mounted) {
-      setState(() => _isBooking = false);
-      _showSuccessDialog();
+      final bookingResult = await ConsultationService.bookConsultation(
+        expertId: widget.expert.id,
+        scheduledAt: scheduledDateTime,
+        type: _selectedType,
+        fee: widget.expert.consultationFee,
+        issueDescription: _issueController.text.isNotEmpty ? _issueController.text : null,
+      );
+
+      if (!bookingResult.success) {
+        throw Exception(bookingResult.error ?? 'Failed to create consultation booking');
+      }
+
+      if (bookingResult.razorpayOrderId == null || 
+          bookingResult.amount == null || 
+          bookingResult.razorpayKey == null) {
+        throw Exception('Payment details not received from server');
+      }
+
+      await PaymentService.instance.openCheckout(
+        razorpayOrderId: bookingResult.razorpayOrderId!,
+        amount: bookingResult.amount!,
+        key: bookingResult.razorpayKey!,
+        name: 'Kheti Sahayak',
+        description: 'Consultation with ${widget.expert.name}',
+        currency: bookingResult.currency ?? 'INR',
+        notes: {
+          'consultation_id': bookingResult.consultation?.id ?? '',
+          'expert_id': widget.expert.id,
+          'type': _selectedType.value,
+        },
+        theme: {'color': '#2E7D32'},
+      );
+    } catch (e) {
+      AppLogger.error('Booking consultation failed', e);
+      if (mounted) {
+        setState(() => _isBooking = false);
+        _showErrorSnackbar(e.toString());
+      }
     }
   }
 

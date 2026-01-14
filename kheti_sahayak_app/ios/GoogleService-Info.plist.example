@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+==========================================================
+FIREBASE CLOUD MESSAGING iOS SETUP GUIDE
+==========================================================
+
+1. Go to https://console.firebase.google.com/
+2. Select your project (or create one)
+3. Add an iOS app with bundle ID: com.khetisahayak.app
+4. Download the GoogleService-Info.plist file
+5. Replace this file with the downloaded GoogleService-Info.plist
+6. Remove the .example extension
+
+ADDITIONAL iOS SETUP STEPS:
+
+A. In Xcode:
+   - Open ios/Runner.xcworkspace
+   - Select Runner target > Signing & Capabilities
+   - Click "+ Capability" and add "Push Notifications"
+   - Click "+ Capability" and add "Background Modes"
+   - Check "Remote notifications" under Background Modes
+
+B. Apple Developer Portal:
+   - Go to https://developer.apple.com/account
+   - Navigate to Certificates, IDs & Profiles
+   - Create an APNs Auth Key (recommended) or Certificate
+   - Upload the key/certificate to Firebase Console
+
+C. Firebase Console:
+   - Go to Project Settings > Cloud Messaging
+   - Under iOS app configuration, upload APNs key
+
+IMPORTANT: Never commit the real GoogleService-Info.plist to git!
+==========================================================
+-->
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>YOUR_CLIENT_ID.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+	<key>API_KEY</key>
+	<string>YOUR_API_KEY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>YOUR_PROJECT_NUMBER</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.khetisahayak.app</string>
+	<key>PROJECT_ID</key>
+	<string>YOUR_PROJECT_ID</string>
+	<key>STORAGE_BUCKET</key>
+	<string>YOUR_PROJECT_ID.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:YOUR_PROJECT_NUMBER:ios:YOUR_APP_ID</string>
+</dict>
+</plist>
