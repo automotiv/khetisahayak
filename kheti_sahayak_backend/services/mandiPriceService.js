@@ -253,12 +253,20 @@ async function getMandiPrices(params = {}) {
     );
   }
 
+  // Add compatibility fields for frontend (name, price strings)
+  const compatiblePrices = prices.map(p => ({
+    ...p,
+    name: p.commodity,
+    price: `₹ ${p.modal_price || p.min_price || 0}/quintal`,
+    unit: 'quintal'
+  }));
+
   const result = {
     success: true,
     source: prices[0]?.source || 'Unknown',
     updated_at: new Date().toISOString(),
-    count: prices.length,
-    data: prices
+    count: compatiblePrices.length,
+    data: compatiblePrices
   };
 
   try {
