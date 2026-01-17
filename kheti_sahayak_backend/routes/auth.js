@@ -64,8 +64,8 @@ const registerValidationRules = [
       }
     }),
   body('password', 'Password must be at least 6 characters long').isLength({ min: 6 }),
-  body('first_name', 'First name is required').not().isEmpty().trim().escape(),
-  body('last_name', 'Last name is required').not().isEmpty().trim().escape(),
+  body('first_name').optional().trim().escape(), // Made optional, handled in controller from username
+  body('last_name').optional().trim().escape(),  // Made optional, handled in controller from username
   body('phone', 'Phone number must be valid').optional().isMobilePhone(),
   body('location_lat', 'Latitude must be a valid number').optional().isFloat({ min: -90, max: 90 }),
   body('location_lng', 'Longitude must be a valid number').optional().isFloat({ min: -180, max: 180 }),
