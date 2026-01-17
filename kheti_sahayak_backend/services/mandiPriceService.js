@@ -13,7 +13,7 @@ const CACHE_TTL = {
 
 const DATA_GOV_API_KEY = process.env.DATA_GOV_API_KEY;
 const AGMARKNET_BASE_URL = 'https://agmarknet.gov.in';
-const DATA_GOV_MANDI_RESOURCE = '9ef84268-d588-465a-a308-a864a43d0070';
+const DATA_GOV_MANDI_RESOURCE = '35985678-0d79-46b4-9ed6-6f13308a1d24';
 
 const SUPPORTED_COMMODITIES = {
   'Rice': { hindi: 'चावल', category: 'cereals' },
@@ -53,7 +53,7 @@ async function fetchFromDataGovAPI(params = {}) {
   }
 
   const { state, commodity, limit = 100 } = params;
-  
+
   const queryParams = new URLSearchParams({
     'api-key': DATA_GOV_API_KEY,
     'format': 'json',
@@ -66,7 +66,7 @@ async function fetchFromDataGovAPI(params = {}) {
   try {
     const url = `https://api.data.gov.in/resource/${DATA_GOV_MANDI_RESOURCE}?${queryParams}`;
     const response = await axios.get(url, { timeout: 10000 });
-    
+
     if (response.data && response.data.records) {
       return response.data.records.map(record => ({
         state: record.state,
@@ -91,7 +91,7 @@ async function fetchFromDataGovAPI(params = {}) {
 
 async function scrapeAgmarknet(params = {}) {
   const { state, commodity, district } = params;
-  
+
   try {
     const formData = new URLSearchParams();
     formData.append('Ession', 'Price');
@@ -116,7 +116,7 @@ async function scrapeAgmarknet(params = {}) {
 
     $('table.mandi-table tr').each((index, row) => {
       if (index === 0) return;
-      
+
       const cells = $(row).find('td');
       if (cells.length >= 7) {
         prices.push({
@@ -143,7 +143,7 @@ async function scrapeAgmarknet(params = {}) {
 
 function generateRealisticMockData(params = {}) {
   const { state = 'Maharashtra', commodity, district } = params;
-  
+
   const basePrices = {
     'Rice': { base: 2800, variance: 400 },
     'Wheat': { base: 2400, variance: 300 },
@@ -221,9 +221,9 @@ function generateRealisticMockData(params = {}) {
 
 async function getMandiPrices(params = {}) {
   const { state, commodity, district, market, forceRefresh = false } = params;
-  
+
   const cacheKey = `mandi:prices:${state || 'all'}:${commodity || 'all'}:${district || 'all'}`;
-  
+
   if (!forceRefresh) {
     try {
       const cached = await redisClient.get(cacheKey);
@@ -237,18 +237,18 @@ async function getMandiPrices(params = {}) {
   }
 
   let prices = await fetchFromDataGovAPI({ state, commodity, limit: 200 });
-  
+
   if (!prices || prices.length === 0) {
     prices = await scrapeAgmarknet({ state, commodity, district });
   }
-  
+
   if (!prices || prices.length === 0) {
     console.log('Using mock data for mandi prices');
     prices = generateRealisticMockData({ state, commodity, district });
   }
 
   if (market) {
-    prices = prices.filter(p => 
+    prices = prices.filter(p =>
       p.market.toLowerCase().includes(market.toLowerCase())
     );
   }
@@ -296,9 +296,9 @@ async function storePriceHistory(prices) {
 
 async function getPriceTrends(params = {}) {
   const { commodity, state, market, period = 'weekly' } = params;
-  
+
   const cacheKey = `mandi:trends:${commodity}:${state || 'all'}:${period}`;
-  
+
   try {
     const cached = await redisClient.get(cacheKey);
     if (cached) return JSON.parse(cached);
@@ -352,7 +352,7 @@ async function getPriceTrends(params = {}) {
 
   try {
     const result = await db.query(query, queryParams);
-    
+
     const trends = result.rows.map(row => ({
       date: row.arrival_date,
       commodity: row.commodity,
@@ -405,9 +405,9 @@ async function getPriceTrends(params = {}) {
 async function getMSPPrices(params = {}) {
   const { crop, year } = params;
   const currentYear = year || new Date().getFullYear();
-  
+
   const cacheKey = `msp:${crop || 'all'}:${currentYear}`;
-  
+
   try {
     const cached = await redisClient.get(cacheKey);
     if (cached) return JSON.parse(cached);
@@ -430,7 +430,7 @@ async function getMSPPrices(params = {}) {
 
   try {
     const result = await db.query(query, queryParams);
-    
+
     const mspResult = {
       success: true,
       year: currentYear,
@@ -453,20 +453,20 @@ async function getMSPPrices(params = {}) {
 
 async function comparePriceWithMSP(params = {}) {
   const { commodity, state, market } = params;
-  
+
   if (!commodity) {
     return { success: false, error: 'Commodity is required' };
   }
 
   const currentYear = new Date().getFullYear();
-  
+
   const [mspResult, mandiResult] = await Promise.all([
     getMSPPrices({ crop: commodity, year: currentYear }),
     getMandiPrices({ commodity, state, market })
   ]);
 
   const mspPrice = mspResult.data && mspResult.data[0]?.msp_price;
-  
+
   if (!mspPrice) {
     return {
       success: true,
@@ -481,14 +481,14 @@ async function comparePriceWithMSP(params = {}) {
     const modalPrice = price.modal_price || 0;
     const difference = modalPrice - mspPrice;
     const differencePercent = ((difference / mspPrice) * 100).toFixed(2);
-    
+
     return {
       ...price,
       msp_price: parseFloat(mspPrice),
       price_vs_msp: parseFloat(difference.toFixed(2)),
       percent_vs_msp: parseFloat(differencePercent),
       status: modalPrice >= mspPrice ? 'ABOVE_MSP' : 'BELOW_MSP',
-      recommendation: modalPrice < mspPrice 
+      recommendation: modalPrice < mspPrice
         ? 'Consider government procurement centers for MSP'
         : 'Market price is favorable'
     };
@@ -716,7 +716,7 @@ async function checkAndTriggerAlerts() {
       if (alert.compare_to_msp) {
         const mspResult = await getMSPPrices({ crop: alert.commodity });
         const mspPrice = mspResult.data && mspResult.data[0]?.msp_price;
-        
+
         if (mspPrice) {
           const mspThreshold = (mspPrice * alert.msp_threshold_percent) / 100;
           if (avgPrice < mspThreshold) {
