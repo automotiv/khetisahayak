@@ -69,16 +69,16 @@ async function fetchFromDataGovAPI(params = {}) {
 
     if (response.data && response.data.records) {
       return response.data.records.map(record => ({
-        state: record.state,
-        district: record.district,
-        market: record.market,
-        commodity: record.commodity,
-        variety: record.variety || 'Other',
-        grade: record.grade,
-        min_price: parseFloat(record.min_price) || null,
-        max_price: parseFloat(record.max_price) || null,
-        modal_price: parseFloat(record.modal_price) || null,
-        arrival_date: record.arrival_date,
+        state: record.State || record.state,
+        district: record.District || record.district,
+        market: record.Market || record.market,
+        commodity: record.Commodity || record.commodity,
+        variety: record.Variety || record.variety || 'Other',
+        grade: record.Grade || record.grade,
+        min_price: parseFloat(record.Min_Price || record.min_price) || null,
+        max_price: parseFloat(record.Max_Price || record.max_price) || null,
+        modal_price: parseFloat(record.Modal_Price || record.modal_price) || null,
+        arrival_date: record.Arrival_Date || record.arrival_date,
         source: 'data.gov.in'
       }));
     }
