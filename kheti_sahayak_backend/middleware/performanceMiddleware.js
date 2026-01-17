@@ -12,7 +12,7 @@ const responseTimeMiddleware = (req, res, next) => {
     const endMemory = process.memoryUsage().heapUsed;
     const memoryDelta = (endMemory - startMemory) / 1024 / 1024;
 
-    res.setHeader('X-Response-Time', `${durationMs.toFixed(2)}ms`);
+    // res.setHeader('X-Response-Time', `${durationMs.toFixed(2)}ms`); // Cannot set headers after response is finished
 
     const logData = {
       method: req.method,
@@ -55,36 +55,36 @@ const cacheControlMiddleware = (options = {}) => {
 
 const compressionHints = (req, res, next) => {
   const acceptEncoding = req.headers['accept-encoding'] || '';
-  
+
   if (acceptEncoding.includes('br')) {
     res.setHeader('X-Compression-Hint', 'brotli');
   } else if (acceptEncoding.includes('gzip')) {
     res.setHeader('X-Compression-Hint', 'gzip');
   }
-  
+
   next();
 };
 
 const etagMiddleware = (req, res, next) => {
   const originalJson = res.json.bind(res);
-  
+
   res.json = (data) => {
     if (req.method === 'GET' && data) {
       const crypto = require('crypto');
       const hash = crypto.createHash('md5').update(JSON.stringify(data)).digest('hex');
       const etag = `"${hash}"`;
-      
+
       res.setHeader('ETag', etag);
-      
+
       const ifNoneMatch = req.headers['if-none-match'];
       if (ifNoneMatch === etag) {
         return res.status(304).end();
       }
     }
-    
+
     return originalJson(data);
   };
-  
+
   next();
 };
 

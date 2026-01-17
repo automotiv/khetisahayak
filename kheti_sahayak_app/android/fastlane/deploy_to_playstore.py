@@ -118,7 +118,7 @@ def create_service(json_path):
     return service
 
 
-def upload_aab_to_playstore(service, aab_path, track='internal', rollout=None, release_notes=None):
+def upload_aab_to_playstore(service, aab_path, track='internal', rollout=None, release_notes=None, release_status='completed'):
     """
     Upload AAB to Google Play Store.
     
@@ -159,7 +159,7 @@ def upload_aab_to_playstore(service, aab_path, track='internal', rollout=None, r
         # Step 3: Prepare release configuration
         release_config = {
             'versionCodes': [str(version_code)],
-            'status': 'completed',
+            'status': release_status,
         }
         
         # Add release notes if provided
@@ -444,6 +444,10 @@ For first-time setup instructions, run:
     parser.add_argument('--service-account',
                         type=str,
                         help='Custom path to service account JSON')
+    parser.add_argument('--release-status',
+                        choices=['completed', 'draft', 'halted', 'inProgress'],
+                        default='completed',
+                        help='Release status (default: completed)')
     parser.add_argument('--dry-run',
                         action='store_true',
                         help='Validate configuration without uploading')
@@ -512,7 +516,8 @@ For first-time setup instructions, run:
         aab_path=aab_path,
         track=args.track,
         rollout=args.rollout,
-        release_notes=args.release_notes
+        release_notes=args.release_notes,
+        release_status=args.release_status
     )
     
     if success:
